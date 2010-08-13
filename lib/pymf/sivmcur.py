@@ -3,7 +3,7 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: sivmcur.py 20 2010-08-02 17:35:19Z cthurau $
+#$Id: sivmcur.py 22 2010-08-13 11:16:43Z cthurau $
 #$Author$
 """  
 PyMF Simplex Volume Maximization for CUR [1]
@@ -26,7 +26,7 @@ __all__ = ["SIVMCUR"]
 
 class SIVMCUR(CUR):
 	'''
-	SIVMCUR(data, num_bases=4, show_progress=True, compW=True, product=False)
+	SIVMCUR(data, num_bases=4, show_progress=True, compW=True, product=False, dist_measure='l2')
 	
 	Simplex Volume based CUR Decomposition. Factorize a data matrix into three 
 	matrices s.t. F = | data - USV| is minimal. Unlike CUR, SIVMCUR selects the
@@ -49,6 +49,10 @@ class SIVMCUR(CUR):
 	show_progress: bool, optional
 		Print some extra information
 		False (default)	
+	dist_measure: string, optional
+		The distance measure for finding the next best candidate that 
+		maximizes the simplex volume ['l2','l1','cosine','sparse_graph_l2']
+		'l2' (default)
 	
 	Attributes
 	----------
@@ -64,11 +68,13 @@ class SIVMCUR(CUR):
 	
 	_VINFO = 'pymf-sivmcur v0.1'
 	
-	def __init__(self, data, rrank=0, crank=0, show_progress=True, product=False):
+	def __init__(self, data, rrank=0, crank=0, show_progress=True, product=False, dist_measure='l2'):
 		CUR.__init__(self, data, rrank=rrank, crank=rrank, show_progress=show_progress)
 	
 		self._product = product
-						
+		self._dist_measure = dist_measure	
+
+		
 	def sample(self, A, c):
 		# switch between product rule and sum rule	
 		# !!! NOT YET IMPLEMENTED !!!	
@@ -77,7 +83,7 @@ class SIVMCUR(CUR):
 		else:
 			m = SIVM
 			
-		sivmnmf_mdl = m(A, num_bases=c, compH=False, show_progress=self._show_progress, dist_measure='cosine')
+		sivmnmf_mdl = m(A, num_bases=c, compH=False, show_progress=self._show_progress, dist_measure=self._dist_measure)
 			
 		sivmnmf_mdl.initialization()
 		sivmnmf_mdl.factorize()

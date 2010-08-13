@@ -3,7 +3,7 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: dist.py 18 2010-08-02 14:53:29Z cthurau $
+#$Id: dist.py 22 2010-08-13 11:16:43Z cthurau $
 #$Author$
 """
 Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL). 
@@ -12,9 +12,10 @@ Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL).
 __version__ = "$Revision$"
 
 import numpy as np
+import scipy.sparse
 
 __all__ = ["kl_divergence", "l1_distance", "l2_distance", "cosine_distance",
-		"vq", "pdist"]
+		"vq", "pdist","sparse_graph_l2_distance"]
 
 def kl_divergence(d, vec):	
 	b = vec*(1/d)	
@@ -37,7 +38,6 @@ def sparse_graph_l2_distance(d, vec):
 	return ret_val
 
 def sparse_l2_distance(d, vec):
-	
 	ret_val = np.zeros((d.shape[1],1))		
 	idx2 = vec.nonzero()[0]
 
@@ -48,7 +48,10 @@ def sparse_l2_distance(d, vec):
 	return ret_val
 		
 def l2_distance(d, vec):	
-	ret_val = np.sqrt(((d[:,:] - vec)** 2).sum(axis=0))				
+	if scipy.sparse.issparse(d):
+		ret_val = sparse_l2_distance(d, vec)
+	else:
+		ret_val = np.sqrt(((d[:,:] - vec)** 2).sum(axis=0))				
 	return ret_val.reshape((-1,1))		
 		
 def cosine_distance(d, vec):

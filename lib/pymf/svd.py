@@ -3,7 +3,7 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: svd.py 20 2010-08-02 17:35:19Z cthurau $
+#$Id: svd.py 22 2010-08-13 11:16:43Z cthurau $
 #$Author$
 """  
 PyMF Singular Value Decomposition.
@@ -16,24 +16,40 @@ PyMF Singular Value Decomposition.
 __version__ = "$Revision$"
 
 
-import numpy as np
 from numpy.linalg import eigh
-
-__all__ = ["SVD", "pinv"]
+import scipy.sparse
+import scipy.sparse.linalg.eigen.arpack as arpack
+import numpy as np
 
 def pinv(A, eps=10**-8):	
 		# calculate SVD
 		svd_mdl =  SVD(A)
 		svd_mdl.factorize()
+		S = svd_mdl.S
+		Sdiag = S.diagonal()
+		Sdiag = np.where(Sdiag >eps, 1.0/Sdiag, 0.0)
 		
-		# calculate pseudoinverse
-		S = np.diag(svd_mdl.S).transpose()
-		S = np.where(S>eps, 1.0/S, 0.0)
+		for i in range(S.shape[0]):
+			S[i,i] = Sdiag[i]
 			
-		A_p = np.zeros((svd_mdl.V.shape[1], svd_mdl.U.shape[0]))
-		A_p[:,:] = np.dot(np.dot(svd_mdl.V.T,  np.diag(S)),svd_mdl.U.T)
+		if scipy.sparse.issparse(A):
+			A_p = svd_mdl.V.T * (S *  svd_mdl.U.T)
+		else:
+			A_p = np.dot(svd_mdl.V.T, np.core.multiply(np.diag(S)[:,np.newaxis], svd_mdl.U.T))
+			
+		return A_p
 		
-		return A_p	
+#		
+#		svd_mdl =  SVD(A)
+#		svd_mdl.factorize()
+#		
+#		# calculate pseudoinverse
+#		S = diagonal(svd_mdl.S).transpose()
+#		S = np.where(S>eps, 1.0/S, 0.0)
+#
+#		
+#
+#		return A_p	
 
 class SVD():	
 	"""  	
@@ -89,19 +105,24 @@ class SVD():
 		
 		Returns:
 			frobenius norm: F = ||data - USV||
-		"""
-		# set the rank for the SVD approximation
-		err = np.sqrt(np.sum((self.data[:,:] - np.dot(np.dot(self.U, self.S), self.V))**2))
+		"""	
+		if scipy.sparse.issparse(self.data):
+			err = self.data - self.U*self.S*self.V	
+			err = err.multiply(err)
+			err = np.sqrt(err.sum())
+		else:				
+			err = self.data[:,:] - np.dot(np.dot(self.U, self.S), self.V)
+			err = np.sqrt(np.sum(err**2))
+							
 		return err
 	
-	def rel_norm(self, rset=[-1], cset=[-1]):
-			rerr = self.frobenius_norm()**2 / np.sum(self.data[:,:]**2)
-			return rerr
+	def _eig(self, A, k=1):
+		return eigh(A)	
 	
 	def factorize(self):	
 		def _right_svd():			
 			AA = np.dot(self.data[:,:], self.data[:,:].T)
-			values, u_vectors = eigh(AA)			
+			values, u_vectors = self._eig(AA)			
 							
 			# sort eigenvectors according to largest value
 			idx = np.argsort(values)
@@ -118,7 +139,7 @@ class SVD():
 			self.S = np.diag(np.sqrt(values))
 			
 			# and the inverse of it
-			S_inv =np.diag(np.sqrt(values)**-1)
+			S_inv = np.diag(np.sqrt(values)**-1)
 					
 			# compute V from it
 			self.V = np.dot(S_inv, np.dot(self.U[:,:].T, self.data[:,:]))	
@@ -126,7 +147,7 @@ class SVD():
 		
 		def _left_svd():
 			AA = np.dot(self.data[:,:].T, self.data[:,:])
-			values, v_vectors = eigh(AA)	
+			values, v_vectors = self._eig(AA)	
 			
 			# sort eigenvectors according to largest value
 			# argsort sorts in ascending order -> access is backwards
@@ -149,11 +170,55 @@ class SVD():
 			self.U = np.dot(np.dot(self.data[:,:], Vtmp), S_inv)				
 			self.V = Vtmp.T
 	
+		def _sparse_right_svd():
+			values, u_vectors = arpack.eigen_symmetric(self.data*self.data.transpose(), k=self.data.shape[0]-1)							
+			# sort eigenvectors according to largest value
+			idx = np.argsort(values)
+			values = values[idx[::-1]]
+					
+			# argsort sorts in ascending order -> access is backwards
+			self.U = scipy.sparse.csc_matrix(u_vectors[:,idx[::-1]])
+					
+			# compute S
+			self.S = scipy.sparse.csc_matrix(np.diag(np.sqrt(values)))
+			
+			# and the inverse of it
+			S_inv = scipy.sparse.csc_matrix(np.diag(1.0/np.sqrt(values)))
+					
+			# compute V from it
+			self.V = self.U.transpose() * self.data
+			self.V = S_inv * self.V
+	
+		def _sparse_left_svd():		
+			values, v_vectors = arpack.eigen_symmetric(self.data.transpose()*self.data,k=self.data.shape[1]-1)
+			# sort eigenvectors according to largest value
+			idx = np.argsort(values)
+			values = values[idx[::-1]]
+			
+			# argsort sorts in ascending order -> access is backwards
+			self.V = scipy.sparse.csc_matrix(v_vectors[:,idx[::-1]])
+					
+			# compute S
+			self.S = scipy.sparse.csc_matrix(np.diag(np.sqrt(values)))
+			
+			# and the inverse of it
+			S_inv = scipy.sparse.csc_matrix(np.diag(1.0/np.sqrt(values)))		
+					
+			self.U = self.data * self.V
+			self.U = self.U * S_inv		
+			self.V = self.V.transpose()
+	
 		
-		if self._rows > self._cols:			
-			_left_svd()
+		if self._rows > self._cols:
+			if scipy.sparse.issparse(self.data):
+				_sparse_left_svd()
+			else:			
+				_left_svd()
 		else:
-			_right_svd()
+			if scipy.sparse.issparse(self.data):
+				_sparse_right_svd()
+			else:			
+				_right_svd()
 			
 if __name__ == "__main__":
 	import doctest  

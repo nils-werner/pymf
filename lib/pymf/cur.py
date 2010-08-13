@@ -3,7 +3,7 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: cur.py 21 2010-08-05 08:13:08Z cthurau $
+#$Id: cur.py 22 2010-08-13 11:16:43Z cthurau $
 #$Author$
 """
 PyMF CUR Decomposition [1]
@@ -17,6 +17,7 @@ a Compressed Approixmate Matrix Decomposition', SIAM J. Computing 36(1), 184-206
 __version__ = "$Revision$"
 
 import numpy as np
+import scipy.sparse
 
 from svd import pinv, SVD
 
@@ -83,7 +84,10 @@ class CUR(SVD):
 		
 	def sample_probability(self):
 		
-		dsquare = self.data[:,:]**2
+		if scipy.sparse.issparse(self.data):
+			dsquare = self.data.multiply(self.data)	
+		else:
+			dsquare = self.data[:,:]**2
 			
 		prow = np.array(dsquare.sum(axis=1))
 		pcol = np.array(dsquare.sum(axis=0))
@@ -97,12 +101,18 @@ class CUR(SVD):
 		# the next  lines do NOT work with h5py if CUR is used -> double indices in self.cid or self.rid
 		# can occur and are not supported by h5py. When using h5py data, always use CMD which ignores
 		# reoccuring row/column selections.
-		self._C = np.dot(self.data[:, self._cid].reshape((self._rows, -1)), np.diag(self._ccnt**(1/2)))		
-		self._R = np.dot(np.diag(self._rcnt**(1/2)), self.data[self._rid,:].reshape((-1, self._cols)))
 		
-		# Compute pseudo inverse of C and R				
-		self._U = np.dot(np.dot(pinv(self._C), self.data[:,:]), pinv(self._R))
+		if scipy.sparse.issparse(self.data):
+			self._C = self.data[:, self._cid] * scipy.sparse.csc_matrix(np.diag(self._ccnt**(1/2)))		
+			self._R = scipy.sparse.csc_matrix(np.diag(self._rcnt**(1/2))) * self.data[self._rid,:]		
+			self._U = (pinv(self._C) * self.data[:,:]) * pinv(self._R)
+		else:			
+			self._C = np.dot(self.data[:, self._cid].reshape((self._rows, -1)), np.diag(self._ccnt**(1/2)))		
+			self._R = np.dot(np.diag(self._rcnt**(1/2)), self.data[self._rid,:].reshape((-1, self._cols)))		
+			# Compute pseudo inverse of C and R				
+			self._U = np.dot(np.dot(pinv(self._C), self.data[:,:]), pinv(self._R))
 			
+						
 		# set some standard (with respect to SVD) variable names 
 		self.U = self._C
 		self.S = self._U

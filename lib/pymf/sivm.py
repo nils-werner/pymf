@@ -3,7 +3,7 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: sivm.py 20 2010-08-02 17:35:19Z cthurau $
+#$Id: sivm.py 22 2010-08-13 11:16:43Z cthurau $
 #$Author$
 """ 
 PyMF Simplex Volume Maximization for CUR [1]
@@ -17,7 +17,7 @@ Conf. on Information and Knowledge Management. ACM. 2010.
 
 __version__ = "$Revision$"
 
-
+import scipy.sparse
 import numpy as np
 from scipy import inf
 
@@ -57,7 +57,7 @@ class SIVM(AA):
 		basis vectors.
 	dist_measure: string, optional
 		The distance measure for finding the next best candidate that 
-		maximizes the simplex volume ['l2','l1','cosine']
+		maximizes the simplex volume ['l2','l1','cosine','sparse_graph_l2']
 		'l2' (default)
 	optimize_lower_bound: bool, optional
 		Use the alternative selection criterion that optimizes the lower
@@ -107,6 +107,7 @@ class SIVM(AA):
 		self._dist_measure = dist_measure	
 		self._optimize_lower_bound=optimize_lower_bound	
 		self._compH = compH
+
 		
 		# assign the correct distance function
 		if self._dist_measure == 'l1':
@@ -119,13 +120,19 @@ class SIVM(AA):
 				self._distfunc = cosine_distance
 				
 		elif self._dist_measure == 'kl':
-				self._distfunc = kl_divergence			
-	
+				self._distfunc = kl_divergence	
+						
+		elif self._dist_measure == 'sparse_graph_l2':
+				self._distfunc = sparse_graph_l2_distance
 
 	def _distance(self, idx):
 			# compute distances of a specific data point to all
 			# other samples			
-			step = 50000	
+			if scipy.sparse.issparse(self.data):
+				step = self.data.shape[1]
+			else:	
+				step = 50000	
+				
 			d = np.zeros((self.data.shape[1],1))		
 			vec = self.data[:, idx:idx+1]	
 			self._print_cur_status('compute distance to node ' + str(idx))									
@@ -155,7 +162,9 @@ class SIVM(AA):
 
 			self.select = []
 			self.select.append(cur_p)	
-			self.H = np.zeros((self._num_bases, self._num_samples))
+			if self._compH:
+				self.H = np.zeros((self._num_bases, self._num_samples))
+				
 			if self._compW:
 				AA.initialization(self)
 
@@ -221,12 +230,13 @@ class SIVM(AA):
 		if self._compW:
 			self.updateW()
 			
-		if self._compH:
+		if self._compH:			
 			self.updateH()					
 			
 		self.ferr = np.zeros(1)
-		self.ferr[0] = self.frobenius_norm()		
-		self._print_cur_status(' FN:' + str(self.ferr[0]))
+		if not scipy.sparse.issparse(self.data):
+			self.ferr[0] = self.frobenius_norm()		
+			self._print_cur_status(' FN:' + str(self.ferr[0]))
 					
 if __name__ == "__main__":
 	import doctest  
