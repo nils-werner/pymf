@@ -26,46 +26,20 @@ from kmeans import *
 __all__ = ["SUB"]
 
 class SUB(NMF):
-	"""  	
-	aa(data, num_bases=4, niter=100, show_progress=True, compW=True)
+	"""  		
+	SUB(data, mfmethod, sstrategy='rand', nsub=20, show_progress=True, mapW=False, 
+	base_sel=2,	num_bases=3 , niterH=1, niter=100, compH=True, compW=True, )
 	
-	
-	Archetypal Analysis. Factorize a data matrix into two matrices s.t.
-	F = | data - W*H | = | data - data*beta*H| is minimal. H and beta
-	are restricted to convexity (beta >=0, sum(beta, axis=1) = [1 .. 1]).
-	Factorization is solved via an alternating least squares optimization
-	using the quadratic programming solver from cvxopt.
+	Evaluate a matrix factorization method "mfmethod" for a certain sampling
+	strategy "sstrategy". This is particular useful for very large datasets. 
 	
 	Parameters
 	----------
-	data : array_like
-		the input data
-	num_bases: int, optional 
-		Number of bases to compute (column rank of W and row rank of H). 
-		4 (default)
-	niter: int, optional
-		Number of iterations of the alternating optimization.
-		100 (default)
-	show_progress: bool, optional
-		Print some extra information
-		False (default)
-	compW: bool, optional
-		Compute W (True) or only H (False). Useful for using basis vectors
-		from another convexity constrained matrix factorization function
-		(e.g. svmnmf) (if set to "True" niter can be set to "1")
-	
+	todo ...
+		
 	Attributes
 	----------
-	
-	Example
-	-------
-	>>> import numpy as np
-	>>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
-	>>> aa_mdl = AA(data, num_bases=2, niter=10)
-	>>> aa_mdl.initialize()
-	>>> aa_mdl.factorize()
-	
-	Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL). 
+	todo ....
 	"""
 	
 	_VINFO = 'pymf-sub v0.1'

@@ -39,22 +39,26 @@ def test_svd(A, func, desc, marker):
 
 def test(A, func, desc, marker):
 	stime = time.time()
+	
 	m = func(A, compW=True, num_bases=4, niter=200, show_progress=False)
 	m.initialization()	
 	m.factorize()
+	
 	print desc, m.ferr[-1]/(A.shape[0] + A.shape[1]) , ' elapsed:' , time.time() - stime
 	return m
 
 def testsub(A, func, mfmethod, nsub, desc, marker):
 	stime = time.time()	
+	
 	m = func(A, mfmethod, compW=True, sstrategy='cur', nsub=nsub, num_bases=4, niter=200, niterH=1,  show_progress=False)
 	m.initialization()	
 	m.factorize()
+	
 	print desc, m.ferr[-1]/(A.shape[0] + A.shape[1]) , ' elapsed:' , time.time() - stime
 	
 	return m
 
-A = np.round(np.random.random((10,100)))
+A = np.round(np.random.random((3,100)))
 B = scipy.sparse.csc_matrix(A)
 # test pseudoinverse
 #pymf.pinv(A)
@@ -78,5 +82,5 @@ m = test(A, pymf.AA, 'AA', 'bs')#
 m = test(A, pymf.SNMF, 'snmf', 'bo')
 m = test(A, pymf.CHNMF, 'chnmf', 'm*')
 m = test(A, pymf.CNMF, 'cnmf', 'c<')
-m = testsub(A, pymf.SUB, pymf.NMF, 100, 'subnmf', 'c<')
 m = test(A, pymf.BNMF, 'bnmf', 'b>')
+m = testsub(A, pymf.SUB, pymf.NMF, 100, 'subnmf', 'c<')

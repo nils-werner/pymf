@@ -18,7 +18,8 @@ __version__ = "$Revision$"
 
 from numpy.linalg import eigh
 import scipy.sparse
-import scipy.sparse.linalg.eigen.arpack as arpack
+
+import scipy.sparse.linalg
 import numpy as np
 
 def pinv(A, eps=10**-8):	
@@ -38,18 +39,7 @@ def pinv(A, eps=10**-8):
 			A_p = np.dot(svd_mdl.V.T, np.core.multiply(np.diag(S)[:,np.newaxis], svd_mdl.U.T))
 			
 		return A_p
-		
-#		
-#		svd_mdl =  SVD(A)
-#		svd_mdl.factorize()
-#		
-#		# calculate pseudoinverse
-#		S = diagonal(svd_mdl.S).transpose()
-#		S = np.where(S>eps, 1.0/S, 0.0)
-#
-#		
-#
-#		return A_p	
+
 
 class SVD():	
 	"""  	
@@ -171,7 +161,7 @@ class SVD():
 			self.V = Vtmp.T
 	
 		def _sparse_right_svd():
-			values, u_vectors = arpack.eigen_symmetric(self.data*self.data.transpose(), k=self.data.shape[0]-1)							
+			values, u_vectors = scipy.sparse.linalg.eigen_symmetric(self.data*self.data.transpose(), k=self.data.shape[0]-1)							
 			# sort eigenvectors according to largest value
 			idx = np.argsort(values)
 			values = values[idx[::-1]]
@@ -190,7 +180,7 @@ class SVD():
 			self.V = S_inv * self.V
 	
 		def _sparse_left_svd():		
-			values, v_vectors = arpack.eigen_symmetric(self.data.transpose()*self.data,k=self.data.shape[1]-1)
+			values, v_vectors = scipy.sparse.linalg.eigen_symmetric(self.data.transpose()*self.data,k=self.data.shape[1]-1)
 			# sort eigenvectors according to largest value
 			idx = np.argsort(values)
 			values = values[idx[::-1]]

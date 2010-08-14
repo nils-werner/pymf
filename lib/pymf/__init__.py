@@ -28,4 +28,3 @@ from sivmcur import *
 from cmd import *
 
 from kmeans import *
-from cmeans import *

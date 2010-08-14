@@ -106,10 +106,9 @@ class CUR(SVD):
 			self._C = self.data[:, self._cid] * scipy.sparse.csc_matrix(np.diag(self._ccnt**(1/2)))		
 			self._R = scipy.sparse.csc_matrix(np.diag(self._rcnt**(1/2))) * self.data[self._rid,:]		
 			self._U = (pinv(self._C) * self.data[:,:]) * pinv(self._R)
-		else:			
-			self._C = np.dot(self.data[:, self._cid].reshape((self._rows, -1)), np.diag(self._ccnt**(1/2)))		
-			self._R = np.dot(np.diag(self._rcnt**(1/2)), self.data[self._rid,:].reshape((-1, self._cols)))		
-			# Compute pseudo inverse of C and R				
+		else:		
+			self._C = np.dot(self.data[:, self._cid].reshape((self._rows, len(self._cid))), np.diag(self._ccnt**(1/2)))		
+			self._R = np.dot(np.diag(self._rcnt**(1/2)), self.data[self._rid,:].reshape((len(self._rid), self._cols)))									
 			self._U = np.dot(np.dot(pinv(self._C), self.data[:,:]), pinv(self._R))
 			
 						

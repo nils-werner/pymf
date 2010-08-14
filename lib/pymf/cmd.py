@@ -77,8 +77,8 @@ class CMD(CUR):
 		for i,idx in enumerate(ncids):
 			self._ccnt[i] = len(np.where(self._cid == idx)[0])
 
-		self.rid = np.int32(list(nrids))
-		self.cid = np.int32(list(ncids))
+		self._rid = np.int32(list(nrids))
+		self._cid = np.int32(list(ncids))
 	
 	def factorize(self):								
 		[prow, pcol] = self.sample_probability()
