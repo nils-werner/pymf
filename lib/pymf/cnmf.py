@@ -146,16 +146,16 @@ class CNMF(NMF):
 			XtX_pos_x_W = np.dot(XtX_pos, self.G)
 		
 			ha = XtX_pos_x_W + np.dot(H_x_WT, XtX_neg_x_W)
-			hb = XtX_neg_x_W + np.dot(H_x_WT, XtX_pos_x_W)
-			self.H = (np.where(hb>0, self.H.T*np.sqrt(ha/hb), self.H.T)).T
+			hb = XtX_neg_x_W + np.dot(H_x_WT, XtX_pos_x_W) + 10**-9
+			self.H = (self.H.T*np.sqrt(ha/hb)).T
 		
 			# update W			
 			if self._compW:
 				HT_x_H = np.dot(self.H, self.H.T)
 				wa = np.dot(XtX_pos, self.H.T) + np.dot(XtX_neg_x_W, HT_x_H)
-				wb = np.dot(XtX_neg, self.H.T) + np.dot(XtX_pos_x_W, HT_x_H)
+				wb = np.dot(XtX_neg, self.H.T) + np.dot(XtX_pos_x_W, HT_x_H) + 10**-9
 			
-				self.G = np.where(wb>0, self.G * np.sqrt(wa/wb), self.G)
+				self.G *= np.sqrt(wa/wb)
 				self.W = np.dot(self.data[:,:], self.G)
 								
 			self.ferr[i] = self.frobenius_norm()

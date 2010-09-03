@@ -12,12 +12,16 @@ Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL)
 version = '0.1'
 
 from nmf import *
+from nmfals import *
+from nmfnnls import *
 from cnmf import *
 from chnmf import *
 from snmf import *
 from aa import *
 from sivm import *
+from laesa import *
 from bnmf import *
+from seminmf import *
 
 from sub import *
 
@@ -28,3 +32,4 @@ from sivmcur import *
 from cmd import *
 
 from kmeans import *
+from cmeans import *

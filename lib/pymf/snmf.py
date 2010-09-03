@@ -123,9 +123,9 @@ class SNMF(NMF):
 		H1 = (XW_pos + np.dot(self.H.T, WW_neg)).T
 		
 		XW_neg = separate_negative(XW)
-		H2 = (XW_neg + np.dot(self.H.T,WW_pos)).T
+		H2 = (XW_neg + np.dot(self.H.T,WW_pos)).T + 10**-9
 		
-		self.H = np.where(H2 > 0, self.H * np.sqrt(H1/H2), self.H)	
+		self.H *= np.sqrt(H1/H2)	
 	
 if __name__ == "__main__":
 	import doctest  

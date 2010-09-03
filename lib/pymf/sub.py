@@ -3,7 +3,7 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: sub.py 20 2010-08-02 17:35:19Z cthurau $
+#$Id: sub.py 24 2010-09-01 07:51:05Z cthurau $
 #$Author$
 """  
 PyMF Matrix SubSampling.
@@ -22,8 +22,13 @@ from chnmf import quickhull
 from nmf import *
 from pca import *
 from kmeans import *
+from laesa import *
+from sivm import *
 
 __all__ = ["SUB"]
+
+
+
 
 class SUB(NMF):
 	"""  		
@@ -66,12 +71,18 @@ class SUB(NMF):
 		elif self._sstrategy == 'hull':
 			self._subfunc = self.hullselect
 			
+		elif self._sstrategy == 'laesa':
+			self._subfunc = self.laesaselect
+			
+		elif self._sstrategy == 'sivm':
+			self._subfunc = self.sivmselect
+			
 		else:
 			self._subfunc = self.randselect
-	
+			
 	def hullselect(self):
 		
-		def selectHullPoints(data, n=3):
+		def selectHullPoints(data, n=20):
 			""" select data points for pairwise projections of the first n
 			dimensions """
 	
@@ -98,7 +109,7 @@ class SUB(NMF):
 		pcamodel.factorize()		
 	
 		idx = selectHullPoints(pcamodel.H, n=self._base_sel)		
-		
+
 		# set the number of subsampled data
 		self.nsub = len(idx)
 		
@@ -132,6 +143,21 @@ class SUB(NMF):
 			
 		return np.sort(temp_ind)
 		
+	def sivmselect(self):
+		sivmmdl = SIVM(self.data, num_bases=self._nsub, compW=True, compH=False, dist_measure='cosine')
+
+		sivmmdl.initialization()	
+		sivmmdl.factorize()
+		idx = sivmmdl.select
+		return idx
+	
+	def laesaselect(self):
+		laesamdl = LAESA(self.data, num_bases=self._nsub, compW=True, compH=False, dist_measure='cosine')
+		laesamdl.initialization()	
+		laesamdl.factorize()
+		idx = laesamdl.select
+		return idx
+	
 	
 	def randselect(self):
 		idx = random.sample(xrange(self._num_samples), self._nsub)		
@@ -159,7 +185,8 @@ class SUB(NMF):
 		self.mdl = self._mfmethod(self.data[:, :], 
 									num_bases=self._num_bases , 
 									niter=self._niterH, 
-									show_progress=self._show_progress, compW=False)
+									show_progress=self._show_progress, 
+									compW=False)
 
 
 		self.mdl.initialization()

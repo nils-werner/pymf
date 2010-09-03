@@ -3,7 +3,7 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: cmd.py 20 2010-08-02 17:35:19Z cthurau $
+#$Id: cmd.py 24 2010-09-01 07:51:05Z cthurau $
 #$Author$
 """
 PyMF Compact Matrix Decomposition [1]

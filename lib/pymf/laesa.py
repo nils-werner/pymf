@@ -19,14 +19,13 @@ __version__ = "$Revision$"
 
 import scipy.sparse
 import numpy as np
-from scipy import inf
 
 from dist import *
 from aa import AA
 
-__all__ = ["SIVM"]
+__all__ = ["LAESA"]
 
-class SIVM(AA):
+class LAESA(AA):
 	"""  	
 	SIVM(data, num_bases=4, niter=100, show_progress=True, compW=True)
 	
@@ -97,15 +96,13 @@ class SIVM(AA):
 	
 	_vstring = 'pymf-svmnmf v0.1'
 
-	def __init__(self, data, num_bases=4, niter=100, 
-				show_progress=False, compW=True, compH=True, 
-				dist_measure='l2', optimize_lower_bound=False):
+	def __init__(self, data, num_bases=4, niter=100, show_progress=False, compW=True, compH=True, dist_measure='l2'):
 
 		# call inherited method		
 		AA.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compW=compW)
 			
 		self._dist_measure = dist_measure	
-		self._optimize_lower_bound=optimize_lower_bound	
+		
 		self._compH = compH
 
 		
@@ -116,7 +113,7 @@ class SIVM(AA):
 		elif self._dist_measure == 'l2':
 				self._distfunc = l2_distance
 																	
-		elif self._dist_measure == 'cosine':				
+		elif self._dist_measure == 'cosine':
 				self._distfunc = cosine_distance
 				
 		elif self._dist_measure == 'kl':
@@ -169,48 +166,15 @@ class SIVM(AA):
 				AA.initialization(self)
 
 	def updateW(self):
-		def optimize_lower():
-				# compute distance matrix between all nodes
-				# and set to the minimum
-				def l2(v1,v2):
-					tmp = np.sqrt(np.sum((v1 - v2)**2))
-					return tmp
-				
-				dtmp = np.zeros((len(self.select), len(self.select)))
-				
-				for idx,x in enumerate(self.select):
-					for idy,y in enumerate(self.select):
-						dtmp[idx,idy] = l2(self.data[:,x:x+1], self.data[:,y:y+1])							
-						
-					dtmp[idx,idx] = np.max(dtmp)	
-										
-				return np.min(dtmp**2)				
-								
+		
 		# initialize some of the recursively updated distance measures ....		
-		d_square = np.zeros((self.data.shape[1],1))
-		d_sum = np.zeros((self.data.shape[1],1))
-		d_i_times_d_j = np.zeros((self.data.shape[1],1))
-		distiter = np.zeros((self.data.shape[1],1))
+		distiter = self._distance(self.select[-1])				
 		
 		for l in range(self._num_bases-1):										
 			d = self._distance(self.select[-1])								
-			
-			if l == 0:				
-				self._maxd = np.max(d)		
-																	
-			elif self._optimize_lower_bound:													
-				self._maxd = optimize_lower()
-											
-			# -----------------------------------		
-			d_i_times_d_j += d * d_sum									 
-			d_sum += d
-			d_square += d**2
-			
-			distiter = self._maxd * d_sum + d_i_times_d_j - (l/2.0) * d_square				
-			
-			# remove the selected data point from the list of possible
-			# candidates		
-			distiter[self.select, :] = -inf
+		
+			# replace distances in distiter
+			distiter = np.where(d<distiter,d,distiter)
 			
 			# detect the next best data point
 			self._print_cur_status('searching for next best node ...')					

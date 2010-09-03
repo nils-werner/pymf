@@ -95,13 +95,13 @@ class BNMF(NMF):
 
 	def updateH(self):
 			H1 = np.dot(self.W.T, self.data[:,:]) + 3.0*self._lamb_H*(self.H**2)
-			H2 = np.dot(np.dot(self.W.T,self.W), self.H) + 2*self._lamb_H*(self.H**3) + self._lamb_H*self.H
-			self.H = np.where(H2>0, self.H*(H1/H2), self.H)
+			H2 = np.dot(np.dot(self.W.T,self.W), self.H) + 2*self._lamb_H*(self.H**3) + self._lamb_H*self.H + 10**-9
+			self.H *= H1/H2
 
 	def updateW(self):
 			W1 = np.dot(self.data[:,:], self.H.T) + 3.0*self._lamb_W*(self.W**2)
-			W2 = np.dot(self.W, np.dot(self.H, self.H.T)) + 2.0*self._lamb_W*(self.W**3) + self._lamb_W*self.W
-			self.W = np.where(W2>0, self.W*(W1/W2), self.W)
+			W2 = np.dot(self.W, np.dot(self.H, self.H.T)) + 2.0*self._lamb_W*(self.W**3) + self._lamb_W*self.W  + 10**-9
+			self.W *= W1/W2
 
 	def factorize(self):
 		""" Perform factorization s.t. data = WH using the standard multiplicative 

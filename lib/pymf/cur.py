@@ -3,7 +3,7 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: cur.py 22 2010-08-13 11:16:43Z cthurau $
+#$Id: cur.py 24 2010-09-01 07:51:05Z cthurau $
 #$Author$
 """
 PyMF CUR Decomposition [1]

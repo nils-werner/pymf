@@ -3,7 +3,7 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: dist.py 22 2010-08-13 11:16:43Z cthurau $
+#$Id: dist.py 24 2010-09-01 07:51:05Z cthurau $
 #$Author$
 """
 Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL). 
@@ -58,10 +58,10 @@ def cosine_distance(d, vec):
 	tmp = np.dot(np.transpose(d), vec)
 	a = np.sqrt(np.sum(d**2, axis=0))
 	b = np.sqrt(np.sum(vec**2))
-	k = (a*b).reshape(-1,1)
+	k = (a*b).reshape(-1,1) + 10**-9
 			
 	# compute distance
-	ret_val = 1.0 - np.where(k>0, tmp/k, 0.0)
+	ret_val = 1.0 - tmp/k
 
 	# check for NaN values			
 	ret_val[np.isnan(ret_val)] = 0

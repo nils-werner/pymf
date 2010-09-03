@@ -3,7 +3,7 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: svd.py 22 2010-08-13 11:16:43Z cthurau $
+#$Id: svd.py 24 2010-09-01 07:51:05Z cthurau $
 #$Author$
 """  
 PyMF Singular Value Decomposition.
@@ -18,6 +18,8 @@ __version__ = "$Revision$"
 
 from numpy.linalg import eigh
 import scipy.sparse
+# check version conflicts <-> Windows/Linux
+import scipy.sparse.linalg.eigen.arpack
 
 import scipy.sparse.linalg
 import numpy as np
@@ -161,7 +163,9 @@ class SVD():
 			self.V = Vtmp.T
 	
 		def _sparse_right_svd():
-			values, u_vectors = scipy.sparse.linalg.eigen_symmetric(self.data*self.data.transpose(), k=self.data.shape[0]-1)							
+			#values, u_vectors = scipy.sparse.linalg.eigen_symmetric(self.data*self.data.transpose(), k=self.data.shape[0]-1)							
+			values, u_vectors = scipy.sparse.linalg.eigen.arpack.eigen_symmetric(self.data*self.data.transpose(), k=self.data.shape[0]-1)							
+			
 			# sort eigenvectors according to largest value
 			idx = np.argsort(values)
 			values = values[idx[::-1]]
@@ -180,7 +184,10 @@ class SVD():
 			self.V = S_inv * self.V
 	
 		def _sparse_left_svd():		
-			values, v_vectors = scipy.sparse.linalg.eigen_symmetric(self.data.transpose()*self.data,k=self.data.shape[1]-1)
+			#values, v_vectors = scipy.sparse.linalg.eigen_symmetric(self.data.transpose()*self.data,k=self.data.shape[1]-1)
+			values, v_vectors = scipy.sparse.linalg.eigen.arpack.eigen_symmetric(self.data.transpose()*self.data,k=self.data.shape[1]-1)
+			
+			
 			# sort eigenvectors according to largest value
 			idx = np.argsort(values)
 			values = values[idx[::-1]]

@@ -19,6 +19,7 @@ __version__ = "$Revision$"
 
 import time
 import sys
+import random
 import numpy as np
 from progressbar import ProgressBar
 
@@ -125,6 +126,11 @@ class NMF:
 		# init
 		self.H = np.random.random((self._num_bases, self._num_samples))
 		self.W = np.random.random((self._data_dimension, self._num_bases))
+		# set W to some random data samples
+		sel = random.sample(xrange(self._num_samples), self._num_bases)
+		
+		# sort indices, otherwise h5py won't work
+		self.W = self.data[:, np.sort(sel)]
 
 	def frobenius_norm(self):
 		""" Frobenius norm (||data - WH||) for a data matrix and a low rank
@@ -140,16 +146,15 @@ class NMF:
 
 	def updateH(self):
 			# pre init H1, and H2 (necessary for storing matrices on disk)									
-			H2 = np.dot(np.dot(self.W.T, self.W), self.H)
+			H2 = np.dot(np.dot(self.W.T, self.W), self.H) + 10**-9
 			self.H *= np.dot(self.W.T, self.data[:,:])
-			self.H = np.where(H2 != 0.0, self.H/H2, self.H)			
-	
+			self.H /= H2				
 	
 	def updateW(self):
 			# pre init W1, and W2 (necessary for storing matrices on disk)									
-			W2 = np.dot(np.dot(self.W, self.H), self.H.T)
+			W2 = np.dot(np.dot(self.W, self.H), self.H.T) + 10**-9
 			self.W *= np.dot(self.data[:,:], self.H.T)
-			self.W = np.where(W2 != 0.0, self.W/W2, self.W)		
+			self.W /= W2		
 
 	def converged(self, i):
 		derr = np.abs(self.ferr[i] - self.ferr[i-1])/self._num_samples
@@ -164,13 +169,13 @@ class NMF:
 		"""	
 							
 		# iterate over W and H
-		for i in xrange(self._niter):
-			# update H
-			self.updateH()
-		
+		for i in xrange(self._niter):						
 			# update W
 			if self._compW:
 				self.updateW()
+									
+			# update H
+			self.updateH()
 								
 			self.ferr[i] = self.frobenius_norm()		
 											
