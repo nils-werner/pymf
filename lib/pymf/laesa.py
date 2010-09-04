@@ -6,13 +6,7 @@
 #$Id: sivm.py 22 2010-08-13 11:16:43Z cthurau $
 #$Author$
 """ 
-PyMF Simplex Volume Maximization for CUR [1]
-
-	SIVM: class for SiVM
-
-[1] C. Thurau, K. Kersting, and C. Bauckhage. Yes We Can - Simplex Volume 
-Maximization for Descriptive Web-Scale Matrix Factorization. In Proc. Int. 
-Conf. on Information and Knowledge Management. ACM. 2010.
+PyMF LAESA
 """
 
 __version__ = "$Revision$"
@@ -72,26 +66,26 @@ class LAESA(AA):
 	
 	Example
 	-------
-	Applying AA to some rather stupid data set:
+	Applying LAESA to some rather stupid data set:
 	
 	>>> import numpy as np
 	>>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
-	>>> sivm_mdl = SIVM(data, num_bases=2, niter=10)
-	>>> sivm_mdl.initialization()
-	>>> sivm_mdl.factorize()
+	>>> laesa_mdl = LAESA(data, num_bases=2, niter=10)
+	>>> laesa_mdl.initialization()
+	>>> laesa_mdl.factorize()
 	
-	The basis vectors are now stored in aa_mdl.W, the coefficients in aa_mdl.H. 
+	The basis vectors are now stored in laesa_mdl.W, the coefficients in laesa_mdl.H. 
 	To compute coefficients for an existing set of basis vectors simply	copy W 
-	to aa_mdl.W, and set compW to False:
+	to laesa_mdl.W, and set compW to False:
 	
 	>>> data = np.array([[1.5, 1.3], [1.2, 0.3]])
 	>>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-	>>> sivm_mdl = SIVM(data, num_bases=2, niter=1, compW=False)
-	>>> sivm_mdl.initialization()
-	>>> sivm_mdl.W = W
-	>>> sivm_mdl.factorize()
+	>>> laesa_mdl = LAESA(data, num_bases=2, niter=1, compW=False)
+	>>> laesa_mdl.initialization()
+	>>> laesa_mdl.W = W
+	>>> laesa_mdl.factorize()
 	
-	The result is a set of coefficients aa_mdl.H, s.t. data = W * aa_mdl.H.
+	The result is a set of coefficients laesa_mdl.H, s.t. data = W * laesa_mdl.H.
 	"""
 	
 	_vstring = 'pymf-svmnmf v0.1'

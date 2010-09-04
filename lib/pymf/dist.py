@@ -6,7 +6,15 @@
 #$Id: dist.py 24 2010-09-01 07:51:05Z cthurau $
 #$Author$
 """
-Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL). 
+PyMF several distance functions
+
+	kl_divergence(): KL Divergence
+	l1_distance(): L1 distance
+	l2_distance(): L2 distance
+	cosine_distance(): Cosine distance 
+	pdist(): Pairwise distance computation
+	vq(): Vector quantization
+	
 """
 
 __version__ = "$Revision$"

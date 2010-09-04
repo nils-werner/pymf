@@ -7,7 +7,6 @@
 #$Author$
 """
 PyMF K-means clustering (unary-convex matrix factorization).
-Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL). 
 """
 
 __version__ = "$Revision$"

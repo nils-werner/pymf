@@ -57,7 +57,7 @@ class SNMF(NMF):
 		
 	Example
 	-------
-	Applying AA to some rather stupid data set:
+	Applying Semi-NMF to some rather stupid data set:
 	
 	>>> import numpy as np
 	>>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])

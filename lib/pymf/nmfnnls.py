@@ -6,8 +6,13 @@
 #$Id: kmeans.py 20 2010-08-02 17:35:19Z cthurau $
 #$Author$
 """
-PyMF K-means clustering (unary-convex matrix factorization).
-Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL). 
+PyMF Non-negative Matrix Factorization.
+
+	NMFALS: Class for Non-negative Matrix Factorization using non negative 
+			least squares optimization (requires scipy.optimize)
+
+[1] Lee, D. D. and Seung, H. S. (1999), Learning the Parts of Objects by Non-negative 
+Matrix Factorization, Nature 401(6755), 788-799.
 """
 
 __version__ = "$Revision$"
@@ -76,7 +81,7 @@ class NMFNNLS(NMF):
 	>>> nmf_mdl.W = W
 	>>> nmf_mdl.factorize()
 	
-	The result is a set of coefficients aa_mdl.H, s.t. data = W * aa_mdl.H.
+	The result is a set of coefficients nmf_mdl.H, s.t. data = W * nmf_mdl.H.
 	"""
 	
 	_VINFO = 'pymf-nmfals v0.1'

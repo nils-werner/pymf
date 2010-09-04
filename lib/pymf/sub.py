@@ -6,7 +6,11 @@
 #$Id: sub.py 24 2010-09-01 07:51:05Z cthurau $
 #$Author$
 """  
-PyMF Matrix SubSampling.
+PyMF Matrix sampling methods
+
+	SUB: apply one of the matrix factorization methods of PyMF 
+		 on sampled data for computing W, then compute H.
+	
 Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL). 
 """
 

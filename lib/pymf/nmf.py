@@ -58,7 +58,7 @@ class NMF:
 	
 	Example
 	-------
-	Applying AA to some rather stupid data set:
+	Applying NMF to some rather stupid data set:
 	
 	>>> import numpy as np
 	>>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
@@ -77,7 +77,7 @@ class NMF:
 	>>> nmf_mdl.W = W
 	>>> nmf_mdl.factorize()
 	
-	The result is a set of coefficients aa_mdl.H, s.t. data = W * aa_mdl.H.
+	The result is a set of coefficients nmf_mdl.H, s.t. data = W * nmf_mdl.H.
 	"""
 	
 	_VINFO = 'pymf-nmf v0.1'

@@ -64,7 +64,7 @@ class BNMF(NMF):
 	
 	The basis vectors are now stored in bnmf_mdl.W, the coefficients in bnmf_mdl.H. 
 	To compute coefficients for an existing set of basis vectors simply	copy W 
-	to aa_mdl.W, and set compW to False:
+	to bnmf_mdl.W, and set compW to False:
 	
 	>>> data = np.array([[0.0], [1.0]])
 	>>> W = np.array([[1.0, 0.0], [0.0, 1.0]])

@@ -26,10 +26,10 @@ __all__ = ["CNMF"]
 
 class CNMF(NMF):
 	"""  	
-	aa(data, num_bases=4, niter=100, show_progress=True, compW=True)
+	CNMF(data, num_bases=4, niter=100, show_progress=True, compW=True)
 	
 	
-	Archetypal Analysis. Factorize a data matrix into two matrices s.t.
+	Convex NMF. Factorize a data matrix into two matrices s.t.
 	F = | data - W*H | = | data - data*beta*H| is minimal. H and beta
 	are restricted to convexity (beta >=0, sum(beta, axis=1) = [1 .. 1]).	
 	

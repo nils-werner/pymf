@@ -73,7 +73,7 @@ class SIVM(AA):
 	
 	Example
 	-------
-	Applying AA to some rather stupid data set:
+	Applying SIVM to some rather stupid data set:
 	
 	>>> import numpy as np
 	>>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
@@ -81,9 +81,9 @@ class SIVM(AA):
 	>>> sivm_mdl.initialization()
 	>>> sivm_mdl.factorize()
 	
-	The basis vectors are now stored in aa_mdl.W, the coefficients in aa_mdl.H. 
+	The basis vectors are now stored in sivm_mdl.W, the coefficients in sivm_mdl.H. 
 	To compute coefficients for an existing set of basis vectors simply	copy W 
-	to aa_mdl.W, and set compW to False:
+	to sivm_mdl.W, and set compW to False:
 	
 	>>> data = np.array([[1.5, 1.3], [1.2, 0.3]])
 	>>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
@@ -92,7 +92,7 @@ class SIVM(AA):
 	>>> sivm_mdl.W = W
 	>>> sivm_mdl.factorize()
 	
-	The result is a set of coefficients aa_mdl.H, s.t. data = W * aa_mdl.H.
+	The result is a set of coefficients sivm_mdl.H, s.t. data = W * sivm_mdl.H.
 	"""
 	
 	_vstring = 'pymf-svmnmf v0.1'
