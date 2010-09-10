@@ -21,7 +21,7 @@ from aa import *
 from sivm import *
 from laesa import *
 from bnmf import *
-from seminmf import *
+from jointnmf import *
 
 from sub import *
 

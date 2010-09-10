@@ -16,10 +16,7 @@ setup.py
 ./lib/pymf/sivm.py
 ./lib/pymf/sivmcur.py
 ./lib/pymf/snmf.py
-./lib/pymf/sparse_cmd.py
-./lib/pymf/sparse_cur.py
-./lib/pymf/sparse_sivmcur.py
-./lib/pymf/sparse_svd.py
 ./lib/pymf/sub.py
 ./lib/pymf/svd.py
+./lib/pymf/jointnmf.py
 scripts/pymftest.py

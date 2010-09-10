@@ -56,8 +56,9 @@ class JointNMF(NMF):
 	
 	Attributes
 	----------
-		W_1 : "data_dimension_1 x num_bases" matrix of basis vectors
-		W_2 : "data_dimension_2 x num_bases" matrix of basis vectors
+		W: concatenated basis vectors W_1 and W_2
+		   W_1 "data_dimension_1 x num_bases" matrix of basis vectors
+		   W_2"data_dimension_2 x num_bases" matrix of basis vectors
 		H : "num bases x num_samples" matrix of coefficients	
 	
 	Example
@@ -71,7 +72,22 @@ class JointNMF(NMF):
 	>>> nmf_mdl.initialization()
 	>>> nmf_mdl.factorize()
 	
-	The basis vectors are now stored in nmf_mdl.W, the coefficients in nmf_mdl.H. 	
+	
+	The basis vectors are now stored in nmf_mdl.W, the coefficients in nmf_mdl.H. 
+	To compute coefficients for an existing set of basis vectors simply	copy W 
+	to nmf_mdl.W, and set compW to False [-> use NMF not JointNMF !!!]
+	
+	>>> data_1 = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
+	>>> W = np.array([[1.0, 0.0], [0.0, 1.0]],[[1.0, 0.3], [0.3, 1.0], [0.1, 0.6]])
+	>>> nmf_mdl = NMF(data_1, num_bases=2, niter=100, compW=False)
+	>>> nmf_mdl.initialization()
+	>>> nmf_mdl.W = W
+	>>> nmf_mdl.factorize()
+	
+	Note that for the dimensionality of nmf_mdl.W we have: 
+	nmf_mdl.W.shape[0] = data_1_dim + data_2_dim
+	Thus, the resulting coefficients (nmf_mdl.H) can be used to reconstruct the 
+	unobserved data_2, => data_2 = np.dot(nmf_mdl.W[data_1_dim:,:], nmf_mdl.H) 		
 	"""
 	
 	_VINFO = 'pymf-jointnmf v0.1'
@@ -122,8 +138,7 @@ class JointNMF(NMF):
 		# rescale the data and the basis vector matrices (coefficients still match)
 		self.data = np.concatenate((self._data_1, self._data_2), axis=0)
 		self.W[:self._data_1.shape[0],:]/= self._lambd
-		self.W[self._data_1.shape[0]:,:]/= (1.0 - self._lambd)
-		self.ferr[i] = self.frobenius_norm()
+		self.W[self._data_1.shape[0]:,:]/= (1.0 - self._lambd)		
 				
 if __name__ == "__main__":
 	import doctest  
