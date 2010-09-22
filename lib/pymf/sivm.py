@@ -165,8 +165,9 @@ class SIVM(AA):
 			if self._compH:
 				self.H = np.zeros((self._num_bases, self._num_samples))
 				
-			if self._compW:
-				AA.initialization(self)
+			self.W = np.zeros((self._data_dimension, self._num_bases))
+			if scipy.sparse.issparse(self.data):
+				self.W = scipy.sparse.csc_matrix(self.W)
 
 	def updateW(self):
 		def optimize_lower():
@@ -230,13 +231,14 @@ class SIVM(AA):
 		if self._compW:
 			self.updateW()
 			
+		# compute H and some error measures
 		if self._compH:			
 			self.updateH()					
 			
-		self.ferr = np.zeros(1)
-		if not scipy.sparse.issparse(self.data):
-			self.ferr[0] = self.frobenius_norm()		
-			self._print_cur_status(' FN:' + str(self.ferr[0]))
+			self.ferr = np.zeros(1)
+			if not scipy.sparse.issparse(self.data) :
+				self.ferr[0] = self.frobenius_norm()		
+				self._print_cur_status(' FN:' + str(self.ferr[0]))
 					
 if __name__ == "__main__":
 	import doctest  

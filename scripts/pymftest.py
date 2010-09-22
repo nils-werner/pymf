@@ -70,8 +70,8 @@ curm = test_svd(A, pymf.CUR, 'cur', 'b<')
 curm = test_svd(B, pymf.CUR, 'cur sparse', 'b<')
 cmdm = test_svd(A, pymf.CMD, 'cmd', 'm<')
 cmdm = test_svd(B, pymf.CMD, 'cmd sparse', 'm<')
-sparse_svmcur = test_svd(A, pymf.SIVMCUR, 'svmcur', 'm<')
-sparse_svmcur = test_svd(B, pymf.SIVMCUR, 'svmcur sparse', 'm<')
+sparse_svmcur = test_svd(A, pymf.SIVMCUR, 'sivmcur', 'm<')
+sparse_svmcur = test_svd(B, pymf.SIVMCUR, 'sivmcur sparse', 'm<')
 
 
 m = test(A, pymf.PCA, 'pca', 'c<')
