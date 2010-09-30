@@ -18,12 +18,7 @@ Matrix Factorization, Nature 401(6755), 788-799.
 __version__ = "$Revision$"
 
 
-import time
-import numpy as np
-import random
-from cvxopt import solvers, base
 import scipy.optimize
-import dist
 from nmf import NMF
 
 __all__ = ["NMFNNLS"]

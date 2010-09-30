@@ -70,15 +70,21 @@ class CUR(SVD):
 		self._cset = range(self._cols) 
 			
 	def sample(self, s, probs):		
-		prob_rows = np.cumsum(probs.flatten()) #.flatten()				
+		prob_rows = np.cumsum(probs.flatten())			
 		temp_ind = np.zeros(s, np.int32)
 	
-		for i in range(s):		 
-			tempI = np.where(prob_rows >= np.random.rand())[0]
-			#if len(tempI) > 0:
-			temp_ind[i] = tempI[0]    	
-			#else:	
-			#	temp_ind[i] = 0
+		for i in range(s):			
+			v = np.random.rand()
+			tempI = np.where(prob_rows >= v - 10**-5)[0]
+			
+			try:
+				temp_ind[i] = tempI[0]    	
+			except:
+				print "oups"
+				print tempI
+				print v
+				print prob_rows
+				temp_ind[i] = 0
 			
 		return np.sort(temp_ind)
 		
@@ -89,8 +95,8 @@ class CUR(SVD):
 		else:
 			dsquare = self.data[:,:]**2
 			
-		prow = np.array(dsquare.sum(axis=1))
-		pcol = np.array(dsquare.sum(axis=0))
+		prow = np.array(dsquare.sum(axis=1), np.float64)
+		pcol = np.array(dsquare.sum(axis=0), np.float64)
 		
 		prow /= prow.sum()
 		pcol /= pcol.sum()	

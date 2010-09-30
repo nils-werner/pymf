@@ -20,7 +20,6 @@ from numpy.linalg import eigh
 import scipy.sparse
 # check version conflicts <-> Windows/Linux
 import scipy.sparse.linalg.eigen.arpack
-
 import scipy.sparse.linalg
 import numpy as np
 
@@ -35,11 +34,12 @@ def pinv(A, eps=10**-8):
 		for i in range(S.shape[0]):
 			S[i,i] = Sdiag[i]
 			
-		if scipy.sparse.issparse(A):
+		if scipy.sparse.issparse(A):			
 			A_p = svd_mdl.V.T * (S *  svd_mdl.U.T)
 		else:
-			A_p = np.dot(svd_mdl.V.T, np.core.multiply(np.diag(S)[:,np.newaxis], svd_mdl.U.T))
 			
+			A_p = np.dot(svd_mdl.V.T, np.core.multiply(np.diag(S)[:,np.newaxis], svd_mdl.U.T))
+
 		return A_p
 
 
@@ -115,17 +115,17 @@ class SVD():
 		def _right_svd():			
 			AA = np.dot(self.data[:,:], self.data[:,:].T)
 			values, u_vectors = self._eig(AA)			
+				
+			# get rid of too low eigenvalues
+			u_vectors = u_vectors[:, values > self._EPS] 
+			values = values[values > self._EPS]
 							
 			# sort eigenvectors according to largest value
 			idx = np.argsort(values)
 			values = values[idx[::-1]]
 
-			# only select eigenvalues >eps
-			sel = np.where(values>self._EPS)[0]		
-			values = values[sel]	
-						
 			# argsort sorts in ascending order -> access is backwards
-			self.U = u_vectors[:,idx[::-1]][:,sel]
+			self.U = u_vectors[:,idx[::-1]]
 			
 			# compute S
 			self.S = np.diag(np.sqrt(values))
@@ -140,16 +140,15 @@ class SVD():
 		def _left_svd():
 			AA = np.dot(self.data[:,:].T, self.data[:,:])
 			values, v_vectors = self._eig(AA)	
+		
+			# get rid of too low eigenvalues
+			v_vectors = v_vectors[:, values > self._EPS] 
+			values = values[values > self._EPS]
 			
 			# sort eigenvectors according to largest value
 			# argsort sorts in ascending order -> access is backwards
 			idx = np.argsort(values)[::-1]
 			values = values[idx]
-		
-			# only select eigenvalues >eps
-			sel = np.where(values>self._EPS)
-			idx = idx[sel]
-			values = values[sel]
 			
 			# compute S
 			self.S= np.diag(np.sqrt(values))
@@ -166,18 +165,22 @@ class SVD():
 			#values, u_vectors = scipy.sparse.linalg.eigen_symmetric(self.data*self.data.transpose(), k=self.data.shape[0]-1)							
 			values, u_vectors = scipy.sparse.linalg.eigen.arpack.eigen_symmetric(self.data*self.data.transpose(), k=self.data.shape[0]-1)							
 			
+			# get rid of too low eigenvalues
+			u_vectors = u_vectors[:, values > self._EPS] 
+			values = values[values > self._EPS]
+			
 			# sort eigenvectors according to largest value
 			idx = np.argsort(values)
-			values = values[idx[::-1]]
-					
-			# argsort sorts in ascending order -> access is backwards
+			values = values[idx[::-1]]						
+			
+			# argsort sorts in ascending order -> access is backwards			
 			self.U = scipy.sparse.csc_matrix(u_vectors[:,idx[::-1]])
 					
 			# compute S
 			self.S = scipy.sparse.csc_matrix(np.diag(np.sqrt(values)))
 			
 			# and the inverse of it
-			S_inv = scipy.sparse.csc_matrix(np.diag(1.0/np.sqrt(values)))
+			S_inv = scipy.sparse.csc_matrix(np.diag(1.0/np.sqrt(values)))			
 					
 			# compute V from it
 			self.V = self.U.transpose() * self.data
@@ -187,20 +190,23 @@ class SVD():
 			#values, v_vectors = scipy.sparse.linalg.eigen_symmetric(self.data.transpose()*self.data,k=self.data.shape[1]-1)
 			values, v_vectors = scipy.sparse.linalg.eigen.arpack.eigen_symmetric(self.data.transpose()*self.data,k=self.data.shape[1]-1)
 			
+			# get rid of too low eigenvalues
+			v_vectors = v_vectors[:, values > self._EPS] 
+			values = values[values > self._EPS]
 			
 			# sort eigenvectors according to largest value
 			idx = np.argsort(values)
 			values = values[idx[::-1]]
 			
-			# argsort sorts in ascending order -> access is backwards
+			# argsort sorts in ascending order -> access is backwards			
 			self.V = scipy.sparse.csc_matrix(v_vectors[:,idx[::-1]])
 					
 			# compute S
 			self.S = scipy.sparse.csc_matrix(np.diag(np.sqrt(values)))
 			
-			# and the inverse of it
-			S_inv = scipy.sparse.csc_matrix(np.diag(1.0/np.sqrt(values)))		
-					
+			# and the inverse of it			
+			S_inv = scipy.sparse.csc_matrix(np.diag(1.0/np.sqrt(values)))								
+			
 			self.U = self.data * self.V
 			self.U = self.U * S_inv		
 			self.V = self.V.transpose()

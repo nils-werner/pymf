@@ -59,7 +59,8 @@ def l2_distance(d, vec):
 	if scipy.sparse.issparse(d):
 		ret_val = sparse_l2_distance(d, vec)
 	else:
-		ret_val = np.sqrt(((d[:,:] - vec)** 2).sum(axis=0))				
+		ret_val = np.sqrt(((d[:,:] - vec)**2).sum(axis=0))
+			
 	return ret_val.reshape((-1,1))		
 		
 def cosine_distance(d, vec):

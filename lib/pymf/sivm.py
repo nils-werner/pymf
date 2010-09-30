@@ -99,16 +99,14 @@ class SIVM(AA):
 
 	def __init__(self, data, num_bases=4, niter=100, 
 				show_progress=False, compW=True, compH=True, 
-				dist_measure='l2', optimize_lower_bound=False):
+				dist_measure='l2'):
 
 		# call inherited method		
 		AA.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compW=compW)
 			
-		self._dist_measure = dist_measure	
-		self._optimize_lower_bound=optimize_lower_bound	
-		self._compH = compH
+		self._dist_measure = dist_measure			
+		self._compH = compH		
 
-		
 		# assign the correct distance function
 		if self._dist_measure == 'l1':
 				self._distfunc = l1_distance
@@ -154,14 +152,17 @@ class SIVM(AA):
 			# Fastmap like initialization
 			# set the starting index for fastmap initialization		
 			cur_p = 0		
+			self.select = []
 			
 			# after 3 iterations the first "real" index is found
 			for i in range(3):								
 				d = self._distance(cur_p)		
 				cur_p = np.argmax(d)
-
-			self.select = []
-			self.select.append(cur_p)	
+				
+			# store maximal found distance -> later used for "a" (->updateW) 
+			self._maxd = np.max(d)						
+			self.select.append(cur_p)
+				
 			if self._compH:
 				self.H = np.zeros((self._num_bases, self._num_samples))
 				
@@ -169,48 +170,27 @@ class SIVM(AA):
 			if scipy.sparse.issparse(self.data):
 				self.W = scipy.sparse.csc_matrix(self.W)
 
-	def updateW(self):
-		def optimize_lower():
-				# compute distance matrix between all nodes
-				# and set to the minimum
-				def l2(v1,v2):
-					tmp = np.sqrt(np.sum((v1 - v2)**2))
-					return tmp
-				
-				dtmp = np.zeros((len(self.select), len(self.select)))
-				
-				for idx,x in enumerate(self.select):
-					for idy,y in enumerate(self.select):
-						dtmp[idx,idy] = l2(self.data[:,x:x+1], self.data[:,y:y+1])							
-						
-					dtmp[idx,idx] = np.max(dtmp)	
-										
-				return np.min(dtmp**2)				
+	def updateW(self):		
 								
 		# initialize some of the recursively updated distance measures ....		
 		d_square = np.zeros((self.data.shape[1],1))
 		d_sum = np.zeros((self.data.shape[1],1))
 		d_i_times_d_j = np.zeros((self.data.shape[1],1))
 		distiter = np.zeros((self.data.shape[1],1))
+		a = np.log(self._maxd**2)
 		
 		for l in range(self._num_bases-1):										
-			d = self._distance(self.select[-1])								
-			
-			if l == 0:				
-				self._maxd = np.max(d)		
-																	
-			elif self._optimize_lower_bound:													
-				self._maxd = optimize_lower()
-											
-			# -----------------------------------		
+			d = self._distance(self.select[-1])
+																								
+			# take the log of d**2 (usually more stable that d)
+			d = np.log(d**2)			
 			d_i_times_d_j += d * d_sum									 
 			d_sum += d
 			d_square += d**2
 			
-			distiter = self._maxd * d_sum + d_i_times_d_j - (l/2.0) * d_square				
+			distiter = d_i_times_d_j + a*d_sum - ((l + 1.0)/2.0) * d_square		
 			
-			# remove the selected data point from the list of possible
-			# candidates		
+			# remove the selected data point from the list of possible candidates
 			distiter[self.select, :] = -inf
 			
 			# detect the next best data point
@@ -220,7 +200,8 @@ class SIVM(AA):
 
 		# sort indices, otherwise h5py won't work
 		self.W = self.data[:, np.sort(self.select)]
-		# but "unsort" it again to keep the correct order
+		
+		# "unsort" it again to keep the correct order
 		self.W = self.W[:, np.argsort(self.select)]
 		
 	def factorize(self):
@@ -233,8 +214,7 @@ class SIVM(AA):
 			
 		# compute H and some error measures
 		if self._compH:			
-			self.updateH()					
-			
+			self.updateH()								
 			self.ferr = np.zeros(1)
 			if not scipy.sparse.issparse(self.data) :
 				self.ferr[0] = self.frobenius_norm()		
