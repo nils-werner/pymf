@@ -22,6 +22,7 @@ from sivm import *
 from laesa import *
 from bnmf import *
 from jointnmf import *
+from jointsivm import *
 
 from sub import *
 

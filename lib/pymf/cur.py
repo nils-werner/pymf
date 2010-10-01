@@ -75,16 +75,12 @@ class CUR(SVD):
 	
 		for i in range(s):			
 			v = np.random.rand()
-			tempI = np.where(prob_rows >= v - 10**-5)[0]
-			
+						
 			try:
+				tempI = np.where(prob_rows >= v)[0]
 				temp_ind[i] = tempI[0]    	
 			except:
-				print "oups"
-				print tempI
-				print v
-				print prob_rows
-				temp_ind[i] = 0
+				temp_ind[i] = len(prob_rows)
 			
 		return np.sort(temp_ind)
 		

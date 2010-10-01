@@ -18,9 +18,7 @@ __version__ = "$Revision$"
 
 from numpy.linalg import eigh
 import scipy.sparse
-# check version conflicts <-> Windows/Linux
-import scipy.sparse.linalg.eigen.arpack
-import scipy.sparse.linalg
+import scipy.sparse.linalg.eigen.arpack as arpack
 import numpy as np
 
 def pinv(A, eps=10**-8):	
@@ -162,8 +160,8 @@ class SVD():
 			self.V = Vtmp.T
 	
 		def _sparse_right_svd():
-			#values, u_vectors = scipy.sparse.linalg.eigen_symmetric(self.data*self.data.transpose(), k=self.data.shape[0]-1)							
-			values, u_vectors = scipy.sparse.linalg.eigen.arpack.eigen_symmetric(self.data*self.data.transpose(), k=self.data.shape[0]-1)							
+			## for some reasons arpack does not allow computation of rank(A) eigenvectors (??)						
+			values, u_vectors = arpack.eigen_symmetric(self.data*self.data.transpose(), k=self.data.shape[0]-1)							
 			
 			# get rid of too low eigenvalues
 			u_vectors = u_vectors[:, values > self._EPS] 
@@ -187,8 +185,8 @@ class SVD():
 			self.V = S_inv * self.V
 	
 		def _sparse_left_svd():		
-			#values, v_vectors = scipy.sparse.linalg.eigen_symmetric(self.data.transpose()*self.data,k=self.data.shape[1]-1)
-			values, v_vectors = scipy.sparse.linalg.eigen.arpack.eigen_symmetric(self.data.transpose()*self.data,k=self.data.shape[1]-1)
+			# for some reasons arpack does not allow computation of rank(A) eigenvectors (??)
+			values, v_vectors = arpack.eigen_symmetric(self.data.transpose()*self.data,k=self.data.shape[1]-1)
 			
 			# get rid of too low eigenvalues
 			v_vectors = v_vectors[:, values > self._EPS] 
@@ -207,8 +205,7 @@ class SVD():
 			# and the inverse of it			
 			S_inv = scipy.sparse.csc_matrix(np.diag(1.0/np.sqrt(values)))								
 			
-			self.U = self.data * self.V
-			self.U = self.U * S_inv		
+			self.U = self.data * self.V * S_inv		
 			self.V = self.V.transpose()
 	
 		
