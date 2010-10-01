@@ -57,20 +57,20 @@ def testsub(A, func, mfmethod, nsub, desc, marker):
 	
 	return m
 
-A = np.round(np.random.random((5,100))) + 3.0
+A = np.round(np.random.random((3,100))) + 3.0
 B = scipy.sparse.csc_matrix(A)
 # test pseudoinverse
 #pymf.pinv(A)
 #pymf.pinv(B)
 
 svdm = test_svd(A, pymf.SVD, 'svd', 'c<')
-svdm = test_svd(B, pymf.SVD, 'svd sparse', 'c<')
+#svdm = test_svd(B, pymf.SVD, 'svd sparse', 'c<')
 curm = test_svd(A, pymf.CUR, 'cur', 'b<')
-curm = test_svd(B, pymf.CUR, 'cur sparse', 'b<')
+#curm = test_svd(B, pymf.CUR, 'cur sparse', 'b<')
 cmdm = test_svd(A, pymf.CMD, 'cmd', 'm<')
-cmdm = test_svd(B, pymf.CMD, 'cmd sparse', 'm<')
+#cmdm = test_svd(B, pymf.CMD, 'cmd sparse', 'm<')
 sparse_svmcur = test_svd(A, pymf.SIVMCUR, 'sivmcur', 'm<')
-sparse_svmcur = test_svd(B, pymf.SIVMCUR, 'sivmcur sparse', 'm<')
+#sparse_svmcur = test_svd(B, pymf.SIVMCUR, 'sivmcur sparse', 'm<')
 
 
 m = test(A, pymf.PCA, 'pca', 'c<')
@@ -82,4 +82,3 @@ m = test(A, pymf.SNMF, 'snmf', 'bo')
 m = test(A, pymf.CHNMF, 'chnmf', 'm*')
 m = test(A, pymf.CNMF, 'cnmf', 'c<')
 m = test(A, pymf.BNMF, 'bnmf', 'b>')
-m = testsub(A, pymf.SUB, pymf.NMF, 100, 'subnmf', 'c<')
