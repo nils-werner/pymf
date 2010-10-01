@@ -22,7 +22,6 @@
 
 """
 
-from matplotlib.pyplot import *
 import pymf
 import time
 import numpy as np
@@ -58,7 +57,7 @@ def testsub(A, func, mfmethod, nsub, desc, marker):
 	
 	return m
 
-A = np.round(np.random.random((3,100))) + 3.0
+A = np.round(np.random.random((5,100))) + 3.0
 B = scipy.sparse.csc_matrix(A)
 # test pseudoinverse
 #pymf.pinv(A)
