@@ -19,7 +19,8 @@ __version__ = "$Revision$"
 
 import numpy as np
 import random
-from itertools import combinations
+#from itertools import combinations
+from chnmf import combinations
 
 import dist
 from chnmf import quickhull
