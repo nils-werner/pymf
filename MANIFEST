@@ -9,8 +9,12 @@ setup.py
 ./lib/pymf/cnmf.py
 ./lib/pymf/cur.py
 ./lib/pymf/dist.py
+./lib/pymf/jointnmf.py
 ./lib/pymf/kmeans.py
+./lib/pymf/laesa.py
 ./lib/pymf/nmf.py
+./lib/pymf/nmfals.py
+./lib/pymf/nmfnnls.py
 ./lib/pymf/pca.py
 ./lib/pymf/progressbar.py
 ./lib/pymf/sivm.py
@@ -18,5 +22,4 @@ setup.py
 ./lib/pymf/snmf.py
 ./lib/pymf/sub.py
 ./lib/pymf/svd.py
-./lib/pymf/jointnmf.py
 scripts/pymftest.py
