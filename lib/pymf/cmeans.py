@@ -82,6 +82,7 @@ class Cmeans(NMF):
 	"""
 	
 	_VINFO = 'pymf-kmeans v0.1'
+	_EPS = 10**-8
 	
 	def __init__(self, data, num_bases=4, niter=50, show_progress=False, compW=True):
 		
@@ -103,16 +104,16 @@ class Cmeans(NMF):
 	def updateH(self):					
 		# assign samples to best matching centres ...
 		m = 1.75
-		tmp_dist = dist.pdist(self.W, self.data, metric='l2')
+		tmp_dist = dist.pdist(self.W, self.data, metric='l2') + self._EPS
 		self.H[:,:] = 0.0
 		
 		for i in range(self._num_bases):
-			for k in range(self._num_bases):
-				self.H[i,:] += (tmp_dist[i,:]/tmp_dist[k,:])**(2.0/(m-1))
+			for k in range(self._num_bases):				
+					self.H[i,:] += (tmp_dist[i,:]/tmp_dist[k,:])**(2.0/(m-1))
 			
 		self.H = np.where(self.H>0, 1.0/self.H, 0)	
 					
 	def updateW(self):			
 		for i in range(self._num_bases):
 			tmp = (self.H[i:i+1,:] * self.data).sum(axis=1)
-			self.W[:,i] = tmp/self.H[i,:].sum()		
+			self.W[:,i] = tmp/(self.H[i,:].sum() + self._EPS)		

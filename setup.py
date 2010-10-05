@@ -8,7 +8,8 @@ setup(name='PyMF',
       author_email='cthurau@googlemail.com',
       url='http://code.google.com/p/pymf/',
       packages = ['pymf'],    
-      package_dir = {'pymf': './lib/pymf'},     
+      package_dir = {'pymf': './lib/pymf'},   
+      scripts=['scripts/testpymf.py'],      
       license = 'OSI Approved :: GNU General Public License (GPL)',
       requires=['cvxopt']      
       )     

@@ -101,8 +101,8 @@ class NMF:
 
 	def _prog_bar(self, total):
 		if total > 1:
- 			self._prog = ProgressBar(0, total, 77, mode='fixed', char='#')
- 		else:
+			self._prog = ProgressBar(0, total, 77, mode='fixed', char='#')
+		else:
 			self._prog = ProgressBar(0, 1, 77, mode='fixed', char='#')				
 		
 		

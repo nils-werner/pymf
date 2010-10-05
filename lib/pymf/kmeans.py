@@ -10,8 +10,6 @@ PyMF K-means clustering (unary-convex matrix factorization).
 """
 
 __version__ = "$Revision$"
-
-
 import time
 import numpy as np
 import random
