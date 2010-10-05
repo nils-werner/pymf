@@ -18,7 +18,13 @@ __version__ = "$Revision$"
 
 from numpy.linalg import eigh
 import scipy.sparse
-import scipy.sparse.linalg as linalg
+
+try:
+	import scipy.sparse.linalg.eigen.arpack as linalg
+except ImportError:
+	import scipy.sparse.linalg as linalg
+
+
 import numpy as np
 
 def pinv(A, eps=10**-8):	
@@ -160,9 +166,13 @@ class SVD():
 			self.V = Vtmp.T
 	
 		def _sparse_right_svd():
-			## for some reasons arpack does not allow computation of rank(A) eigenvectors (??)						
-			values, u_vectors = linalg.eigen_symmetric(self.data*self.data.transpose(), k=self.data.shape[0]-1)							
-			
+			## for some reasons arpack does not allow computation of rank(A) eigenvectors (??)	#
+			AA = self.data*self.data.transpose()	
+			if self.data.shape[0] > 1:					
+				values, u_vectors = linalg.eigen_symmetric(AA, k=self.data.shape[0]-1)							
+			else:				
+				values, u_vectors = self._eig(AA.todense())
+					
 			# get rid of too low eigenvalues
 			u_vectors = u_vectors[:, values > self._EPS] 
 			values = values[values > self._EPS]
@@ -186,8 +196,12 @@ class SVD():
 	
 		def _sparse_left_svd():		
 			# for some reasons arpack does not allow computation of rank(A) eigenvectors (??)
-			values, v_vectors = linalg.eigen_symmetric(self.data.transpose()*self.data,k=self.data.shape[1]-1)
+			AA = self.data.transpose()*self.data
 			
+			if self.data.shape[1] > 1:				
+				values, v_vectors = linalg.eigen_symmetric(AA,k=self.data.shape[1]-1)			
+			else:				
+				values, v_vectors = self._eig(AA.todense())	
 			# get rid of too low eigenvalues
 			v_vectors = v_vectors[:, values > self._EPS] 
 			values = values[values > self._EPS]

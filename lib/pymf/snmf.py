@@ -104,7 +104,7 @@ class SNMF(NMF):
 	def updateW(self):
 		W1 = np.dot(self.data[:,:], self.H.T)
 		W2 = np.dot(self.H, self.H.T)	
-		W = np.dot(W1, np.linalg.inv(W2))
+		self.W = np.dot(W1, np.linalg.inv(W2))
 		
 	def updateH(self):
 		def separate_positive(m):

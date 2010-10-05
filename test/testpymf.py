@@ -49,7 +49,7 @@ def test(A, func, desc, marker):
 def testsub(A, func, mfmethod, nsub, desc, marker):
 	stime = time.time()	
 	
-	m = func(A, mfmethod, compW=True, sstrategy='cur', nsub=nsub, num_bases=4, niter=200, niterH=1,  show_progress=False)
+	m = func(A, mfmethod, compW=True, sstrategy='cur', nsub=nsub, num_bases=8, niter=200, niterH=1,  show_progress=False)
 	m.initialization()	
 	m.factorize()
 	
@@ -57,27 +57,25 @@ def testsub(A, func, mfmethod, nsub, desc, marker):
 	
 	return m
 
-A = np.round(np.random.random((3,100))) + 3.0
+print "test all methods on boring random data..."
+A = np.round(np.random.random((2,200))) + 2.0
 B = scipy.sparse.csc_matrix(A)
 # test pseudoinverse
-#pymf.pinv(A)
-#pymf.pinv(B)
-
+pymf.pinv(A)
+pymf.pinv(B)
 svdm = test_svd(A, pymf.SVD, 'svd', 'c<')
 #svdm = test_svd(B, pymf.SVD, 'svd sparse', 'c<')
 curm = test_svd(A, pymf.CUR, 'cur', 'b<')
-#curm = test_svd(B, pymf.CUR, 'cur sparse', 'b<')
+curm = test_svd(B, pymf.CUR, 'cur sparse', 'b<')
 cmdm = test_svd(A, pymf.CMD, 'cmd', 'm<')
-#cmdm = test_svd(B, pymf.CMD, 'cmd sparse', 'm<')
+cmdm = test_svd(B, pymf.CMD, 'cmd sparse', 'm<')
 sparse_svmcur = test_svd(A, pymf.SIVMCUR, 'sivmcur', 'm<')
-#sparse_svmcur = test_svd(B, pymf.SIVMCUR, 'sivmcur sparse', 'm<')
-
-
+sparse_svmcur = test_svd(B, pymf.SIVMCUR, 'sivmcur sparse', 'm<')
 m = test(A, pymf.PCA, 'pca', 'c<')
 m = test(A, pymf.NMF, 'nmf', 'rs')
 m = test(A, pymf.SIVM, 'sivm', 'bs')
 m = test(A, pymf.Kmeans, 'kmeans', 'b*')
-m = test(A, pymf.AA, 'AA', 'bs')#
+m = test(A, pymf.AA, 'AA', 'bs')
 m = test(A, pymf.SNMF, 'snmf', 'bo')
 m = test(A, pymf.CHNMF, 'chnmf', 'm*')
 m = test(A, pymf.CNMF, 'cnmf', 'c<')
