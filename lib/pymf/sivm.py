@@ -126,6 +126,11 @@ class SIVM(AA):
 		elif self._dist_measure == 'sparse_graph_l2':
 				self._distfunc = sparse_graph_l2_distance
 
+		# switch to sparse l2 if the data is sparse
+		if scipy.sparse.issparse(self.data) and self._dist_measure =='l2':
+			self._dist_measure = 'sparse_graph_l2'
+			self._distfunc = sparse_graph_l2_distance
+
 	def _distance(self, idx):
 		# compute distances of a specific data point to all
 		# other samples			

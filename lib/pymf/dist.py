@@ -43,7 +43,7 @@ def sparse_graph_l2_distance(d, vec):
 	tmp = (d.T * vec).todense()	
 	ret_val = ret_val.T - (2.0*tmp)	
 	ret_val = np.where(ret_val > 0, np.sqrt(ret_val), ret_val)
-	return ret_val
+	return ret_val.reshape((-1))
 
 def sparse_l2_distance(d, vec):
 	ret_val = np.zeros((d.shape[1],1))		
