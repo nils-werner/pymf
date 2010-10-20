@@ -113,9 +113,12 @@ class SIVM(AA):
 				
 		elif self._dist_measure == 'l2':
 				self._distfunc = l2_distance
-																	
+		
 		elif self._dist_measure == 'cosine':				
 				self._distfunc = cosine_distance
+		
+		elif self._dist_measure == 'abs_cosine':				
+				self._distfunc = abs_cosine_distance
 				
 		elif self._dist_measure == 'kl':
 				self._distfunc = kl_divergence	
@@ -124,30 +127,32 @@ class SIVM(AA):
 				self._distfunc = sparse_graph_l2_distance
 
 	def _distance(self, idx):
-			# compute distances of a specific data point to all
-			# other samples			
-			if scipy.sparse.issparse(self.data):
-				step = self.data.shape[1]
-			else:	
-				step = 50000	
-				
-			d = np.zeros((self.data.shape[1],1))		
-			vec = self.data[:, idx:idx+1]	
-			self._print_cur_status('compute distance to node ' + str(idx))									
-			self._prog_bar(np.round(self.data.shape[1]/step))
-													
-			# slice data into smaller chunks
-			for idx_start in range(0,self.data.shape[1],step):					
-				if idx_start + step > self.data.shape[1]:
-					idx_end = self.data.shape[1]
-				else:
-					idx_end = idx_start + step
-
-				d[idx_start:idx_end,0:1] = self._distfunc(self.data[:,idx_start:idx_end], vec)
-				self._update_prog_bar()	
-			
-			return d
+		# compute distances of a specific data point to all
+		# other samples			
 		
+		if scipy.sparse.issparse(self.data):
+			step = self.data.shape[1]
+		else:	
+			step = 50000	
+				
+		d = np.zeros((self.data.shape[1]))		
+		vec = self.data[:, idx:idx+1]	
+		
+		self._print_cur_status('compute distance to node ' + str(idx))									
+		self._prog_bar(np.round(self.data.shape[1]/step))
+												
+		# slice data into smaller chunks
+		for idx_start in range(0, self.data.shape[1], step):					
+			if idx_start + step > self.data.shape[1]:
+				idx_end = self.data.shape[1]
+			else:
+				idx_end = idx_start + step
+
+			d[idx_start:idx_end] = self._distfunc(self.data[:,idx_start:idx_end], vec)
+			self._update_prog_bar()	
+			
+		return d
+	
 	def initialization(self):
 			# Fastmap like initialization
 			# set the starting index for fastmap initialization		
@@ -173,26 +178,23 @@ class SIVM(AA):
 	def updateW(self):		
 								
 		# initialize some of the recursively updated distance measures ....		
-		d_square = np.zeros((self.data.shape[1],1))
-		d_sum = np.zeros((self.data.shape[1],1))
-		d_i_times_d_j = np.zeros((self.data.shape[1],1))
-		distiter = np.zeros((self.data.shape[1],1))
+		d_square = np.zeros((self.data.shape[1]))
+		d_sum = np.zeros((self.data.shape[1]))
+		d_i_times_d_j = np.zeros((self.data.shape[1]))
+		distiter = np.zeros((self.data.shape[1]))
+
 		a = np.log(self._maxd**2)
 		
-		for l in range(self._num_bases-1):										
+		for l in range(self._num_bases-1):
 			d = self._distance(self.select[-1])
-																								
 			# take the log of d**2 (usually more stable that d)
 			d = np.log(d**2)			
-			d_i_times_d_j += d * d_sum									 
+
+			d_i_times_d_j += d * d_sum
 			d_sum += d
 			d_square += d**2
-			
+
 			distiter = d_i_times_d_j + a*d_sum - ((l + 1.0)/2.0) * d_square		
-			
-			# remove the selected data point from the list of possible candidates
-			distiter[self.select, :] = -inf
-			
 			# detect the next best data point
 			self._print_cur_status('searching for next best node ...')					
 			self.select.append(np.argmax(distiter))

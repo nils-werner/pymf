@@ -26,7 +26,7 @@ import pymf
 import time
 import numpy as np
 import scipy.sparse
-
+	
 
 def test_svd(A, func, desc, marker):
 	stime = time.time()
@@ -39,7 +39,7 @@ def test_svd(A, func, desc, marker):
 def test(A, func, desc, marker, niter=200):
 	stime = time.time()
 	
-	m = func(A, compW=True, num_bases=4, niter=niter, show_progress=False)
+	m = func(A, compW=True, num_bases=2, niter=niter, show_progress=False)
 	m.initialization()	
 	m.factorize()
 	
@@ -58,7 +58,7 @@ def testsub(A, func, mfmethod, nsub, desc, marker):
 	return m
 
 print "test all methods on boring random data..."
-A = np.round(np.random.random((2,200))) + 2.0
+A = np.random.random((2,20)) + 2.0
 B = scipy.sparse.csc_matrix(A)
 # test pseudoinverse
 pymf.pinv(A)

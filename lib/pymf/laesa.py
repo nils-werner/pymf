@@ -106,7 +106,6 @@ class LAESA(AA):
 				
 		elif self._dist_measure == 'l2':
 				self._distfunc = l2_distance
-																	
 		elif self._dist_measure == 'cosine':
 				self._distfunc = cosine_distance
 				
@@ -124,7 +123,7 @@ class LAESA(AA):
 			else:	
 				step = 50000	
 				
-			d = np.zeros((self.data.shape[1],1))		
+			d = np.zeros((self.data.shape[1]))		
 			vec = self.data[:, idx:idx+1]	
 			self._print_cur_status('compute distance to node ' + str(idx))									
 			self._prog_bar(np.round(self.data.shape[1]/step))
@@ -136,7 +135,7 @@ class LAESA(AA):
 				else:
 					idx_end = idx_start + step
 
-				d[idx_start:idx_end,0:1] = self._distfunc(self.data[:,idx_start:idx_end], vec)
+				d[idx_start:idx_end] = self._distfunc(self.data[:,idx_start:idx_end], vec)
 				self._update_prog_bar()	
 			
 			return d

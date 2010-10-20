@@ -19,6 +19,7 @@ from chnmf import *
 from snmf import *
 from aa import *
 from sivm import *
+from sivmem import *
 from laesa import *
 from bnmf import *
 from jointnmf import *
