@@ -21,9 +21,9 @@ __version__ = "$Revision$"
 
 import numpy as np
 import scipy.sparse
+import time
 
-__all__ = ["cmd", "abs_cosine_distance", "kl_divergence", "l1_distance", "l2_distance", "cosine_distance",
-		"vq", "pdist","sparse_graph_l2_distance"]
+__all__ = ["cmd", "abs_cosine_distance", "kl_divergence", "l1_distance", "l2_distance", "cosine_distance","vq", "pdist"]
 
 def kl_divergence(d, vec):	
 	b = vec*(1/d)	
@@ -37,22 +37,12 @@ def l1_distance(d, vec):
 	ret_val = ret_val.reshape((-1))						
 	return ret_val
 	
-
-def sparse_graph_l2_distance(d, vec):	
-	ret_val = d.sum(axis=0) + vec.sum()
-	tmp = (d.T * vec).todense()	
-	ret_val = ret_val.T - (2.0*tmp)	
-	ret_val = np.where(ret_val > 0, np.sqrt(ret_val), ret_val)
-	return ret_val.reshape((-1))
-
 def sparse_l2_distance(d, vec):
-	ret_val = np.zeros((d.shape[1],1))		
-	idx2 = vec.nonzero()[0]
+	# compute the norm of d
+	nd = (d.multiply(d)).sum(axis=0)
+	nv = (vec.multiply(vec)).sum(axis=0)
+	ret_val = nd + nv -  2.0*(d.T * vec).T
 
-	for i in range(d.shape[1]):
-			idx1 = d[:,i:i+1].nonzero()[0]
-			tmp = np.setxor1d(idx1, idx2)
-			ret_val[i,0] = np.sqrt(len(tmp))				
 	return ret_val
 		
 def l2_distance(d, vec):	
@@ -62,17 +52,25 @@ def l2_distance(d, vec):
 		ret_val = np.sqrt(((d[:,:] - vec)**2).sum(axis=0))
 			
 	return ret_val.reshape((-1))		
-		
+
+def l2_distance_new(d,vec):
+	# compute the norm of d
+	nd = (d**2).sum(axis=0)
+	nv = (vec**2).sum(axis=0)
+	ret_val = nd + nv -  2.0*np.dot(d.T,vec.reshape((-1,1))).T
+
+	return np.sqrt(ret_val)
+	
 def cosine_distance(d, vec):
 	tmp = np.dot(np.transpose(d), vec)
 	a = np.sqrt(np.sum(d**2, axis=0))
 	b = np.sqrt(np.sum(vec**2))
-	k = (a*b).reshape((-1)) + 10**-9
-			
+	k = (a*b).reshape(-1,1) + 10**-9
+	
 	# compute distance
 	ret_val = 1.0 - tmp/k
-		
-	return ret_val
+	
+	return ret_val.reshape((-1))
 
 def abs_cosine_distance(d, vec):
 	tmp = np.dot(np.transpose(d), vec)
@@ -86,7 +84,7 @@ def abs_cosine_distance(d, vec):
 	tmp = a/np.max(a)
 	ret_val[:,0] *= tmp**2
 		
-	return ret_val
+	return ret_val.reshape((-1))
 
 def pdist(A, B, metric='l2' ):
 	# compute pairwise distance between a data matrix A (d x n) and B (d x m).
