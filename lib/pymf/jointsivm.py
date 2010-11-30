@@ -127,7 +127,7 @@ class JointSIVM(SIVM):
 								
 		self.ferr = self.frobenius_norm()		
 										
-		self._print_cur_status('Fro:' + str(self.ferr))
+		self._logger.info('FN:' + str(self.ferr))
 
 				
 		# rescale the data and the basis vector matrices (coefficients still match)
