@@ -104,27 +104,3 @@ def vq(A, B):
 	# returns an index list [assume n column vectors, d x n]
 	assigned = np.argmin(pdist(A,B), axis=0)
 	return assigned
-
-def cmd(A):
-	# compute the cayley menger determinant -> volume of the n-simplex
-	## not usable ...
-	n = A.shape[1]-1
-	print n
-	D = np.zeros((n+2, n+2))
-	D[0,1:] = 1.0
-	D[1:,0] = 1.0
-	for i in range(n+1):
-		for j in range(n+1):
-			tmp = l2_distance(A[:,i:i+1], A[:,j:j+1])**2
-			if j != i:
-				D[i+1,j+1] = tmp
-				D[j+1,i+1] = tmp
-
-	# compute the preceeding factor
-	fac = (-1)**(n+1) / (2**n * scipy.misc.common.factorial(n)**2)
-	Vol = fac * np.linalg.det(D)
-	print "D:", D
-	print "Volume:", np.sqrt(Vol)
-	print "CM Det:", np.linalg.det(D)
-	U, s, V = np.linalg.svd(D)
-	print "Eigenvalues:", s
