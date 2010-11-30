@@ -82,7 +82,6 @@ class Kmeans(NMF):
 		
 		NMF.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compW=compW)
 
-
 	def initialization(self):
 		# initialize W,H
 		self.H = np.zeros((self._num_bases, self._num_samples))

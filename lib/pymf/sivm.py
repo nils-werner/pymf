@@ -140,8 +140,7 @@ class SIVM(AA):
 		else:
 			vec = self.data[:, idx:idx+1]	
 		
-		self._print_cur_status('compute distance to node ' + str(idx))									
-		self._prog_bar(np.round(self.data.shape[1]/step))
+		self._logger.info('compute distance to node ' + str(idx))									
 												
 		# slice data into smaller chunks
 		for idx_start in range(0, self.data.shape[1], step):					
@@ -151,8 +150,7 @@ class SIVM(AA):
 				idx_end = idx_start + step
 
 			d[idx_start:idx_end] = self._distfunc(self.data[:,idx_start:idx_end], vec)
-			self._update_prog_bar()	
-			
+			self._logger.info('completed:' + str(idx_end/(self.data.shape[1]/100.0)) + "%")	
 		return d
 	
 	def initialization(self, init='fastmap'):
@@ -208,9 +206,9 @@ class SIVM(AA):
 			distiter = d_i_times_d_j + a*d_sum - (l/2.0) * d_square		
 
 			# detect the next best data point
-			self._print_cur_status('searching for next best node ...')					
+			self._logger.info('searching for next best node ...')					
 			self.select.append(np.argmax(distiter))
-			self._print_cur_status('cur_nodes: ' + str(self.select))
+			self._logger.info('cur_nodes: ' + str(self.select))
 
 		# sort indices, otherwise h5py won't work
 		self.W = self.data[:, np.sort(self.select)]
@@ -232,7 +230,7 @@ class SIVM(AA):
 			self.ferr = np.zeros(1)
 			if not scipy.sparse.issparse(self.data) :
 				self.ferr[0] = self.frobenius_norm()		
-				self._print_cur_status(' FN:' + str(self.ferr[0]))
+				self._logger.info('FN:' + str(self.ferr[0]))
 					
 if __name__ == "__main__":
 	import doctest  

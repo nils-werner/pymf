@@ -58,7 +58,7 @@ def testsub(A, func, mfmethod, nsub, desc, marker):
 	return m
 
 print "test all methods on boring random data..."
-A = np.random.random((2,20)) + 2.0
+A = np.random.random((2,50)) + 2.0
 B = scipy.sparse.csc_matrix(A)
 # test pseudoinverse
 pymf.pinv(A)

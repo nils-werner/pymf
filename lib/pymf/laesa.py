@@ -125,9 +125,7 @@ class LAESA(AA):
 				
 			d = np.zeros((self.data.shape[1]))		
 			vec = self.data[:, idx:idx+1]	
-			self._print_cur_status('compute distance to node ' + str(idx))									
-			self._prog_bar(np.round(self.data.shape[1]/step))
-													
+			self._logger.info('compute distance to node ' + str(idx))									
 			# slice data into smaller chunks
 			for idx_start in range(0,self.data.shape[1],step):					
 				if idx_start + step > self.data.shape[1]:
@@ -136,7 +134,7 @@ class LAESA(AA):
 					idx_end = idx_start + step
 
 				d[idx_start:idx_end] = self._distfunc(self.data[:,idx_start:idx_end], vec)
-				self._update_prog_bar()	
+				self._logger.info('completed:' + str(idx_end/(self.data.shape[1]/100.0)) + "%")	
 			
 			return d
 		
@@ -170,9 +168,9 @@ class LAESA(AA):
 			distiter = np.where(d<distiter,d,distiter)
 			
 			# detect the next best data point
-			self._print_cur_status('searching for next best node ...')					
+			self._logger.info('searching for next best node ...')					
 			self.select.append(np.argmax(distiter))
-			self._print_cur_status('cur_nodes: ' + str(self.select))
+			self._logger.info('cur_nodes: ' + str(self.select))
 
 		# sort indices, otherwise h5py won't work
 		self.W = self.data[:, np.sort(self.select)]
@@ -193,7 +191,7 @@ class LAESA(AA):
 		self.ferr = np.zeros(1)
 		if not scipy.sparse.issparse(self.data):
 			self.ferr[0] = self.frobenius_norm()		
-			self._print_cur_status(' FN:' + str(self.ferr[0]))
+			self._logger.info('FN:' + str(self.ferr[0]))
 					
 if __name__ == "__main__":
 	import doctest  

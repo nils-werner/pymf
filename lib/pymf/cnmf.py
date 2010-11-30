@@ -160,7 +160,7 @@ class CNMF(NMF):
 								
 			self.ferr[i] = self.frobenius_norm()
 
-			self._print_cur_status('iteration ' + str(i+1) + '/' + str(self._niter) + ' Fro:' + str(self.ferr[i]))
+			self._logger.info('iteration ' + str(i+1) + '/' + str(self._niter) + ' Fro:' + str(self.ferr[i]))
 
 			if i > 1:
 				if self.converged(i):					

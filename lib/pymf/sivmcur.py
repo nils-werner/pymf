@@ -76,7 +76,8 @@ class SIVMCUR(CUR):
 		
 	def sample(self, A, c):
 		sivm_mdl = SIVM(A, num_bases=c, compH=False, show_progress=self._show_progress, dist_measure=self._dist_measure)
-			
+		# for optimizing the volume of the submatrix, set init to 'origin' (otherwise the volume of
+		# the ordinary simplex would be optimized)
 		sivm_mdl.initialization(init='origin')
 		sivm_mdl.factorize()
 		
@@ -84,6 +85,7 @@ class SIVMCUR(CUR):
 			
 			
 	def factorize(self):			
+		# sample row and column indices that maximize the volume of the submatrix
 		self._rid = self.sample(self.data.transpose(), self._rrank)
 		self._cid = self.sample(self.data, self._crank)
 						

@@ -128,7 +128,7 @@ class BNMF(NMF):
 				self._lamb_W = self._lamb_increase_W * self._lamb_W
 				self._lamb_H = self._lamb_increase_H * self._lamb_H
 			
-			self._print_cur_status('iteration ' + str(i+1) + '/' + str(self._niter) + ' FN:' + str(self.ferr[i]))
+			self._logger.info('iteration ' + str(i+1) + '/' + str(self._niter) + ' FN:' + str(self.ferr[i]))
 
 
 if __name__ == "__main__":

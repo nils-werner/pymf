@@ -218,7 +218,7 @@ class CHNMF(AA):
 					
 		self.ferr = np.zeros(1)
 		self.ferr[0] = self.frobenius_norm()		
-		self._print_cur_status(' Fro:' + str(self.ferr[0]))	
+		self._logger.info('FN:' + str(self.ferr[0]))	
 
 if __name__ == "__main__":
 	import doctest  

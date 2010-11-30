@@ -28,23 +28,24 @@ except ImportError:
 import numpy as np
 
 def pinv(A, eps=10**-8):	
-		# calculate SVD
-		svd_mdl =  SVD(A)
-		svd_mdl.factorize()
-		S = svd_mdl.S
-		Sdiag = S.diagonal()
-		Sdiag = np.where(Sdiag >eps, 1.0/Sdiag, 0.0)
+	# Compute Pseudoinverse of a matrix
+	# calculate SVD
+	svd_mdl =  SVD(A)
+	svd_mdl.factorize()
+	S = svd_mdl.S
+	Sdiag = S.diagonal()
+	Sdiag = np.where(Sdiag >eps, 1.0/Sdiag, 0.0)
 		
-		for i in range(S.shape[0]):
-			S[i,i] = Sdiag[i]
+	
+	for i in range(S.shape[0]):
+		S[i,i] = Sdiag[i]
 			
-		if scipy.sparse.issparse(A):			
-			A_p = svd_mdl.V.T * (S *  svd_mdl.U.T)
-		else:
-			
-			A_p = np.dot(svd_mdl.V.T, np.core.multiply(np.diag(S)[:,np.newaxis], svd_mdl.U.T))
+	if scipy.sparse.issparse(A):			
+		A_p = svd_mdl.V.T * (S *  svd_mdl.U.T)
+	else:	
+		A_p = np.dot(svd_mdl.V.T, np.core.multiply(np.diag(S)[:,np.newaxis], svd_mdl.U.T))
 
-		return A_p
+	return A_p
 
 
 class SVD():	

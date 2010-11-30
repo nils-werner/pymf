@@ -21,7 +21,8 @@ import time
 import sys
 import random
 import numpy as np
-from progressbar import ProgressBar
+import logging
+import logging.config
 
 __all__ = ["NMF"]
 
@@ -99,39 +100,41 @@ class NMF:
 		self._compW = compW
 		self._compH = compH
 
-	def _prog_bar(self, total):
-		if total > 1:
-			self._prog = ProgressBar(0, total, 77, mode='fixed', char='#')
+		# init loggers ---> for using config files
+		# logging.config.fileConfig("pymflogging.conf")
+		# create logger
+		# self._logger = logging.getLogger("pymf")
+		# self._logger.setLevel(logging.DEBUG)
+
+		# create logger
+		self._logger = logging.getLogger("pymf")
+		if self._show_progress:
+			self._logger.setLevel(logging.DEBUG)
 		else:
-			self._prog = ProgressBar(0, 1, 77, mode='fixed', char='#')				
+			self._logger.setLevel(logging.ERROR)
+
+		# create console handler and set level to debug
+		ch = logging.StreamHandler()
+		ch.setLevel(logging.DEBUG)
+
+		# create formatter
+		formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
+
+		# add formatter to ch
+		ch.setFormatter(formatter)
+
+		# add ch to logger
+		self._logger.addHandler(ch)
+
 		
-		
-	def _update_prog_bar(self):
-		if self._show_progress:
-			self._prog.increment_amount()
-			sys.stdout.write("\r")				
-			sys.stdout.write(str(self._prog))
-			sys.stdout.write("\n")
-			sys.stdout.flush()
-				
-				
-	def _print_cur_status(self, message):		
-		if self._show_progress:
-			sys.stdout.write('[' + time.ctime() + '/' + self._VINFO + '] ' + message + '\n')					
-	
-	
 	def initialization(self):
 		""" Initialize W and H to random values in [0,1].
 		"""
-		# init
+		# init to random values (there are probably smarter ways for
+		# initializing W,H ...)
 		self.H = np.random.random((self._num_bases, self._num_samples))
 		self.W = np.random.random((self._data_dimension, self._num_bases))
-		# set W to some random data samples
-		#sel = random.sample(xrange(self._num_samples), self._num_bases)
 		
-		# sort indices, otherwise h5py won't work
-		#self.W = self.data[:, np.sort(sel)]
-
 	def frobenius_norm(self):
 		""" Frobenius norm (||data - WH||) for a data matrix and a low rank
 		approximation given by WH
@@ -179,7 +182,7 @@ class NMF:
 								
 			self.ferr[i] = self.frobenius_norm()		
 											
-			self._print_cur_status('iteration ' + str(i+1) + '/' + str(self._niter) + ' Fro:' + str(self.ferr[i]))
+			self._logger.info('Iteration ' + str(i+1) + '/' + str(self._niter) + ' FN:' + str(self.ferr[i]))
 			
 					# check if the err is not changing anymore
 			if i > 1:
