@@ -127,10 +127,10 @@ class NMF:
 		self.H = np.random.random((self._num_bases, self._num_samples))
 		self.W = np.random.random((self._data_dimension, self._num_bases))
 		# set W to some random data samples
-		sel = random.sample(xrange(self._num_samples), self._num_bases)
+		#sel = random.sample(xrange(self._num_samples), self._num_bases)
 		
 		# sort indices, otherwise h5py won't work
-		self.W = self.data[:, np.sort(sel)]
+		#self.W = self.data[:, np.sort(sel)]
 
 	def frobenius_norm(self):
 		""" Frobenius norm (||data - WH||) for a data matrix and a low rank

@@ -122,26 +122,23 @@ class SIVM(AA):
 				
 		elif self._dist_measure == 'kl':
 				self._distfunc = kl_divergence	
-						
-		elif self._dist_measure == 'sparse_graph_l2':
-				self._distfunc = sparse_graph_l2_distance
-
-		# switch to sparse l2 if the data is sparse
-		if scipy.sparse.issparse(self.data) and self._dist_measure =='l2':
-			self._dist_measure = 'sparse_graph_l2'
-			self._distfunc = sparse_graph_l2_distance
-
+				
 	def _distance(self, idx):
 		# compute distances of a specific data point to all
 		# other samples			
-		
 		if scipy.sparse.issparse(self.data):
 			step = self.data.shape[1]
 		else:	
 			step = 50000	
 				
 		d = np.zeros((self.data.shape[1]))		
-		vec = self.data[:, idx:idx+1]	
+		if idx == -1:
+			# set vec to origin if idx=-1
+			vec = np.zeros((self.data.shape[0],1))
+			if scipy.sparse.issparse(self.data):
+				vec = scipy.sparse.csc_matrix(vec)
+		else:
+			vec = self.data[:, idx:idx+1]	
 		
 		self._print_cur_status('compute distance to node ' + str(idx))									
 		self._prog_bar(np.round(self.data.shape[1]/step))
@@ -158,11 +155,14 @@ class SIVM(AA):
 			
 		return d
 	
-	def initialization(self):
+	def initialization(self, init='fastmap'):
+		# initialization can be either 'fastmap' or 'origin' ...
+		self.select = []
+
+		if init == 'fastmap':
 			# Fastmap like initialization
 			# set the starting index for fastmap initialization		
 			cur_p = 0		
-			self.select = []
 			
 			# after 3 iterations the first "real" index is found
 			for i in range(3):								
@@ -172,34 +172,41 @@ class SIVM(AA):
 			# store maximal found distance -> later used for "a" (->updateW) 
 			self._maxd = np.max(d)						
 			self.select.append(cur_p)
+
+		elif init == 'origin':
+			# set first vertex to origin
+			cur_p = -1
+			d = self._distance(cur_p)
+			self._maxd = np.max(d)
+			self.select.append(cur_p)
+			
+
+		if self._compH:
+			self.H = np.zeros((self._num_bases, self._num_samples))
 				
-			if self._compH:
-				self.H = np.zeros((self._num_bases, self._num_samples))
-				
-			self.W = np.zeros((self._data_dimension, self._num_bases))
-			if scipy.sparse.issparse(self.data):
-				self.W = scipy.sparse.csc_matrix(self.W)
+		self.W = np.zeros((self._data_dimension, self._num_bases))
+		if scipy.sparse.issparse(self.data):
+			self.W = scipy.sparse.csc_matrix(self.W)
 
 	def updateW(self):		
-								
 		# initialize some of the recursively updated distance measures ....		
 		d_square = np.zeros((self.data.shape[1]))
 		d_sum = np.zeros((self.data.shape[1]))
 		d_i_times_d_j = np.zeros((self.data.shape[1]))
 		distiter = np.zeros((self.data.shape[1]))
 
-		a = np.log(self._maxd**2)
+		a = np.log(self._maxd) 
 		
-		for l in range(self._num_bases-1):
+		for l in range(1,self._num_bases):
 			d = self._distance(self.select[-1])
-			# take the log of d**2 (usually more stable that d)
-			d = np.log(d**2)			
-
+			# take the log of d (sually more stable that d)
+			d = np.log(d)			
+			
 			d_i_times_d_j += d * d_sum
 			d_sum += d
 			d_square += d**2
+			distiter = d_i_times_d_j + a*d_sum - (l/2.0) * d_square		
 
-			distiter = d_i_times_d_j + a*d_sum - ((l + 1.0)/2.0) * d_square		
 			# detect the next best data point
 			self._print_cur_status('searching for next best node ...')					
 			self.select.append(np.argmax(distiter))
@@ -207,9 +214,9 @@ class SIVM(AA):
 
 		# sort indices, otherwise h5py won't work
 		self.W = self.data[:, np.sort(self.select)]
-		
+			
 		# "unsort" it again to keep the correct order
-		self.W = self.W[:, np.argsort(self.select)]
+		self.W = self.W[:, np.argsort(np.argsort(self.select))]
 		
 	def factorize(self):
 		"""Do factorization s.t. data = dot(dot(data,beta),H), under the convexity constraint

@@ -139,7 +139,7 @@ class JointNMF(NMF):
 		self.data = np.concatenate((self._data_1, self._data_2), axis=0)
 		self.W[:self._data_1.shape[0],:]/= self._lambd
 		self.W[self._data_1.shape[0]:,:]/= (1.0 - self._lambd)		
-				
+
 if __name__ == "__main__":
 	import doctest  
 	doctest.testmod()	

@@ -68,27 +68,19 @@ class SIVMCUR(CUR):
 	
 	_VINFO = 'pymf-sivmcur v0.1'
 	
-	def __init__(self, data, rrank=0, crank=0, show_progress=False, product=False, dist_measure='l2'):
+	def __init__(self, data, rrank=0, crank=0, show_progress=False, dist_measure='l2'):
 		CUR.__init__(self, data, rrank=rrank, crank=rrank, show_progress=show_progress)
 	
-		self._product = product
 		self._dist_measure = dist_measure	
 
 		
 	def sample(self, A, c):
-		# switch between product rule and sum rule	
-		# !!! NOT YET IMPLEMENTED !!!	
-		if self._product:
-			m = SIVM
-		else:
-			m = SIVM
+		sivm_mdl = SIVM(A, num_bases=c, compH=False, show_progress=self._show_progress, dist_measure=self._dist_measure)
 			
-		sivmnmf_mdl = m(A, num_bases=c, compH=False, show_progress=self._show_progress, dist_measure=self._dist_measure)
-			
-		sivmnmf_mdl.initialization()
-		sivmnmf_mdl.factorize()
+		sivm_mdl.initialization(init='origin')
+		sivm_mdl.factorize()
 		
-		return sivmnmf_mdl.select	
+		return sivm_mdl.select	
 			
 			
 	def factorize(self):			

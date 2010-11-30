@@ -177,7 +177,7 @@ class LAESA(AA):
 		# sort indices, otherwise h5py won't work
 		self.W = self.data[:, np.sort(self.select)]
 		# but "unsort" it again to keep the correct order
-		self.W = self.W[:, np.argsort(self.select)]
+		self.W = self.W[:, np.argsort(np.argsort(self.select))]
 		
 	def factorize(self):
 		"""Do factorization s.t. data = dot(dot(data,beta),H), under the convexity constraint

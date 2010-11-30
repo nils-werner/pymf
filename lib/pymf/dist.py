@@ -23,7 +23,7 @@ import numpy as np
 import scipy.sparse
 import time
 
-__all__ = ["cmd", "abs_cosine_distance", "kl_divergence", "l1_distance", "l2_distance", "cosine_distance","vq", "pdist"]
+__all__ = ["abs_cosine_distance", "kl_divergence", "l1_distance", "l2_distance", "cosine_distance","vq", "pdist"]
 
 def kl_divergence(d, vec):	
 	b = vec*(1/d)	
