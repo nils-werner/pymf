@@ -80,8 +80,6 @@ class Cmeans(NMF):
 	
 	The result is a set of coefficients kmeans_mdl.H, s.t. data = W * kmeans_mdl.H.
 	"""
-	
-	_VINFO = 'pymf-kmeans v0.1'
 	_EPS = 10**-8
 	
 	def __init__(self, data, num_bases=4, niter=50, show_progress=False, compW=True):

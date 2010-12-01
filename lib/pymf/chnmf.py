@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
 #
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
@@ -145,8 +145,6 @@ class CHNMF(AA):
 	
 	The result is a set of coefficients chnmf_mdl.H, s.t. data = W * chnmf_mdl.H.
 	"""		
-	
-	_VINFO = 'pymf-chnmf v0.1'
 	
 	def __init__(self, data, num_bases=4,  niter=100, show_progress=False, compW=True, compH=True, base_sel=3):		
 		# call inherited method

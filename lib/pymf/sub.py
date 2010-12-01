@@ -52,8 +52,6 @@ class SUB(NMF):
 	todo ....
 	"""
 	
-	_VINFO = 'pymf-sub v0.1'
-	
 	def __init__(self, data, mfmethod, nsub=20, show_progress=True, mapW=False, base_sel=2,
 				num_bases=3 , niterH=1, niter=100, compH=True, compW=True, sstrategy='rand'):
 		NMF.__init__(self, data, num_bases=num_bases, niter=niter, compH=compH, show_progress=show_progress, compW=compW)

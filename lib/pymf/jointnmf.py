@@ -90,8 +90,6 @@ class JointNMF(NMF):
 	unobserved data_2, => data_2 = np.dot(nmf_mdl.W[data_1_dim:,:], nmf_mdl.H) 		
 	"""
 	
-	_VINFO = 'pymf-jointnmf v0.1'
-	
 	EPS = 10**-8
 	
 	def __init__(self, data_1, data_2, lambd=0.5, num_bases=4, niter=100, show_progress=False, compH=True, compW=True):

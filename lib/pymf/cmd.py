@@ -58,8 +58,6 @@ class CMD(CUR):
 	>>> cmd_mdl.factorize()
 	"""
 	
-	_VINFO = 'pymf-cmd v0.1'
-	
 
 	def __init__(self, data, rrank=0, crank=0, show_progress=True):
 		CUR.__init__(self, data, rrank=rrank, crank=rrank, show_progress=show_progress)

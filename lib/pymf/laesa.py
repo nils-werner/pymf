@@ -87,8 +87,6 @@ class LAESA(AA):
 	
 	The result is a set of coefficients laesa_mdl.H, s.t. data = W * laesa_mdl.H.
 	"""
-	
-	_vstring = 'pymf-svmnmf v0.1'
 
 	def __init__(self, data, num_bases=4, niter=100, show_progress=False, compW=True, compH=True, dist_measure='l2'):
 

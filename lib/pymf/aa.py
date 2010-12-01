@@ -85,9 +85,6 @@ class AA(NMF):
 	
 	The result is a set of coefficients aa_mdl.H, s.t. data = W * aa_mdl.H.
 	"""
-	
-	_VINFO = 'pymf-aa v0.1'
-	
 	# set cvxopt options
 	solvers.options['show_progress'] = False
 		

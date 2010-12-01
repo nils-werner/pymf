@@ -21,7 +21,7 @@ import scipy.sparse
 
 try:
 	import scipy.sparse.linalg.eigen.arpack as linalg
-except ImportError:
+except:
 	import scipy.sparse.linalg as linalg
 
 
@@ -78,8 +78,6 @@ class SVD():
 	"""
 	
 	_EPS=10**-8
-	
-	_VINFO = 'pymf-svd v0.1'
 	
 	def __init__(self, data, rrank=0, crank=0, show_progress=True):
 		self.data = data

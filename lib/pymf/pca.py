@@ -82,8 +82,6 @@ class PCA(NMF):
 	The result is a set of coefficients pca_mdl.H, s.t. data = W * pca_mdl.H.
 	"""
 	
-	_VINFO = 'pymf-pca v0.1'
-	
 	def __init__(self, data, num_bases=0, niter=1, show_progress=False, compW=True, center_mean=True):
 
 		NMF.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compW=compW)

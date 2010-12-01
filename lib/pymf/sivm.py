@@ -95,7 +95,6 @@ class SIVM(AA):
 	The result is a set of coefficients sivm_mdl.H, s.t. data = W * sivm_mdl.H.
 	"""
 	
-	_vstring = 'pymf-svmnmf v0.1'
 
 	def __init__(self, data, num_bases=4, niter=100, 
 				show_progress=False, compW=True, compH=True, 
@@ -188,6 +187,7 @@ class SIVM(AA):
 
 	def updateW(self):		
 		# initialize some of the recursively updated distance measures ....		
+		EPS = 10**-8
 		d_square = np.zeros((self.data.shape[1]))
 		d_sum = np.zeros((self.data.shape[1]))
 		d_i_times_d_j = np.zeros((self.data.shape[1]))
@@ -197,8 +197,9 @@ class SIVM(AA):
 		
 		for l in range(1,self._num_bases):
 			d = self._distance(self.select[-1])
+			
 			# take the log of d (sually more stable that d)
-			d = np.log(d)			
+			d = np.log(d + EPS)			
 			
 			d_i_times_d_j += d * d_sum
 			d_sum += d

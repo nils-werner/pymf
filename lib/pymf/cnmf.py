@@ -81,8 +81,6 @@ class CNMF(NMF):
 	The result is a set of coefficients acnmf_mdl.H, s.t. data = W * cnmf_mdl.H.
 	"""
 
-	_VINFO = 'pymf-cnmf v0.1'
-	
 	def __init__(self, data, num_bases=4, niter=100, show_progress=False, compW=True):
 		# data can be either supplied by conventional numpy arrays or
 		# as a numpy array within a pytables table (should be preferred for large data sets)

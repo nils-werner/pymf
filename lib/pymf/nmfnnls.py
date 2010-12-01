@@ -79,8 +79,6 @@ class NMFNNLS(NMF):
 	The result is a set of coefficients nmf_mdl.H, s.t. data = W * nmf_mdl.H.
 	"""
 	
-	_VINFO = 'pymf-nmfals v0.1'
-	
 	def __init__(self, data, num_bases=4, niter=10, show_progress=False, compW=True):
 		
 		NMF.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compW=compW)

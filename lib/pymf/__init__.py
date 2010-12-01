@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
 #
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
@@ -10,26 +10,25 @@ Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL)
 '''
 
 version = '0.1'
+from .nmf import *
+from .nmfals import *
+from .nmfnnls import *
+from .cnmf import *
+from .chnmf import *
+from .snmf import *
+from .aa import *
+from .sivm import *
+from .laesa import *
+from .bnmf import *
+from .jointnmf import *
 
-from nmf import *
-from nmfals import *
-from nmfnnls import *
-from cnmf import *
-from chnmf import *
-from snmf import *
-from aa import *
-from sivm import *
-from laesa import *
-from bnmf import *
-from jointnmf import *
+from .sub import *
 
-from sub import *
+from .svd import *
+from .pca import *
+from .cur import *
+from .sivmcur import *
+from .cmd import *
 
-from svd import *
-from pca import *
-from cur import *
-from sivmcur import *
-from cmd import *
-
-from kmeans import *
-from cmeans import *
+from .kmeans import *
+from .cmeans import *

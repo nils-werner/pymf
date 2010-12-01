@@ -78,8 +78,6 @@ class SNMF(NMF):
 	
 	The result is a set of coefficients snmf_mdl.H, s.t. data = W * snmf_mdl.H. 
 	"""
-	
-	_VINFO = 'pymf-snmf v0.1'
 
 	def __init__(self, data, num_bases=4, niter=100, show_progress=False, compW=True):
 		""" Inits Nmf class:

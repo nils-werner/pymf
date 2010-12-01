@@ -81,8 +81,6 @@ class NMF:
 	The result is a set of coefficients nmf_mdl.H, s.t. data = W * nmf_mdl.H.
 	"""
 	
-	_VINFO = 'pymf-nmf v0.1'
-	
 	EPS = 10**-8
 	
 	def __init__(self, data, num_bases=4, niter=100, show_progress=False, compH=True, compW=True):
@@ -109,7 +107,7 @@ class NMF:
 		# create logger
 		self._logger = logging.getLogger("pymf")
 		if self._show_progress:
-			self._logger.setLevel(logging.DEBUG)
+			self._logger.setLevel(logging.INFO)
 		else:
 			self._logger.setLevel(logging.ERROR)
 
@@ -184,7 +182,7 @@ class NMF:
 											
 			self._logger.info('Iteration ' + str(i+1) + '/' + str(self._niter) + ' FN:' + str(self.ferr[i]))
 			
-					# check if the err is not changing anymore
+			# check if the err is not changing anymore
 			if i > 1:
 				if self.converged(i):		
 					# adjust the error measure
