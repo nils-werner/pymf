@@ -43,7 +43,7 @@ def sparse_l2_distance(d, vec):
 	nv = (vec.multiply(vec)).sum(axis=0)
 	ret_val = nd + nv -  2.0*(d.T * vec).T
 
-	return ret_val
+	return np.sqrt(ret_val)
 		
 def l2_distance(d, vec):	
 	if scipy.sparse.issparse(d):
