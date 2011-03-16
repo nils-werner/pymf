@@ -21,7 +21,7 @@ import scipy.sparse
 
 try:
 	import scipy.sparse.linalg.eigen.arpack as linalg
-except:
+except (ImportError, AttributeError):
 	import scipy.sparse.linalg as linalg
 
 
