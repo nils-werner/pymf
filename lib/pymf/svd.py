@@ -27,11 +27,12 @@ except:
 
 import numpy as np
 
-def pinv(A, eps=10**-8):	
+def pinv(A, k=-1, eps=10**-8):	
 	# Compute Pseudoinverse of a matrix
 	# calculate SVD
-	svd_mdl =  SVD(A)
+	svd_mdl =  SVD(A, k=k)
 	svd_mdl.factorize()
+	
 	S = svd_mdl.S
 	Sdiag = S.diagonal()
 	Sdiag = np.where(Sdiag >eps, 1.0/Sdiag, 0.0)
@@ -79,7 +80,7 @@ class SVD():
 	
 	_EPS=10**-8
 	
-	def __init__(self, data, rrank=0, crank=0, show_progress=True):
+	def __init__(self, data, k=-1, rrank=0, crank=0, show_progress=True):
 		self.data = data
 		(self._rows, self._cols) = self.data.shape
 		if rrank > 0:
@@ -91,6 +92,9 @@ class SVD():
 			self._crank = crank
 		else:
 			self._crank = self._cols
+		
+		# set the rank to either rrank or crank
+		self._k = k
 
 		self._show_progress = show_progress
 	
@@ -117,7 +121,7 @@ class SVD():
 	def factorize(self):	
 		def _right_svd():			
 			AA = np.dot(self.data[:,:], self.data[:,:].T)
-			values, u_vectors = self._eig(AA)			
+			values, u_vectors = eigh(AA)			
 				
 			# get rid of too low eigenvalues
 			u_vectors = u_vectors[:, values > self._EPS] 
@@ -168,7 +172,13 @@ class SVD():
 			## for some reasons arpack does not allow computation of rank(A) eigenvectors (??)	#
 			AA = self.data*self.data.transpose()	
 			if self.data.shape[0] > 1:					
-				values, u_vectors = linalg.eigen_symmetric(AA, k=self.data.shape[0]-1)							
+				# do not compute full rank if desired
+				if self._k > 0 and self._k < self.data.shape[0]-1:
+					k = self._k
+				else:
+					k = self.data.shape[0]-1
+
+				values, u_vectors = linalg.eigen_symmetric(AA,k=k)
 			else:				
 				values, u_vectors = self._eig(AA.todense())
 					
@@ -198,7 +208,12 @@ class SVD():
 			AA = self.data.transpose()*self.data
 			
 			if self.data.shape[1] > 1:				
-				values, v_vectors = linalg.eigen_symmetric(AA,k=self.data.shape[1]-1)			
+				# do not compute full rank if desired
+				if self._k > 0 and self._k < self.data.shape[1]-1:
+					k = self._k
+				else:
+					k = self.data.shape[1]-1
+				values, v_vectors = linalg.eigen_symmetric(AA,k=k)			
 			else:				
 				values, v_vectors = self._eig(AA.todense())	
 			# get rid of too low eigenvalues
