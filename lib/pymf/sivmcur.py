@@ -66,8 +66,8 @@ class SIVMCUR(CUR):
 	>>> sivmcur_mdl.factorize()
 	'''
 	
-	def __init__(self, data, rrank=0, crank=0, show_progress=False, dist_measure='l2'):
-		CUR.__init__(self, data, rrank=rrank, crank=rrank, show_progress=show_progress)
+	def __init__(self, data, k=-1, rrank=0, crank=0, show_progress=False, dist_measure='l2'):
+		CUR.__init__(self, data, k=k, rrank=rrank, crank=rrank, show_progress=show_progress)
 	
 		self._dist_measure = dist_measure	
 

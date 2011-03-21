@@ -59,8 +59,8 @@ class CMD(CUR):
 	"""
 	
 
-	def __init__(self, data, rrank=0, crank=0, show_progress=True):
-		CUR.__init__(self, data, rrank=rrank, crank=rrank, show_progress=show_progress)
+	def __init__(self, data, k=-1, rrank=0, crank=0, show_progress=True):
+		CUR.__init__(self, data, k=k, rrank=rrank, crank=rrank, show_progress=show_progress)
 	
 	def _cmdinit(self):
 		nrids = np.unique(self._rid)

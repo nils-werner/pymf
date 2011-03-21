@@ -19,7 +19,6 @@ __version__ = "$Revision$"
 
 import scipy.sparse
 import numpy as np
-from scipy import inf
 
 from dist import *
 from aa import AA
@@ -224,7 +223,7 @@ class SIVM(AA):
 		# compute new coefficients for reconstructing data points		
 		if self._compW:
 			self.updateW()
-			
+		
 		# compute H and some error measures
 		if self._compH:			
 			self.updateH()								

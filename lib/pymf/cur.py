@@ -58,15 +58,16 @@ class CUR(SVD):
 	>>> cur_mdl.factorize()
 	"""
 	
-	def __init__(self, data, rrank=0, crank=0, show_progress=True):
-		SVD.__init__(self, data, rrank=rrank, crank=rrank, show_progress=show_progress)
+	def __init__(self, data,k=-1, rrank=0, crank=0, show_progress=True):
+		SVD.__init__(self, data,k=k,rrank=rrank, crank=rrank, show_progress=show_progress)
 		
 		# select all data samples for computing the error:
 		# note that this might take very long, adjust self._rset and self._cset for 
 		# faster computations.
 		self._rset = range(self._rows)
 		self._cset = range(self._cols) 
-			
+
+		
 	def sample(self, s, probs):		
 		prob_rows = np.cumsum(probs.flatten())			
 		temp_ind = np.zeros(s, np.int32)
@@ -105,10 +106,14 @@ class CUR(SVD):
 		if scipy.sparse.issparse(self.data):
 			self._C = self.data[:, self._cid] * scipy.sparse.csc_matrix(np.diag(self._ccnt**(1/2)))		
 			self._R = scipy.sparse.csc_matrix(np.diag(self._rcnt**(1/2))) * self.data[self._rid,:]		
+			Rinv = pinv(self._R, self._k)
+			Cinv = pinv(self._C, self._k)
 			self._U = (pinv(self._C) * self.data[:,:]) * pinv(self._R)
 		else:		
 			self._C = np.dot(self.data[:, self._cid].reshape((self._rows, len(self._cid))), np.diag(self._ccnt**(1/2)))		
-			self._R = np.dot(np.diag(self._rcnt**(1/2)), self.data[self._rid,:].reshape((len(self._rid), self._cols)))									
+			self._R = np.dot(np.diag(self._rcnt**(1/2)), self.data[self._rid,:].reshape((len(self._rid), self._cols)))
+			Rinv = pinv(self._R, self._k)
+			Cinv = pinv(self._C, self._k)
 			self._U = np.dot(np.dot(pinv(self._C), self.data[:,:]), pinv(self._R))
 			
 						

@@ -13,9 +13,7 @@ Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL).
 __version__ = "$Revision$"
 
 
-import time
 import numpy as np
-import random
 
 import dist
 from nmf import NMF

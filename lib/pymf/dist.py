@@ -21,7 +21,6 @@ __version__ = "$Revision$"
 
 import numpy as np
 import scipy.sparse
-import time
 
 __all__ = ["abs_cosine_distance", "kl_divergence", "l1_distance", "l2_distance", "cosine_distance","vq", "pdist"]
 

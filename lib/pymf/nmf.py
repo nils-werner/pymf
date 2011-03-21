@@ -16,10 +16,6 @@ Matrix Factorization, Nature 401(6755), 788-799.
 
 __version__ = "$Revision$"
 
-
-import time
-import sys
-import random
 import numpy as np
 import logging
 import logging.config

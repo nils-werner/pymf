@@ -16,7 +16,6 @@ PyMF Archetypal Analysis [1]
 __version__ = "$Revision$"
 
 import numpy as np
-import random
 from dist import vq
 from cvxopt import solvers, base
 
