@@ -95,12 +95,13 @@ class SIVM(AA):
 	"""
 	
 
-	def __init__(self, data, num_bases=4, niter=100, 
+	def __init__(self, data, num_bases=4, niter=1, 
 				show_progress=False, compW=True, compH=True, 
 				dist_measure='l2'):
 
 		# call inherited method		
-		AA.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compW=compW)
+		# set "niter=1" as anything else doesn't make sense
+		AA.__init__(self, data, num_bases=num_bases, niter=1, show_progress=show_progress, compW=compW, compH=compH)
 			
 		self._dist_measure = dist_measure			
 		self._compH = compH		
@@ -215,22 +216,6 @@ class SIVM(AA):
 			
 		# "unsort" it again to keep the correct order
 		self.W = self.W[:, np.argsort(np.argsort(self.select))]
-		
-	def factorize(self):
-		"""Do factorization s.t. data = dot(dot(data,beta),H), under the convexity constraint
-			beta >=0, sum(beta)=1, H >=0, sum(H)=1
-		"""
-		# compute new coefficients for reconstructing data points		
-		if self._compW:
-			self.updateW()
-		
-		# compute H and some error measures
-		if self._compH:			
-			self.updateH()								
-			self.ferr = np.zeros(1)
-			if not scipy.sparse.issparse(self.data) :
-				self.ferr[0] = self.frobenius_norm()		
-				self._logger.info('FN:' + str(self.ferr[0]))
 					
 if __name__ == "__main__":
 	import doctest  

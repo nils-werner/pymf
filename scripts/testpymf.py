@@ -44,7 +44,7 @@ def test(A, func, desc, marker, niter=200):
 	m.factorize()
 	
 	print desc + ': Fro.:', m.ferr[-1]/(A.shape[0] + A.shape[1]) , ' elapsed:' , time.time() - stime
-	return m
+	del(m)
 
 def testsub(A, func, mfmethod, nsub, desc, marker):
 	stime = time.time()	
@@ -58,19 +58,20 @@ def testsub(A, func, mfmethod, nsub, desc, marker):
 	return m
 
 print "test all methods on boring random data..."
+np.random.seed(400401) # VS for repeatability of experiments/tests
 A = np.random.random((2,50)) + 2.0
 B = scipy.sparse.csc_matrix(A)
 # test pseudoinverse
 pymf.pinv(A)
 pymf.pinv(B)
 svdm = test_svd(A, pymf.SVD, 'Singula Value Decomposition (SVD)', 'c<')
-#svdm = test_svd(B, pymf.SVD, 'svd sparse', 'c<')
+svdm = test_svd(A.T, pymf.SVD, 'Singula Value Decomposition (SVD)', 'c<')
+svdm = test_svd(B, pymf.SVD, 'svd sparse', 'c<')
 curm = test_svd(A, pymf.CUR, 'CUR Matrix Decomposition', 'b<')
 curm = test_svd(B, pymf.CUR, 'CUR Matrix Decomposition (sparse data)', 'b<')
 cmdm = test_svd(A, pymf.CMD, 'Compact Matrix Decomposition (CMD)', 'm<')
 cmdm = test_svd(B, pymf.CMD, 'Compact Matrix Decomposition (CMD - sparse data)', 'm<')
 sparse_svmcur = test_svd(A, pymf.SIVMCUR, 'Simplex Volume Maximization f. CUR (SIVMCUR)', 'm<')
-sparse_svmcur = test_svd(B, pymf.SIVMCUR, 'Simplex Volume Maximization f. CUR (SIVMCUR - sparse data)', 'm<')
 m = test(A, pymf.PCA, 'Principal Component Analysis (PCA)', 'c<')
 m = test(A, pymf.NMF, 'Non-negative Matrix Factorization (NMF)', 'rs')
 m = test(A, pymf.NMFALS, 'NMF u. alternating least squares (NMFALS)', 'rs', niter=10)

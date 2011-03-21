@@ -19,6 +19,7 @@ __version__ = "$Revision$"
 import numpy as np
 import logging
 import logging.config
+import scipy.sparse
 
 __all__ = ["NMF"]
 
@@ -79,10 +80,11 @@ class NMF:
 
     EPS = 10**-8
 
-    def __init__(self, data, num_bases=4, niter=100, show_progress=False, compH=True, compW=True):
+    def __init__(self, data, num_bases=4, niter=100, show_progress=False, compH=True, compW=True, comp_norm=True):
         # create logger
         self._show_progress = show_progress
         self._logger = logging.getLogger("pymf")
+
         if self._show_progress:
             self._logger.setLevel(logging.INFO)
         else:
@@ -93,9 +95,9 @@ class NMF:
         ch.setLevel(logging.DEBUG)
 
         # create formatter
-        formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
-
-        # add formatter to ch
+	formatter = logging.Formatter("%(asctime)s [%(levelname)s %(module)s %(lineno)d] %(message)s")
+        
+	# add formatter to ch
         ch.setFormatter(formatter)
 
         # add ch to logger
@@ -114,7 +116,7 @@ class NMF:
         # control if W should be updated -> usefull for assigning precomputed basis vectors
         self._compW = compW
         self._compH = compH
-
+        self._comp_norm = comp_norm
         
 
     def initialization(self):
@@ -133,7 +135,12 @@ class NMF:
             frobenius norm: F = ||data - WH||
         """
 
-        err = np.sqrt( np.sum((self.data[:,:] - np.dot(self.W, self.H))**2 ))
+        # check if W and H exist
+        if hasattr(self,'H') and not scipy.sparse.issparse(self.data):
+            err = np.sqrt( np.sum((self.data[:,:] - np.dot(self.W, self.H))**2 ))
+        else:
+            err = -123456
+
         return err
 
 
@@ -168,14 +175,22 @@ class NMF:
                 self.updateW()
 
             # update H
-            self.updateH()
+	    if self._compH:
+		    if scipy.sparse.issparse(self.data):
+		    	self._logger.error('Only a very methods currently support sparse matrices (comp. of H generally not supported)')			    
+		    else:
+		    	self.updateH()                                        
 
-            self.ferr[i] = self.frobenius_norm()
-
+              
+            if self._comp_norm:                 
+                self.ferr[i] = self.frobenius_norm()
+            else:
+                self.ferr[i] = -1.0
+                
             self._logger.info('Iteration ' + str(i+1) + '/' + str(self._niter) + ' FN:' + str(self.ferr[i]))
 
             # check if the err is not changing anymore
-            if i > 1:
+            if i > 1 and self._comp_norm:
                 if self.converged(i):
                     # adjust the error measure
                     self.ferr = self.ferr[:i]

@@ -24,16 +24,13 @@ from chnmf import combinations
 
 import dist
 from chnmf import quickhull
-from nmf import *
-from pca import *
-from kmeans import *
-from laesa import *
-from sivm import *
+from nmf import NMF
+from pca import PCA
+from kmeans import Kmeans
+from laesa import LAESA
+from sivm import SIVM
 
 __all__ = ["SUB"]
-
-
-
 
 class SUB(NMF):
 	"""  		

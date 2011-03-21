@@ -114,9 +114,7 @@ class SVD():
 			err = np.sqrt(np.sum(err**2))
 							
 		return err
-	
-	def _eig(self, A, k=1):
-		return eigh(A)	
+		
 	
 	def factorize(self):	
 		def _right_svd():			
@@ -146,7 +144,7 @@ class SVD():
 		
 		def _left_svd():
 			AA = np.dot(self.data[:,:].T, self.data[:,:])
-			values, v_vectors = self._eig(AA)	
+			values, v_vectors = eigh(AA)	
 		
 			# get rid of too low eigenvalues
 			v_vectors = v_vectors[:, values > self._EPS] 
@@ -180,7 +178,7 @@ class SVD():
 
 				values, u_vectors = linalg.eigen_symmetric(AA,k=k)
 			else:				
-				values, u_vectors = self._eig(AA.todense())
+				values, u_vectors = eigh(AA.todense())
 					
 			# get rid of too low eigenvalues
 			u_vectors = u_vectors[:, values > self._EPS] 
@@ -215,7 +213,7 @@ class SVD():
 					k = self.data.shape[1]-1
 				values, v_vectors = linalg.eigen_symmetric(AA,k=k)			
 			else:				
-				values, v_vectors = self._eig(AA.todense())	
+				values, v_vectors = eigh(AA.todense())	
 			# get rid of too low eigenvalues
 			v_vectors = v_vectors[:, values > self._EPS] 
 			values = values[values > self._EPS]

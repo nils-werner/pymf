@@ -87,12 +87,12 @@ class AA(NMF):
 	solvers.options['show_progress'] = False
 		
 		
-	def __init__(self, data, num_bases=4, niter=100, show_progress=False, compW=True):
+	def __init__(self, data, num_bases=4, niter=100, show_progress=False, compW=True, compH=True):
 
 		# call inherited method
-		NMF.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compW=compW)
+		NMF.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compW=compW, compH=compH)
 
-
+	
 	def initialization(self): 
 		""" Initialize W and H to random values in [0,1]
 		"""
