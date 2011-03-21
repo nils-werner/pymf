@@ -19,7 +19,6 @@ import numpy as np
 from dist import vq
 from cvxopt import solvers, base
 
-#from numpy.linalg import pinv
 from svd import pinv
 from nmf import NMF
 
@@ -57,7 +56,7 @@ class AA(NMF):
 		W : "data_dimension x num_bases" matrix of basis vectors
 		H : "num bases x num_samples" matrix of coefficients
 		beta : "num_bases x num_samples" matrix of basis vector coefficients 
-			(for constructiong W s.t. W = beta * data.T )
+			(for constructing W s.t. W = beta * data.T )
 			
 		ferr : frobenius norm (after calling .factorize())
 	
@@ -99,7 +98,6 @@ class AA(NMF):
 		"""
 		# initialize beta coefficients -> convex factors for creating basis vectors from data samples
 		self.H = np.random.random((self._num_bases, self._num_samples))
-
 		self.H /= self.H.sum(axis=0)
 			
 		# reintialize W to random data values

@@ -9,8 +9,9 @@ Detailed documentation is available at http://pymf.googlecode.com
 Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL)
 '''
 
-version = '0.1'
-from .nmf import *
+__version__ = "$Revision$"
+            
+from .nmf import NMF
 from .nmfals import *
 from .nmfnnls import *
 from .cnmf import *

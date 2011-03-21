@@ -85,8 +85,7 @@ class PCA(NMF):
 	def __init__(self, data, num_bases=0, niter=1, show_progress=False, compW=True, center_mean=True):
 
 		NMF.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compW=compW)
-
-					
+		
 		# center the data around the mean first
 		self._center_mean = center_mean			
 
