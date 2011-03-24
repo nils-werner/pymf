@@ -35,7 +35,7 @@ class CNMF(NMF):
     
     Parameters
     ----------
-    data : array_like
+    data : array_like [data_dimension x num_samples]
         the input data
     num_bases: int, optional 
         Number of bases to compute (column rank of W and row rank of H). 
@@ -62,6 +62,7 @@ class CNMF(NMF):
     Applying CNMF to some rather stupid data set:
     
     >>> import numpy as np
+    >>> from cnmf import CNMF
     >>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
     >>> cnmf_mdl = CNMF(data, num_bases=2, niter=10)
     >>> cnmf_mdl.initialization()

@@ -35,9 +35,9 @@ class JointSIVM(SIVM):
     
     Parameters
     ----------
-    data_1 : array_like 
+    data_1 : array_like  [data_dimension_1 x num_samples]
         the input data 1
-    data_2 : array_like
+    data_2 : array_like [data_dimension_2 x num_samples]
         the input data 2
     lamb_d: float [0.0, 1.0]
         mixing coefficient, controls contribution of data_1 vs. data_2
@@ -66,9 +66,10 @@ class JointSIVM(SIVM):
     Applying JointNMF to some rather stupid data set:
     
     >>> import numpy as np
+    >>> from jointsivm import JointSIVM
     >>> data_1 = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
     >>> data_1 = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0], [0.0, 1.0, 1.0]])
-    >>> nmf_mdl = JointNMF(data_1, data_2, lambd=0.5, num_bases=2, niter=10)
+    >>> nmf_mdl = JointSIVM(data_1, data_2, lambd=0.5, num_bases=2, niter=10)
     >>> nmf_mdl.initialization()
     >>> nmf_mdl.factorize()
     
@@ -114,20 +115,15 @@ class JointSIVM(SIVM):
         # build weighted matrix data
         self.data = np.concatenate((self._lambd*self._data_1, (1.0-self._lambd)* self._data_2), axis=0)
                 
-        # update W
         if self._compute_w:
             self.update_w()
-            # update H
+
         if self._compute_h:
             self.update_h()
-        
-            
                                 
-        self.ferr = self.frobenius_norm()        
-                                        
+        self.ferr = self.frobenius_norm()                                                
         self._logger.info('FN:' + str(self.ferr))
 
-                
         # rescale the data and the basis vector matrices (coefficients still match)
         self.data = np.concatenate((self._data_1, self._data_2), axis=0)
         self.W[:self._data_1.shape[0],:]/= self._lambd

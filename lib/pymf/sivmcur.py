@@ -35,7 +35,7 @@ class SIVMCUR(CUR):
     
     Parameters
     ----------
-    data : array_like
+    data : array_like [data_dimension x num_samples]
         the input data
     rrank: int, optional 
         Number of rows to sample from data.

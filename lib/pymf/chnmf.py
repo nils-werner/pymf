@@ -76,7 +76,7 @@ class CHNMF(AA):
     
     Parameters
     ----------
-    data : array_like
+    data : array_like [data_dimension x num_samples]
         the input data
     num_bases: int, optional 
         Number of bases to compute (column rank of W and row rank of H). 
@@ -107,6 +107,7 @@ class CHNMF(AA):
     Applying CHNMF to some rather stupid data set:
     
     >>> import numpy as np
+    >>> from chnmf import CHNMF
     >>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
     >>> chnmf_mdl = CHNMF(data, num_bases=2, niter=10)
     >>> chnmf_mdl.initialization()

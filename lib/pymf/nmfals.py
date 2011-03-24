@@ -36,7 +36,7 @@ class NMFALS(NMF):
     
     Parameters
     ----------
-    data : array_like
+    data : array_like [data_dimension x num_samples]
         the input data
     num_bases: int, optional 
         Number of bases to compute (column rank of W and row rank of H). 

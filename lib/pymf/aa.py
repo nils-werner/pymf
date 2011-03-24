@@ -36,7 +36,7 @@ class AA(NMF):
 
     Parameters
     ----------
-    data : array_like
+    data : array_like [data_dimension x num_samples]
         the input data
     num_bases: int, optional
         Number of bases to compute (column rank of W and row rank of H).
@@ -65,6 +65,7 @@ class AA(NMF):
     Applying AA to some rather stupid data set:
 
     >>> import numpy as np
+    >>> from aa import AA
     >>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
     >>> aa_mdl = AA(data, num_bases=2, niter=10)
     >>> aa_mdl.initialization()

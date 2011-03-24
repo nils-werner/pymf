@@ -34,7 +34,7 @@ class CUR(SVD):
     
     Parameters
     ----------
-    data : array_like
+    data : array_like [data_dimension x num_samples]
         the input data
     rrank: int, optional 
         Number of rows to sample from data.
@@ -53,6 +53,7 @@ class CUR(SVD):
     Example
     -------
     >>> import numpy as np
+    >>> from cur import CUR
     >>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
     >>> cur_mdl = CUR(data, show_progress=False, rrank=1, crank=2)    
     >>> cur_mdl.factorize()

@@ -32,7 +32,7 @@ class CMD(CUR):
     
     Parameters
     ----------
-    data : array_like
+    data : array_like [data_dimension x num_samples]
         the input data
     rrank: int, optional 
         Number of rows to sample from data. Double entries are eliminiated s.t.
@@ -53,6 +53,7 @@ class CMD(CUR):
     Example
     -------
     >>> import numpy as np
+    >>> from cmd import CMD
     >>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
     >>> cmd_mdl = CMD(data, show_progress=False, rrank=1, crank=2)    
     >>> cmd_mdl.factorize()

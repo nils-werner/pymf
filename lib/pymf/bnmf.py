@@ -30,7 +30,7 @@ class BNMF(NMF):
     
     Parameters
     ----------
-    data : array_like
+    data : array_like [data_dimension x num_samples]
         the input data
     num_bases: int, optional 
         Number of bases to compute (column rank of W and row rank of H). 
@@ -56,6 +56,7 @@ class BNMF(NMF):
     Applying BNMF to some rather stupid data set:
     
     >>> import numpy as np
+    >>> from bnmf import BNMF
     >>> data = np.array([[1.0, 0.0, 1.0], [0.0, 1.0, 1.0]])
     >>> bnmf_mdl = BNMF(data, num_bases=2, niter=10)
     >>> bnmf_mdl.initialization()

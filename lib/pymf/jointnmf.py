@@ -35,8 +35,8 @@ class JointNMF(NMF):
     
     Parameters
     ----------
-    data_1 : array_like 
-        the input data 1
+    data_1 : array_like [data_dimension_1 x num_samples]
+        the input data 1 [data_dimension_2 x num_samples]
     data_2 : array_like
         the input data 2
     lamb_d: float [0.0, 1.0]
@@ -66,6 +66,7 @@ class JointNMF(NMF):
     Applying JointNMF to some rather stupid data set:
     
     >>> import numpy as np
+    >>> from jointnmf import JointNMF
     >>> data_1 = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
     >>> data_1 = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0], [0.0, 1.0, 1.0]])
     >>> nmf_mdl = JointNMF(data_1, data_2, lambd=0.5, num_bases=2, niter=10)
