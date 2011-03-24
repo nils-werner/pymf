@@ -19,33 +19,12 @@ __version__ = "$Revision$"
 
 import numpy as np
 
-#from itertools import combinations
-
+from itertools import combinations
 from dist import vq
 from pca import PCA
 from aa import AA
 
 __all__ = ["CHNMF"]
-
-def combinations(iterable, r):
-    # combinations('ABCD', 2) --> AB AC AD BC BD CD
-    # combinations(range(4), 3) --> 012 013 023 123
-    pool = tuple(iterable)
-    n = len(pool)
-    if r > n:
-        return
-    indices = list(range(r))
-    yield tuple(pool[i] for i in indices)
-    while True:
-        for i in reversed(range(r)):
-            if indices[i] != i + n - r:
-                break
-        else:
-            return
-        indices[i] += 1
-        for j in range(i+1, r):
-            indices[j] = indices[j-1] + 1
-        yield tuple(pool[i] for i in indices)
 
 
 def quickhull(sample):
@@ -85,14 +64,15 @@ def quickhull(sample):
 
 class CHNMF(AA):
     """      
-    CHNMF(data, num_bases=4, niter=100, show_progress=True, compW=True, compH=True)
+    CHNMF(data, num_bases=4, niter=100, show_progress=True, compute_w=True, compute_h=True)
         
-    Convex Hull Non-negative Matrix Factorization. Factorize a data matrix into two 
-    matrices s.t. F = | data - W*H | is minimal. H is restricted to convexity 
+    Convex Hull Non-negative Matrix Factorization. Factorize a data matrix into
+    two matrices s.t. F = | data - W*H | is minimal. H is restricted to convexity 
     (H >=0, sum(H, axis=1) = [1 .. 1]) and W resides on actual data points. 
     Factorization is solved via an alternating least squares optimization using 
-    the quadratic programming solver from cvxopt. The results are usually equivalent 
-    to Archetypal Analysis (pymf.AA) but CHNMF also works for very large datasets.
+    the quadratic programming solver from cvxopt. The results are usually 
+    equivalent to Archetypal Analysis (pymf.AA) but CHNMF also works for very 
+    large datasets.
     
     Parameters
     ----------
@@ -107,11 +87,11 @@ class CHNMF(AA):
     show_progress: bool, optional
         Print some extra information
         False (default)
-    compW: bool, optional
+    compute_w: bool, optional
         Compute W (True) or only H (False). Useful for using basis vectors
         from another convexity constrained matrix factorization function
         (e.g. svmnmf) (if set to "True" niter can be set to "1")
-    compH: bool, optional
+    compute_h: bool, optional
         Compute H (True) or only W (False). Useful when only the basis vectors
         need to be known.
     
@@ -132,13 +112,13 @@ class CHNMF(AA):
     >>> chnmf_mdl.initialization()
     >>> chnmf_mdl.factorize()
     
-    The basis vectors are now stored in chnmf_mdl.W, the coefficients in chnmf_mdl.H. 
-    To compute coefficients for an existing set of basis vectors simply    copy W 
-    to chnmf_mdl.W, and set compW to False:
+    The basis vectors are now stored in chnmf_mdl.W, the coefficients in 
+    chnmf_mdl.H. To compute coefficients for an existing set of basis vectors 
+    simply copy W to chnmf_mdl.W, and set compute_w to False:
     
     >>> data = np.array([[1.5, 2.0], [1.2, 1.8]])
     >>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-    >>> chnmf_mdl = CHNMF(data, num_bases=2, niter=1, compW=False)
+    >>> chnmf_mdl = CHNMF(data, num_bases=2, niter=1, compute_w=False)
     >>> chnmf_mdl.initialization()
     >>> chnmf_mdl.W = W
     >>> chnmf_mdl.factorize()
@@ -146,11 +126,14 @@ class CHNMF(AA):
     The result is a set of coefficients chnmf_mdl.H, s.t. data = W * chnmf_mdl.H.
     """        
     
-    def __init__(self, data, num_bases=4,  niter=100, show_progress=False, compW=True, compH=True, base_sel=3):        
+    def __init__(self, data, num_bases=4,  niter=100, show_progress=False, 
+                 compute_w=True, compute_h=True, base_sel=3):        
+                     
         # call inherited method
-        AA.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compW=compW)
+        AA.__init__(self, data, num_bases=num_bases, niter=niter, 
+                    show_progress=show_progress, compute_w=compute_w)
                 
-        self._compH = compH
+        self._compute_h = compute_h
                 
         # base sel should never be larger than the actual
         # data dimension
@@ -159,9 +142,9 @@ class CHNMF(AA):
         else:
             self._base_sel = self.data.shape[0]
 
-    def updateW(self):
+    def update_w(self):
         
-        def selectHullPoints(data, n=3):
+        def select_hull_points(data, n=3):
             """ select data points for pairwise projections of the first n
             dimensions """
     
@@ -184,12 +167,14 @@ class CHNMF(AA):
         #if self.data.shape[1] > 50:    
         pcamodel = PCA(self.data, show_progress=self._show_progress)        
         pcamodel.factorize()        
-        self._hull_idx = selectHullPoints(pcamodel.H, n=self._base_sel)
+        self._hull_idx = select_hull_points(pcamodel.H, n=self._base_sel)
 
         #else:
         #    self._hull_idx = range(self.data.shape[1])
 
-        aa_mdl = AA(self.data[:, self._hull_idx], num_bases=self._num_bases, niter=self._niter, show_progress=self._show_progress, compW=True)
+        aa_mdl = AA(self.data[:, self._hull_idx], num_bases=self._num_bases, 
+                    niter=self._niter, show_progress=self._show_progress, 
+                    compute_w=True, compute_h=True)
 
         # initialize W, H, and beta
         aa_mdl.initialization()
@@ -200,18 +185,18 @@ class CHNMF(AA):
         self.W = aa_mdl.W        
     
     def factorize(self):
-        """Do factorization s.t. data = dot(dot(data,beta),H), under the convexity constraint
-            beta >=0, sum(beta)=1, H >=0, sum(H)=1
+        """Do factorization s.t. data = dot(dot(data,beta),H), under the 
+        convexity constraint beta >=0, sum(beta)=1, H >=0, sum(H)=1.
         """
         # compute new coefficients for reconstructing data points
-        if self._compW:
-            self.updateW()
+        if self._compute_w:
+            self.update_w()
             self.map_W_to_Data()
         
         # for CHNMF it is sometimes useful to only compute
         # the basis vectors
-        if self._compH:
-            self.updateH()
+        if self._compute_h:
+            self.update_h()
                     
         self.ferr = np.zeros(1)
         self.ferr[0] = self.frobenius_norm()        

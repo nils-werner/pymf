@@ -26,36 +26,36 @@ import pymf
 import time
 import numpy as np
 import scipy.sparse
-	
+    
 
 def test_svd(A, func, desc, marker):
-	stime = time.time()
-	m = func(A, show_progress=False, rrank=2, crank=2)	
-	m.factorize()
-	print desc + ': Fro.:', m.frobenius_norm()/(A.shape[0] + A.shape[1]) , ' elapsed:' , time.time() - stime
-	return m
+    stime = time.time()
+    m = func(A, show_progress=False, rrank=2, crank=2)    
+    m.factorize()
+    print desc + ': Fro.:', m.frobenius_norm()/(A.shape[0] + A.shape[1]) , ' elapsed:' , time.time() - stime
+    return m
 
 
 def test(A, func, desc, marker, niter=200):
-	stime = time.time()
-	
-	m = func(A, compW=True, num_bases=2, niter=niter, show_progress=False)
-	m.initialization()	
-	m.factorize()
-	
-	print desc + ': Fro.:', m.ferr[-1]/(A.shape[0] + A.shape[1]) , ' elapsed:' , time.time() - stime
-	del(m)
+    stime = time.time()
+    
+    m = func(A, compute_w=True, num_bases=2, niter=niter, show_progress=False)
+    m.initialization()    
+    m.factorize()
+    
+    print desc + ': Fro.:', m.ferr[-1]/(A.shape[0] + A.shape[1]) , ' elapsed:' , time.time() - stime
+    del(m)
 
 def testsub(A, func, mfmethod, nsub, desc, marker):
-	stime = time.time()	
-	
-	m = func(A, mfmethod, compW=True, sstrategy='cur', nsub=nsub, num_bases=8, niter=200, niterH=1,  show_progress=False)
-	m.initialization()	
-	m.factorize()
-	
-	print desc, m.ferr[-1]/(A.shape[0] + A.shape[1]) , ' elapsed:' , time.time() - stime
-	
-	return m
+    stime = time.time()    
+    
+    m = func(A, mfmethod, compute_w=True, sstrategy='cur', nsub=nsub, num_bases=8, niter=200, niterH=1,  show_progress=False)
+    m.initialization()    
+    m.factorize()
+    
+    print desc, m.ferr[-1]/(A.shape[0] + A.shape[1]) , ' elapsed:' , time.time() - stime
+    
+    return m
 
 print "test all methods on boring random data..."
 np.random.seed(400401) # VS for repeatability of experiments/tests

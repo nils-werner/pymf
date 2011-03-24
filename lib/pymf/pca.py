@@ -24,7 +24,7 @@ __all__ = ["PCA"]
 
 class PCA(NMF):
 	"""  	
-	PCA(data, num_bases=4, niter=100, show_progress=True, compW=True, center_mean=True)
+	PCA(data, num_bases=4, niter=100, show_progress=True, compute_w=True, center_mean=True)
 	
 	
 	Archetypal Analysis. Factorize a data matrix into two matrices s.t.
@@ -47,7 +47,7 @@ class PCA(NMF):
 	center_mean: bool, optional
 		Center data around the mean
 		True (default)
-	compW: bool, optional
+	compute_w: bool, optional
 		Compute W (True) or only H (False). Useful for using precomputed
 		basis vectors.
 	
@@ -70,11 +70,11 @@ class PCA(NMF):
 	
 	The basis vectors are now stored in pca_mdl.W, the coefficients in pca_mdl.H. 
 	To compute coefficients for an existing set of basis vectors simply	copy W 
-	to pca_mdl.W, and set compW to False:
+	to pca_mdl.W, and set compute_w to False:
 	
 	>>> data = np.array([[1.5], [1.2]])
 	>>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-	>>> pca_mdl = PCA(data, num_bases=2, niter=1, compW=False)
+	>>> pca_mdl = PCA(data, num_bases=2, niter=1, compute_w=False)
 	>>> pca_mdl.initialization()
 	>>> pca_mdl.W = W
 	>>> pca_mdl.factorize()
@@ -82,9 +82,9 @@ class PCA(NMF):
 	The result is a set of coefficients pca_mdl.H, s.t. data = W * pca_mdl.H.
 	"""
 	
-	def __init__(self, data, num_bases=0, niter=1, show_progress=False, compW=True, center_mean=True):
+	def __init__(self, data, num_bases=0, niter=1, show_progress=False, compute_w=True, center_mean=True):
 
-		NMF.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compW=compW)
+		NMF.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compute_w=compute_w)
 		
 		# center the data around the mean first
 		self._center_mean = center_mean			
@@ -102,11 +102,11 @@ class PCA(NMF):
 		# not needed
 		pass
 
-	def updateH(self):					
+	def update_h(self):					
 		self.H = np.dot(self.W.T, self.data[:,:])
 		
 					
-	def updateW(self):
+	def update_w(self):
 		# compute eigenvectors and eigenvalues using SVD			
 		svd_mdl = SVD(self.data)
 		svd_mdl.factorize()
@@ -124,10 +124,10 @@ class PCA(NMF):
 		self.eigenvalues =  S[order]			
 
 	def factorize(self):			
-		if self._compW:
-			self.updateW()
+		if self._compute_w:
+			self.update_w()
 			
-		self.updateH()
+		self.update_h()
 
 		self.ferr = np.zeros(1)
 		self.ferr[0] = self.frobenius_norm()

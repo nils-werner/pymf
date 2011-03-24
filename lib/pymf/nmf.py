@@ -25,7 +25,7 @@ __all__ = ["NMF"]
 
 class NMF:
     """
-    NMF(data, num_bases=4, niter=100, show_progress=False, compW=True)
+    NMF(data, num_bases=4, niter=100, show_progress=False, compute_w=True)
 
 
     Non-negative Matrix Factorization. Factorize a data matrix into two matrices
@@ -45,7 +45,7 @@ class NMF:
     show_progress: bool, optional
         Print some extra information
         False (default)
-    compW: bool, optional
+    compute_w: bool, optional
         Compute W (True) or only H (False). Useful for using precomputed
         basis vectors.
 
@@ -66,11 +66,11 @@ class NMF:
 
     The basis vectors are now stored in nmf_mdl.W, the coefficients in nmf_mdl.H.
     To compute coefficients for an existing set of basis vectors simply    copy W
-    to nmf_mdl.W, and set compW to False:
+    to nmf_mdl.W, and set compute_w to False:
 
     >>> data = np.array([[1.5], [1.2]])
     >>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-    >>> nmf_mdl = NMF(data, num_bases=2, niter=1, compW=False)
+    >>> nmf_mdl = NMF(data, num_bases=2, niter=1, compute_w=False)
     >>> nmf_mdl.initialization()
     >>> nmf_mdl.W = W
     >>> nmf_mdl.factorize()
@@ -80,7 +80,7 @@ class NMF:
 
     EPS = 10**-8
 
-    def __init__(self, data, num_bases=4, niter=100, show_progress=False, compH=True, compW=True, comp_norm=True):
+    def __init__(self, data, num_bases=4, niter=100, show_progress=False, compute_h=True, compute_w=True, compute_norm=True):
         # create logger
         self._show_progress = show_progress
         self._logger = logging.getLogger("pymf")
@@ -95,9 +95,9 @@ class NMF:
         ch.setLevel(logging.DEBUG)
 
         # create formatter
-	formatter = logging.Formatter("%(asctime)s [%(levelname)s %(module)s %(lineno)d] %(message)s")
+        formatter = logging.Formatter("%(asctime)s [%(levelname)s %(module)s %(lineno)d] %(message)s")
         
-	# add formatter to ch
+        # add formatter to ch
         ch.setFormatter(formatter)
 
         # add ch to logger
@@ -114,9 +114,9 @@ class NMF:
         (self._data_dimension, self._num_samples) = self.data.shape
 
         # control if W should be updated -> usefull for assigning precomputed basis vectors
-        self._compW = compW
-        self._compH = compH
-        self._comp_norm = comp_norm
+        self._compute_w = compute_w
+        self._compute_h = compute_h
+        self._compute_norm = compute_norm
         
 
     def initialization(self):
@@ -128,7 +128,7 @@ class NMF:
         self.W = np.random.random((self._data_dimension, self._num_bases))
 
     def frobenius_norm(self):
-        """ Frobenius norm (||data - WH||) for a data matrix and a low rank
+        """ Frobenius norm (||data - WH||) of a data matrix and a low rank
         approximation given by WH
 
         Returns:
@@ -144,13 +144,13 @@ class NMF:
         return err
 
 
-    def updateH(self):
+    def update_h(self):
             # pre init H1, and H2 (necessary for storing matrices on disk)
             H2 = np.dot(np.dot(self.W.T, self.W), self.H) + 10**-9
             self.H *= np.dot(self.W.T, self.data[:,:])
             self.H /= H2
 
-    def updateW(self):
+    def update_w(self):
             # pre init W1, and W2 (necessary for storing matrices on disk)
             W2 = np.dot(np.dot(self.W, self.H), self.H.T) + 10**-9
             self.W *= np.dot(self.data[:,:], self.H.T)
@@ -171,18 +171,18 @@ class NMF:
         # iterate over W and H
         for i in xrange(self._niter):
             # update W
-            if self._compW:
-                self.updateW()
+            if self._compute_w:
+                self.update_w()
 
             # update H
-	    if self._compH:
-		    if scipy.sparse.issparse(self.data):
-		    	self._logger.error('Only a very methods currently support sparse matrices (comp. of H generally not supported)')			    
-		    else:
-		    	self.updateH()                                        
+            if self._compute_h:
+                if scipy.sparse.issparse(self.data):
+                    self._logger.error('Only very few methods currently support sparse matrices (comp. of H generally not supported)')                
+                else:
+                    self.update_h()                                        
 
               
-            if self._comp_norm:                 
+            if self._compute_norm:                 
                 self.ferr[i] = self.frobenius_norm()
             else:
                 self.ferr[i] = -1.0
@@ -190,7 +190,7 @@ class NMF:
             self._logger.info('Iteration ' + str(i+1) + '/' + str(self._niter) + ' FN:' + str(self.ferr[i]))
 
             # check if the err is not changing anymore
-            if i > 1 and self._comp_norm:
+            if i > 1 and self._compute_norm:
                 if self.converged(i):
                     # adjust the error measure
                     self.ferr = self.ferr[:i]

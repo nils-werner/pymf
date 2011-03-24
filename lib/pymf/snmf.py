@@ -25,7 +25,7 @@ __all__ = ["SNMF"]
 
 class SNMF(NMF):
 	"""  	
-	SNMF(data, num_bases=4, niter=100, show_progress=True, compW=True)
+	SNMF(data, num_bases=4, niter=100, show_progress=True, compute_w=True)
 	
 	Semi Non-negative Matrix Factorization. Factorize a data matrix into two 
 	matrices s.t. F = | data - W*H | is minimal.
@@ -43,7 +43,7 @@ class SNMF(NMF):
 	show_progress: bool, optional
 		Print some extra information
 		False (default)
-	compW: bool, optional
+	compute_w: bool, optional
 		Compute W (True) or only H (False). Useful for using basis vectors
 		from another convexity constrained matrix factorization function
 		(e.g. svmnmf) (if set to "True" niter can be set to "1")
@@ -67,11 +67,11 @@ class SNMF(NMF):
 	
 	The basis vectors are now stored in snmf_mdl.W, the coefficients in snmf_mdl.H. 
 	To compute coefficients for an existing set of basis vectors simply	copy W 
-	to snmf_mdl.W, and set compW to False:
+	to snmf_mdl.W, and set compute_w to False:
 	
 	>>> data = np.array([[1.5], [1.2]])
 	>>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-	>>> snmf_mdl = SNMF(data, num_bases=2, niter=1, compW=False)
+	>>> snmf_mdl = SNMF(data, num_bases=2, niter=1, compute_w=False)
 	>>> snmf_mdl.initialization()
 	>>> snmf_mdl.W = W
 	>>> snmf_mdl.factorize()
@@ -79,32 +79,32 @@ class SNMF(NMF):
 	The result is a set of coefficients snmf_mdl.H, s.t. data = W * snmf_mdl.H. 
 	"""
 
-	def __init__(self, data, num_bases=4, niter=100, show_progress=False, compW=True):
+	def __init__(self, data, num_bases=4, niter=100, show_progress=False, compute_w=True):
 		""" Inits Nmf class:
 		
-		sampleNmf = Nmf(data, num_bases=4, niter=100, show_progress=True, compW=True)
+		sampleNmf = Nmf(data, num_bases=4, niter=100, show_progress=True, compute_w=True)
 		
 		Args:
 			data (required)	: d x n data matrix [d - dimension, n -number of samples]
 			num_bases	: number of basis vectors for W (default: 4)
 			niter		: number of iterations (default: 100)
 			show_progress	: (default: True)
-			compW		: set to True if W and H should be optimized, set to False
+			compute_w		: set to True if W and H should be optimized, set to False
 					if only H should be optimized. This is usefull if W is 
 					computed somewhere or if new data should be mapped on a
 					given set of basis vectors W.
 		"""
 		# data can be either supplied by conventional numpy arrays or
 		# as a numpy array within a pytables table (should be preferred for large data sets)
-		NMF.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compW=compW)
+		NMF.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compute_w=compute_w)
 		
 
-	def updateW(self):
+	def update_w(self):
 		W1 = np.dot(self.data[:,:], self.H.T)
 		W2 = np.dot(self.H, self.H.T)	
 		self.W = np.dot(W1, np.linalg.inv(W2))
 		
-	def updateH(self):
+	def update_h(self):
 		def separate_positive(m):
 			return (np.abs(m) + m)/2.0 
 		
