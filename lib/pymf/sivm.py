@@ -93,19 +93,19 @@ class SIVM(AA):
 
         # assign the correct distance function
         if self._dist_measure == 'l1':
-                self._distfunc = l1_distance
+            self._distfunc = l1_distance
                 
         elif self._dist_measure == 'l2':
-                self._distfunc = l2_distance
+            self._distfunc = l2_distance
         
         elif self._dist_measure == 'cosine':                
-                self._distfunc = cosine_distance
+            self._distfunc = cosine_distance
         
         elif self._dist_measure == 'abs_cosine':                
-                self._distfunc = abs_cosine_distance
+            self._distfunc = abs_cosine_distance
                 
         elif self._dist_measure == 'kl':
-                self._distfunc = kl_divergence    
+            self._distfunc = kl_divergence    
                  
         self.W = np.zeros((self._data_dimension, self._num_bases))
         if scipy.sparse.issparse(self.data):
@@ -113,8 +113,8 @@ class SIVM(AA):
 
                 
     def _distance(self, idx):
-        # compute distances of a specific data point to all
-        # other samples            
+        """ compute distances of a specific data point to all other samples"""
+            
         if scipy.sparse.issparse(self.data):
             step = self.data.shape[1]
         else:    
@@ -123,13 +123,13 @@ class SIVM(AA):
         d = np.zeros((self.data.shape[1]))        
         if idx == -1:
             # set vec to origin if idx=-1
-            vec = np.zeros((self.data.shape[0],1))
+            vec = np.zeros((self.data.shape[0], 1))
             if scipy.sparse.issparse(self.data):
                 vec = scipy.sparse.csc_matrix(vec)
         else:
             vec = self.data[:, idx:idx+1]    
-        
-        self._logger.info('compute distance to node ' + str(idx))                                    
+            
+        self._logger.info('compute distance to node ' + str(idx))
                                                 
         # slice data into smaller chunks
         for idx_start in range(0, self.data.shape[1], step):                    
@@ -138,14 +138,18 @@ class SIVM(AA):
             else:
                 idx_end = idx_start + step
 
-            d[idx_start:idx_end] = self._distfunc(self.data[:,idx_start:idx_end], vec)
-            self._logger.info('completed:' + str(idx_end/(self.data.shape[1]/100.0)) + "%")    
+            d[idx_start:idx_end] = self._distfunc(
+                self.data[:,idx_start:idx_end], vec)
+            self._logger.info('completed:' + 
+                str(idx_end/(self.data.shape[1]/100.0)) + "%")    
         return d
        
 
-    def update_w(self):        
-        # initialize some of the recursively updated distance measures ....        
+    def update_w(self): 
+        """ compute new W """
+        
         EPS = 10**-8
+        # initialize some of the recursively updated distance measures ....
         d_square = np.zeros((self.data.shape[1]))
         d_sum = np.zeros((self.data.shape[1]))
         d_i_times_d_j = np.zeros((self.data.shape[1]))
@@ -153,7 +157,7 @@ class SIVM(AA):
 
         a = np.log(self._maxd) 
         
-        for l in range(1,self._num_bases):
+        for l in range(1, self._num_bases):
             d = self._distance(self.select[-1])
             
             # take the log of d (sually more stable that d)
@@ -165,7 +169,7 @@ class SIVM(AA):
             distiter = d_i_times_d_j + a*d_sum - (l/2.0) * d_square        
 
             # detect the next best data point
-            self._logger.info('searching for next best node ...')                    
+            self._logger.info('searching for next best node ...')            
             self.select.append(np.argmax(distiter))
             self._logger.info('cur_nodes: ' + str(self.select))
 
@@ -225,7 +229,8 @@ class SIVM(AA):
             self.select.append(cur_p)       
                       
         # set iterations to 1, otherwise it doesn't make sense
-        AA.factorize(self, niter=1, show_progress=False, compute_w=compute_w, compute_h=compute_h, compute_err=compute_err)  
+        AA.factorize(self, niter=1, show_progress=False, compute_w=compute_w, 
+                     compute_h=compute_h, compute_err=compute_err)  
              
 if __name__ == "__main__":
     import doctest  

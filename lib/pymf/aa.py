@@ -10,7 +10,8 @@ PyMF Archetypal Analysis [1]
 
     AA: class for Archetypal Analysis
 
-[1] Cutler, A. Breiman, L. (1994), "Archetypal Analysis", Technometrics 36(4), 338-347.
+[1] Cutler, A. Breiman, L. (1994), "Archetypal Analysis", Technometrics 36(4), 
+338-347.
 """
 
 __version__ = "$Revision$"
@@ -119,17 +120,18 @@ class AA(NMF):
         # as self might be unsorted (in non ascending order)
         # -> sorting sel would screw the matching to W if
         # self.data is stored as a hdf5 table (see h5py)
-        for i,s in enumerate(self._Wmapped_index):
+        for i, s in enumerate(self._Wmapped_index):
             self.Wmapped[:,i] = self.data[:,s]
 
 
     def update_h(self):
         """ compute new H """
         def update_single_h(i):
+            """ compute single H[:,i] """
             # optimize alpha using qp solver from cvxopt
             FA = base.matrix(np.float64(np.dot(-self.W.T, self.data[:,i])))
             al = solvers.qp(HA, FA, INQa, INQb, EQa, EQb)
-            self.H[:,i] = np.array(al['x']).reshape((1,self._num_bases))
+            self.H[:,i] = np.array(al['x']).reshape((1, self._num_bases))
 
         EQb = base.matrix(1.0, (1,1))
         # float64 required for cvxopt
@@ -145,6 +147,7 @@ class AA(NMF):
     def update_w(self):
         """ compute new W """
         def update_single_w(i):
+            """ compute single W[:,i] """
             # optimize beta     using qp solver from cvxopt
             FB = base.matrix(np.float64(np.dot(-self.data.T, W_hat[:,i])))
             be = solvers.qp(HB, FB, INQa, INQb, EQa, EQb)

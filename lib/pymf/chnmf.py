@@ -11,8 +11,8 @@ PyMF Convex Hull Non-negative Matrix Factorization [1]
     CHNMF(NMF) : Class for Convex-hull NMF
     quickhull : Function for finding the convex hull in 2D
     
-[1] C. Thurau, K. Kersting, and C. Bauckhage. Convex Non-Negative Matrix Factorization 
-in the Wild. ICDM 2009.
+[1] C. Thurau, K. Kersting, and C. Bauckhage. Convex Non-Negative Matrix 
+Factorization in the Wild. ICDM 2009.
 """
 
 __version__ = "$Revision$"
@@ -127,10 +127,11 @@ class CHNMF(AA):
     The result is a set of coefficients chnmf_mdl.H, s.t. data = W * chnmf_mdl.H.
     """        
     
-    def __init__(self, data, num_bases=4, init_w=True, init_h=True, base_sel=3):        
-                     
+    def __init__(self, data, num_bases=4, init_w=True, init_h=True, base_sel=3):
+                             
         # call inherited method
-        AA.__init__(self, data, num_bases=num_bases, init_w=init_w, init_h=init_h)
+        AA.__init__(self, data, num_bases=num_bases, 
+                    init_w=init_w, init_h=init_h)
                 
         # base sel should never be larger than the actual data dimension
         if base_sel < self.data.shape[0]:
@@ -138,7 +139,8 @@ class CHNMF(AA):
         else:
             self._base_sel = self.data.shape[0]
 
-    def update_w(self):        
+    def update_w(self): 
+        """ compute new W """
         def select_hull_points(data, n=3):
             """ select data points for pairwise projections of the first n
             dimensions """
