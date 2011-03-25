@@ -25,7 +25,7 @@ __all__ = ["NMF"]
 
 class NMF:
     """
-    NMF(data, num_bases=4, niter=100, show_progress=False, compute_w=True)
+    NMF(data, num_bases=4, compute_w=True, compute_H=True)
 
 
     Non-negative Matrix Factorization. Factorize a data matrix into two matrices
@@ -34,25 +34,24 @@ class NMF:
 
     Parameters
     ----------
-    data : array_like [data_dimension x num_samples]
+    data : array_like, shape (_data_dimension, _num_samples)
         the input data
     num_bases: int, optional
         Number of bases to compute (column rank of W and row rank of H).
-        4 (default)
-    niter: int, optional
-        Number of iterations of the alternating optimization.
-        100 (default)
-    show_progress: bool, optional
-        Print some extra information
-        False (default)
-    compute_w: bool, optional
-        Compute W (True) or only H (False). Useful for using precomputed
-        basis vectors.
+        4 (default)    
+    init_w: bool, optional
+        Initialize W (True - default). Useful for using precomputed basis 
+        vectors or custom initializations or matrices stored via hdf5.        
+    init_h: bool, optional
+        Initialize H (True - default). Useful for using precomputed coefficients 
+        or custom initializations or matrices stored via hdf5.        
+    
 
     Attributes
     ----------
-        W : "data_dimension x num_bases" matrix of basis vectors
-        H : "num bases x num_samples" matrix of coefficients
+    W : "data_dimension x num_bases" matrix of basis vectors
+    H : "num bases x num_samples" matrix of coefficients
+    ferr : frobenius norm (after calling .factorize()) 
 
     Example
     -------
@@ -80,52 +79,41 @@ class NMF:
 
     EPS = 10**-8
 
-    def __init__(self, data, num_bases=4, niter=100, show_progress=False, compute_h=True, compute_w=True, compute_norm=True):
-        # create logger
-        self._show_progress = show_progress
-        self._logger = logging.getLogger("pymf")
-
-        if self._show_progress:
-            self._logger.setLevel(logging.INFO)
-        else:
-            self._logger.setLevel(logging.ERROR)
-
-        # create console handler and set level to debug
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-
-        # create formatter
-        formatter = logging.Formatter("%(asctime)s [%(levelname)s %(module)s %(lineno)d] %(message)s")
+    def __init__(self, data, num_bases=4, init_h=True, init_w=True):
         
-        # add formatter to ch
-        ch.setFormatter(formatter)
-
-        # add ch to logger
-        self._logger.addHandler(ch)
-
-        # set variables
-        self.data = data
+        def setup_logging():
+            # create logger       
+            self._logger = logging.getLogger("pymf")
        
-        self._num_bases = num_bases
-        self._niter = niter       
-        self.ferr = np.zeros(self._niter)
+            # add ch to logger
+            if len(self._logger.handlers) < 1:
+                # create console handler and set level to debug
+                ch = logging.StreamHandler()
+                ch.setLevel(logging.DEBUG)
+                # create formatter
+                formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
+        
+                # add formatter to ch
+                ch.setFormatter(formatter)
+
+                self._logger.addHandler(ch)
+
+        setup_logging()
+        
+        # set variables
+        self.data = data       
+        self._num_bases = num_bases             
+      
 
         # initialize H and W to random values
         (self._data_dimension, self._num_samples) = self.data.shape
-
-        # control if W should be updated -> usefull for assigning precomputed basis vectors
-        self._compute_w = compute_w
-        self._compute_h = compute_h
-        self._compute_norm = compute_norm
         
-
-    def initialization(self):
-        """ Initialize W and H to random values in [0,1].
-        """
-        # init to random values (there are probably smarter ways for
-        # initializing W,H ...)
-        self.H = np.random.random((self._num_bases, self._num_samples))
-        self.W = np.random.random((self._data_dimension, self._num_bases))
+        if init_w:
+            self.W = np.random.random((self._data_dimension, self._num_bases))
+        
+        if init_h:
+            self.H = np.random.random((self._num_bases, self._num_samples))
+        
 
     def frobenius_norm(self):
         """ Frobenius norm (||data - WH||) of a data matrix and a low rank
@@ -136,13 +124,12 @@ class NMF:
         """
 
         # check if W and H exist
-        if hasattr(self,'H') and not scipy.sparse.issparse(self.data):
+        if hasattr(self,'H') and hasattr(self,'W') and not scipy.sparse.issparse(self.data):
             err = np.sqrt( np.sum((self.data[:,:] - np.dot(self.W, self.H))**2 ))
         else:
             err = -123456
 
         return err
-
 
     def update_h(self):
             # pre init H1, and H2 (necessary for storing matrices on disk)
@@ -163,34 +150,56 @@ class NMF:
         else:
             return False
 
-    def factorize(self):
-        """ Perform factorization s.t. data = WH using the standard multiplicative
-        update rule for Non-negative matrix factorization.
+    def factorize(self, niter=1, show_progress=False, 
+                  compute_w=True, compute_h=True, compute_err=True):
+        """ Factorize s.t. WH = data
+            
+            Parameters
+            ----------
+            niter : int
+                    number of iterations.
+            show_progress : bool
+                    print some extra information to stdout.
+            compute_h : bool
+                    iteratively update values for H.
+            compute_w : bool
+                    iteratively update values for W.
+            compute_err : bool
+                    compute Frobenius norm |data-WH| after each update and store
+                    it to .ferr[k].
+            
+            Updated Values
+            --------------
+            .W : updated values for W.
+            .H : updated values for H.
+            .ferr : Frobenius norm |data-WH| for each iteration.
         """
-
+        
+        if show_progress:
+            self._logger.setLevel(logging.INFO)
+        else:
+            self._logger.setLevel(logging.ERROR)        
+        
+        if compute_err:
+            self.ferr = np.zeros(niter)
+        
         # iterate over W and H
-        for i in xrange(self._niter):
-            # update W
-            if self._compute_w:
+        for i in xrange(niter):
+            if compute_w:
                 self.update_w()
 
-            # update H
-            if self._compute_h:
-                if scipy.sparse.issparse(self.data):
-                    self._logger.error('Only very few methods currently support sparse matrices (comp. of H generally not supported)')                
-                else:
-                    self.update_h()                                        
-
-              
-            if self._compute_norm:                 
+            if compute_h:
+                self.update_h()                                        
+         
+            if compute_err:                 
                 self.ferr[i] = self.frobenius_norm()
-            else:
-                self.ferr[i] = -1.0
-                
-            self._logger.info('Iteration ' + str(i+1) + '/' + str(self._niter) + ' FN:' + str(self.ferr[i]))
+                self._logger.info('Iteration ' + str(i+1) + '/' + str(niter) + ' FN:' + str(self.ferr[i]))
+            else:                
+                self._logger.info('Iteration ' + str(i+1) + '/' + str(niter))
+           
 
             # check if the err is not changing anymore
-            if i > 1 and self._compute_norm:
+            if i > 1 and compute_err:
                 if self.converged(i):
                     # adjust the error measure
                     self.ferr = self.ferr[:i]

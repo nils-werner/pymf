@@ -25,35 +25,33 @@ __all__ = ["SNMF"]
 
 class SNMF(NMF):
     """      
-    SNMF(data, num_bases=4, niter=100, show_progress=True, compute_w=True)
+    SNMF(data, num_bases=4, init_h=True, init_w=True)
     
     Semi Non-negative Matrix Factorization. Factorize a data matrix into two 
     matrices s.t. F = | data - W*H | is minimal.
     
     Parameters
     ----------
-    data : array_like [data_dimension x num_samples]
+    data : array_like, shape (_data_dimension, _num_samples)
         the input data
-    num_bases: int, optional 
-        Number of bases to compute (column rank of W and row rank of H). 
-        4 (default)
-    niter: int, optional
-        Number of iterations of the alternating optimization.
-        100 (default)
-    show_progress: bool, optional
-        Print some extra information
-        False (default)
-    compute_w: bool, optional
-        Compute W (True) or only H (False). Useful for using basis vectors
-        from another convexity constrained matrix factorization function
-        (e.g. svmnmf) (if set to "True" niter can be set to "1")
+    num_bases: int, optional
+        Number of bases to compute (column rank of W and row rank of H).
+        4 (default)    
+    init_w: bool, optional
+        Initialize W (True - default). Useful for using precomputed basis 
+        vectors or custom initializations or matrices stored via hdf5.        
+    init_h: bool, optional
+        Initialize H (True - default). Useful for using precomputed coefficients 
+        or custom initializations or matrices stored via hdf5.        
     
+
     Attributes
     ----------
-        W : "data_dimension x num_bases" matrix of basis vectors
-        H : "num bases x num_samples" matrix of coefficients
-    
-        ferr : frobenius norm (after calling .factorize())
+    W : "data_dimension x num_bases" matrix of basis vectors
+    H : "num bases x num_samples" matrix of coefficients
+    beta : "num_bases x num_samples" matrix of basis vector coefficients
+        (for constructing W s.t. W = beta * data.T )
+    ferr : frobenius norm (after calling .factorize())
         
     Example
     -------
@@ -79,25 +77,6 @@ class SNMF(NMF):
     The result is a set of coefficients snmf_mdl.H, s.t. data = W * snmf_mdl.H. 
     """
 
-    def __init__(self, data, num_bases=4, niter=100, show_progress=False, compute_w=True):
-        """ Inits Nmf class:
-        
-        sampleNmf = Nmf(data, num_bases=4, niter=100, show_progress=True, compute_w=True)
-        
-        Args:
-            data (required)    : d x n data matrix [d - dimension, n -number of samples]
-            num_bases    : number of basis vectors for W (default: 4)
-            niter        : number of iterations (default: 100)
-            show_progress    : (default: True)
-            compute_w        : set to True if W and H should be optimized, set to False
-                    if only H should be optimized. This is usefull if W is 
-                    computed somewhere or if new data should be mapped on a
-                    given set of basis vectors W.
-        """
-        # data can be either supplied by conventional numpy arrays or
-        # as a numpy array within a pytables table (should be preferred for large data sets)
-        NMF.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compute_w=compute_w)
-        
 
     def update_w(self):
         W1 = np.dot(self.data[:,:], self.H.T)

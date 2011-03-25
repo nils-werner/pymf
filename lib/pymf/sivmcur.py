@@ -39,7 +39,7 @@ class SIVMCUR(CUR):
         the input data
     rrank: int, optional 
         Number of rows to sample from data.
-        4 (default)
+        4 (default)crank
     crank: int, optional
         Number of columns to sample from data.
         4 (default)
@@ -66,23 +66,33 @@ class SIVMCUR(CUR):
     >>> sivmcur_mdl.factorize()
     '''
     
-    def __init__(self, data, k=-1, rrank=0, crank=0, show_progress=False, dist_measure='l2'):
-        CUR.__init__(self, data, k=k, rrank=rrank, crank=rrank, show_progress=show_progress)
+    def __init__(self, data, k=-1, rrank=0, crank=0, dist_measure='l2'):
+        CUR.__init__(self, data, k=k, rrank=rrank, crank=rrank)
     
         self._dist_measure = dist_measure    
-
+	
         
     def sample(self, A, c):
-        sivm_mdl = SIVM(A, num_bases=c, compute_h=False, show_progress=self._show_progress, dist_measure=self._dist_measure)
         # for optimizing the volume of the submatrix, set init to 'origin' (otherwise the volume of
-        # the ordinary simplex would be optimized)
-        sivm_mdl.initialization(init='origin')
-        sivm_mdl.factorize()
+        # the ordinary simplex would be optimized)      
+        sivm_mdl = SIVM(A, num_bases=c, init_h=False, init_w=True,
+                        dist_measure=self._dist_measure)
+        
+        sivm_mdl.factorize(show_progress=False, compute_w=True, init='origin', 
+                           compute_h=False, compute_err=False)
         
         return sivm_mdl.select    
             
             
-    def factorize(self):            
+    def factorize(self):
+        """ Factorize s.t. CUR = data
+            
+            Updated Values
+            --------------
+            .C : updated values for C.
+            .U : updated values for U.
+            .R : updated values for R.          
+        """            
         # sample row and column indices that maximize the volume of the submatrix
         self._rid = self.sample(self.data.transpose(), self._rrank)
         self._cid = self.sample(self.data, self._crank)

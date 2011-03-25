@@ -50,8 +50,8 @@ class SUB(NMF):
     """
     
     def __init__(self, data, mfmethod, nsub=20, show_progress=True, mapW=False, base_sel=2,
-                num_bases=3 , niterH=1, niter=100, compute_h=True, compute_w=True, sstrategy='rand'):
-        NMF.__init__(self, data, num_bases=num_bases, niter=niter, compute_h=compute_h, show_progress=show_progress, compute_w=compute_w)
+                num_bases=3 , niterH=1, compute_h=True, compute_w=True, sstrategy='rand'):
+        NMF.__init__(self, data, num_bases=num_bases, compute_h=compute_h, show_progress=show_progress, compute_w=compute_w)
     
         self._niterH = niterH
         self._nsub = nsub
@@ -116,7 +116,7 @@ class SUB(NMF):
         return idx
 
     def kmeansselect(self):
-            kmeans_mdl = Kmeans(self.data, num_bases=self._nsub, niter=self._niter)
+            kmeans_mdl = Kmeans(self.data, num_bases=self._nsub)
             kmeans_mdl.initialization()
             kmeans_mdl.factorize()
             
@@ -170,8 +170,7 @@ class SUB(NMF):
 
         
         mdl_small = self._mfmethod(self.data[:, idx], 
-                                num_bases=self._num_bases, 
-                                niter=self._niter, 
+                                num_bases=self._num_bases,                                
                                 show_progress=self._show_progress, 
                                 compute_w=True)
 
@@ -183,8 +182,7 @@ class SUB(NMF):
         
         
         self.mdl = self._mfmethod(self.data[:, :], 
-                                    num_bases=self._num_bases , 
-                                    niter=self._niterH, 
+                                    num_bases=self._num_bases ,                                    
                                     show_progress=self._show_progress, 
                                     compute_w=False)
 

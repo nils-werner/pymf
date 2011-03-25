@@ -26,7 +26,7 @@ __all__ = ["CUR"]
 
 class CUR(SVD):
     """      
-    CUR(data, num_bases=4, show_progress=True, compute_w=True)
+    CUR(data,  data, k=-1, rrank=0, crank=0)
         
     CUR Decomposition. Factorize a data matrix into three matrices s.t.
     F = | data - USV| is minimal. CUR randomly selects rows and columns from
@@ -59,8 +59,8 @@ class CUR(SVD):
     >>> cur_mdl.factorize()
     """
     
-    def __init__(self, data,k=-1, rrank=0, crank=0, show_progress=True):
-        SVD.__init__(self, data,k=k,rrank=rrank, crank=rrank, show_progress=show_progress)
+    def __init__(self, data, k=-1, rrank=0, crank=0):
+        SVD.__init__(self, data,k=k,rrank=rrank, crank=rrank)
         
         # select all data samples for computing the error:
         # note that this might take very long, adjust self._rset and self._cset for 
@@ -122,7 +122,15 @@ class CUR(SVD):
         self.S = self._U
         self.V = self._R
             
-    def factorize(self):            
+    def factorize(self):
+        """ Factorize s.t. CUR = data
+            
+            Updated Values
+            --------------
+            .C : updated values for C.
+            .U : updated values for U.
+            .R : updated values for R.           
+        """          
         [prow, pcol] = self.sample_probability()
         self._rid = self.sample(self._rrank, prow)
         self._cid = self.sample(self._crank, pcol)

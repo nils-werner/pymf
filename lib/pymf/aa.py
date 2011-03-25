@@ -26,7 +26,7 @@ __all__ = ["AA"]
 
 class AA(NMF):
     """
-    AA(data, num_bases=4, niter=100, show_progress=True, compute_w=True, compute_h=True)
+    AA(data, num_bases=4, niter=100, init_w=True, init_h=True)
 
     Archetypal Analysis. Factorize a data matrix into two matrices s.t.
     F = | data - W*H | = | data - data*beta*H| is minimal. H and beta
@@ -36,30 +36,27 @@ class AA(NMF):
 
     Parameters
     ----------
-    data : array_like [data_dimension x num_samples]
+    data : array_like, shape (_data_dimension, _num_samples)
         the input data
     num_bases: int, optional
         Number of bases to compute (column rank of W and row rank of H).
-        4 (default)
-    niter: int, optional
-        Number of iterations of the alternating optimization.
-        100 (default)
-    show_progress: bool, optional
-        Print some extra information
-        False (default)
-    compute_w: bool, optional
-        Compute W (True) or only H (False). Useful for using precomputed
-        basis vectors.
+        4 (default)    
+    init_w: bool, optional
+        Initialize W (True - default). Useful for using precomputed basis 
+        vectors or custom initializations or matrices stored via hdf5.        
+    init_h: bool, optional
+        Initialize H (True - default). Useful for using precomputed coefficients 
+        or custom initializations or matrices stored via hdf5.        
+    
 
     Attributes
     ----------
-        W : "data_dimension x num_bases" matrix of basis vectors
-        H : "num bases x num_samples" matrix of coefficients
-        beta : "num_bases x num_samples" matrix of basis vector coefficients
-            (for constructing W s.t. W = beta * data.T )
-
-        ferr : frobenius norm (after calling .factorize())
-
+    W : "data_dimension x num_bases" matrix of basis vectors
+    H : "num bases x num_samples" matrix of coefficients
+    beta : "num_bases x num_samples" matrix of basis vector coefficients
+        (for constructing W s.t. W = beta * data.T )
+    ferr : frobenius norm (after calling .factorize()) 
+        
     Example
     -------
     Applying AA to some rather stupid data set:
@@ -67,9 +64,14 @@ class AA(NMF):
     >>> import numpy as np
     >>> from aa import AA
     >>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
-    >>> aa_mdl = AA(data, num_bases=2, niter=10)
-    >>> aa_mdl.initialization()
-    >>> aa_mdl.factorize()
+    
+    Use 2 basis vectors -> W shape(data_dimension, 2).
+    
+    >>> aa_mdl = AA(data, num_bases=2)
+
+    Set number of iterations to 5 and start computing the factorization.    
+    
+    >>> aa_mdl.factorize(niter=5)
 
     The basis vectors are now stored in aa_mdl.W, the coefficients in aa_mdl.H.
     To compute coefficients for an existing set of basis vectors simply copy W
@@ -77,10 +79,9 @@ class AA(NMF):
 
     >>> data = np.array([[1.5], [1.2]])
     >>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-    >>> aa_mdl = AA(data, num_bases=2, niter=1, compute_w=False)
-    >>> aa_mdl.initialization()
+    >>> aa_mdl = AA(data, num_bases=2)
     >>> aa_mdl.W = W
-    >>> aa_mdl.factorize()
+    >>> aa_mdl.factorize(niter=5, compute_w=False)
 
     The result is a set of coefficients aa_mdl.H, s.t. data = W * aa_mdl.H.
     """
@@ -88,27 +89,22 @@ class AA(NMF):
     solvers.options['show_progress'] = False
 
 
-    def __init__(self, data, num_bases=4, niter=100, show_progress=False, 
-                 compute_w=True, compute_h=True):
+    def __init__(self, data, num_bases=4, init_w=True, init_h=True):
 
         # call inherited method
-        NMF.__init__(self, data, num_bases=num_bases, niter=niter, 
-                     show_progress=show_progress, compute_w=compute_w, 
-                     compute_h=compute_h)
+        NMF.__init__(self, data, num_bases=num_bases, init_w=init_w, 
+                    init_h=init_h)
 
+        if init_h:
+            self.H /= self.H.sum(axis=0)
 
-    def initialization(self):
-        """ Initialize W and H to random values in [0,1]
-        """
-        # initialize beta coefficients -> convex factors for creating basis 
-        # vectors from data samples
-        self.H = np.random.random((self._num_bases, self._num_samples))
-        self.H /= self.H.sum(axis=0)
-
-        # reintialize W to random data values
         self.beta = np.random.random((self._num_bases, self._num_samples))
         self.beta /= self.beta.sum(axis=0)
-        self.W = np.dot(self.beta, self.data.T).T
+
+        if init_w:
+        # reintialize W to random data values       
+            self.W = np.dot(self.beta, self.data.T).T
+
 
 
     def map_W_to_Data(self):

@@ -10,8 +10,12 @@ Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL)
 '''
 
 __version__ = "$Revision$"
-            
-from .nmf import NMF
+
+import numpy as np
+from scipy.sparse import issparse
+
+    
+from .nmf import *
 from .nmfals import *
 from .nmfnnls import *
 from .cnmf import *
@@ -21,7 +25,6 @@ from .aa import *
 from .sivm import *
 from .laesa import *
 from .bnmf import *
-from .jointnmf import *
 
 from .sub import *
 

@@ -30,27 +30,24 @@ class Kmeans(NMF):
     
     Parameters
     ----------
-    data : array_like [data_dimension x num_samples]
+    data : array_like, shape (_data_dimension, _num_samples)
         the input data
-    num_bases: int, optional 
-        Number of bases to compute (column rank of W and row rank of H). 
-        4 (default)
-    niter: int, optional
-        Number of iterations of the alternating optimization.
-        100 (default)
-    show_progress: bool, optional
-        Print some extra information
-        False (default)
-    compute_w: bool, optional
-        Compute W (True) or only H (False). Useful for using precomputed
-        basis vectors.
+    num_bases: int, optional
+        Number of bases to compute (column rank of W and row rank of H).
+        4 (default)    
+    init_w: bool, optional
+        Initialize W (True - default). Useful for using precomputed basis 
+        vectors or custom initializations or matrices stored via hdf5.        
+    init_h: bool, optional
+        Initialize H (True - default). Useful for using precomputed coefficients 
+        or custom initializations or matrices stored via hdf5.        
     
+
     Attributes
     ----------
-        W : "data_dimension x num_bases" matrix of basis vectors
-        H : "num bases x num_samples" matrix of coefficients
-        
-        ferr : frobenius norm (after calling .factorize())
+    W : "data_dimension x num_bases" matrix of basis vectors
+    H : "num bases x num_samples" matrix of coefficients
+    ferr : frobenius norm (after calling .factorize()) 
     
     Example
     -------
@@ -76,11 +73,12 @@ class Kmeans(NMF):
     The result is a set of coefficients kmeans_mdl.H, s.t. data = W * kmeans_mdl.H.
     """
     
-    def __init__(self, data, num_bases=4, niter=10, show_progress=False, compute_w=True):
+    def __init__(self, data, num_bases=4, init_w=True, init_h=True):
         
-        NMF.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compute_w=compute_w)
-
-    def initialization(self):
+        # we don't need to initialize W,H in NMF
+        NMF.__init__(self, data, num_bases=num_bases, 
+                     init_w=False, init_h=False)
+    
         # initialize W,H
         self.H = np.zeros((self._num_bases, self._num_samples))
         
@@ -88,8 +86,7 @@ class Kmeans(NMF):
         sel = random.sample(xrange(self._num_samples), self._num_bases)
         
         # sort indices, otherwise h5py won't work
-        self.W = self.data[:, np.sort(sel)]
-        
+        self.W = self.data[:, np.sort(sel)]        
         self.update_h()
         
 

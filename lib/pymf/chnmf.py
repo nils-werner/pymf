@@ -76,31 +76,27 @@ class CHNMF(AA):
     
     Parameters
     ----------
-    data : array_like [data_dimension x num_samples]
+    data : array_like, shape (_data_dimension, _num_samples)
         the input data
-    num_bases: int, optional 
-        Number of bases to compute (column rank of W and row rank of H). 
-        4 (default)
-    niter: int, optional
-        Number of iterations of the alternating optimization.
-        100 (default)
-    show_progress: bool, optional
-        Print some extra information
-        False (default)
-    compute_w: bool, optional
-        Compute W (True) or only H (False). Useful for using basis vectors
-        from another convexity constrained matrix factorization function
-        (e.g. svmnmf) (if set to "True" niter can be set to "1")
-    compute_h: bool, optional
-        Compute H (True) or only W (False). Useful when only the basis vectors
-        need to be known.
+    num_bases: int, optional
+        Number of bases to compute (column rank of W and row rank of H).
+        4 (default)    
+    init_w: bool, optional
+        Initialize W (True - default). Useful for using precomputed basis 
+        vectors or custom initializations or matrices stored via hdf5.        
+    init_h: bool, optional
+        Initialize H (True - default). Useful for using precomputed coefficients 
+        or custom initializations or matrices stored via hdf5.   
+    base_sel: int,
+        Number of pairwise basis vector projections. Set to a value< rank(data).
+        Computation time scale exponentially with this value, usually rather low
+        values are sufficient (3-10).
     
     Attributes
     ----------
         W : "data_dimension x num_bases" matrix of basis vectors
         H : "num bases x num_samples" matrix of coefficients
-    
-        ferr : frobenius norm (after calling .factorize())
+        ferr : frobenius norm (after calling .factorize()) 
     
     Example
     -------
@@ -109,8 +105,13 @@ class CHNMF(AA):
     >>> import numpy as np
     >>> from chnmf import CHNMF
     >>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
-    >>> chnmf_mdl = CHNMF(data, num_bases=2, niter=10)
-    >>> chnmf_mdl.initialization()
+    
+    Use 2 basis vectors -> W shape(data_dimension, 2).    
+    
+    >>> chnmf_mdl = CHNMF(data, num_bases=2)
+    
+    And start computing the factorization.        
+    
     >>> chnmf_mdl.factorize()
     
     The basis vectors are now stored in chnmf_mdl.W, the coefficients in 
@@ -120,31 +121,24 @@ class CHNMF(AA):
     >>> data = np.array([[1.5, 2.0], [1.2, 1.8]])
     >>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
     >>> chnmf_mdl = CHNMF(data, num_bases=2, niter=1, compute_w=False)
-    >>> chnmf_mdl.initialization()
     >>> chnmf_mdl.W = W
     >>> chnmf_mdl.factorize()
     
     The result is a set of coefficients chnmf_mdl.H, s.t. data = W * chnmf_mdl.H.
     """        
     
-    def __init__(self, data, num_bases=4,  niter=100, show_progress=False, 
-                 compute_w=True, compute_h=True, base_sel=3):        
+    def __init__(self, data, num_bases=4, init_w=True, init_h=True, base_sel=3):        
                      
         # call inherited method
-        AA.__init__(self, data, num_bases=num_bases, niter=niter, 
-                    show_progress=show_progress, compute_w=compute_w)
+        AA.__init__(self, data, num_bases=num_bases, init_w=init_w, init_h=init_h)
                 
-        self._compute_h = compute_h
-                
-        # base sel should never be larger than the actual
-        # data dimension
+        # base sel should never be larger than the actual data dimension
         if base_sel < self.data.shape[0]:
             self._base_sel = base_sel
         else:
             self._base_sel = self.data.shape[0]
 
-    def update_w(self):
-        
+    def update_w(self):        
         def select_hull_points(data, n=3):
             """ select data points for pairwise projections of the first n
             dimensions """
@@ -166,42 +160,53 @@ class CHNMF(AA):
         # determine convex hull data points only if the total
         # amount of available data is >50
         #if self.data.shape[1] > 50:    
-        pcamodel = PCA(self.data, show_progress=self._show_progress)        
-        pcamodel.factorize()        
+        pcamodel = PCA(self.data)        
+        pcamodel.factorize(show_progress=False)        
         self._hull_idx = select_hull_points(pcamodel.H, n=self._base_sel)
 
         #else:
         #    self._hull_idx = range(self.data.shape[1])
 
-        aa_mdl = AA(self.data[:, self._hull_idx], num_bases=self._num_bases, 
-                    niter=self._niter, show_progress=self._show_progress, 
-                    compute_w=True, compute_h=True)
-
-        # initialize W, H, and beta
-        aa_mdl.initialization()
+        aa_mdl = AA(self.data[:, self._hull_idx], num_bases=self._num_bases,                     
+                    init_w=True, init_h=True)
 
         # determine W
-        aa_mdl.factorize()
+        aa_mdl.factorize(niter=50, compute_h=True, compute_w=True, 
+                         compute_err=True, show_progress=False)
             
         self.W = aa_mdl.W        
-    
-    def factorize(self):
-        """Do factorization s.t. data = dot(dot(data,beta),H), under the 
-        convexity constraint beta >=0, sum(beta)=1, H >=0, sum(H)=1.
-        """
-        # compute new coefficients for reconstructing data points
-        if self._compute_w:
-            self.update_w()
-            self.map_W_to_Data()
+        self.map_W_to_Data()
         
-        # for CHNMF it is sometimes useful to only compute
-        # the basis vectors
-        if self._compute_h:
-            self.update_h()
-                    
-        self.ferr = np.zeros(1)
-        self.ferr[0] = self.frobenius_norm()        
-        self._logger.info('FN:' + str(self.ferr[0]))    
+        
+    def factorize(self, niter=1, show_progress=False, 
+                 compute_w=True, compute_h=True, compute_err=True):  
+        """ Factorize s.t. WH = data
+            
+            Parameters
+            ----------
+            niter : int
+                    number of iterations.
+            show_progress : bool
+                    print some extra information to stdout.
+            compute_h : bool
+                    iteratively update values for H.
+            compute_w : bool
+                    iteratively update values for W.
+            compute_err : bool
+                    compute Frobenius norm |data-WH| after each update and store
+                    it to .ferr[k].
+            
+            Updated Values
+            --------------
+            .W : updated values for W.
+            .H : updated values for H.
+            .ferr : Frobenius norm |data-WH| for each iteration.
+        """                     
+        # set iterations to 1, otherwise it doesn't make sense
+        AA.factorize(self, niter=1, show_progress=show_progress, 
+                     compute_w=compute_w, compute_h=compute_h, 
+                     compute_err=compute_err)      
+
 
 if __name__ == "__main__":
     import doctest  

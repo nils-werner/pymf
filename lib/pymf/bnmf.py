@@ -16,7 +16,7 @@ Applications. ICDM 2007
 
 __version__ = "$Revision$"
 
-
+import logging
 import numpy as np
 from nmf import NMF
 
@@ -24,32 +24,30 @@ __all__ = ["BNMF"]
 
 class BNMF(NMF):
     """      
-    BNMF(data, num_bases=4, niter=100, show_progress=True, compute_w=True)
+    BNMF(data, data, num_bases=4, init_w=True, init_h=True)
     Binary Matrix Factorization. Factorize a data matrix into two matrices s.t.
     F = | data - W*H | is minimal. H and W are restricted to binary values.
     
-    Parameters
+   Parameters
     ----------
-    data : array_like [data_dimension x num_samples]
+    data : array_like, shape (_data_dimension, _num_samples)
         the input data
-    num_bases: int, optional 
-        Number of bases to compute (column rank of W and row rank of H). 
-        4 (default)
-    niter: int, optional
-        Number of iterations of the alternating optimization.
-        100 (default)
-    show_progress: bool, optional
-        Print some extra information
-        False (default)
-    compute_w: bool, optional
-        Compute W (True) or only H (False). Useful for using basis vectors
-        from another matrix factorization function.
+    num_bases: int, optional
+        Number of bases to compute (column rank of W and row rank of H).
+        4 (default)    
+    init_w: bool, optional
+        Initialize W (True - default). Useful for using precomputed basis 
+        vectors or custom initializations or matrices stored via hdf5.        
+    init_h: bool, optional
+        Initialize H (True - default). Useful for using precomputed coefficients 
+        or custom initializations or matrices stored via hdf5.        
     
+
     Attributes
     ----------
         W : "data_dimension x num_bases" matrix of basis vectors
-        H : "num bases x num_samples" matrix of coefficients    
-        ferr : frobenius norm (after calling .factorize())
+        H : "num bases x num_samples" matrix of coefficients
+        ferr : frobenius norm (after calling .factorize()) 
     
     Example
     -------
@@ -58,29 +56,33 @@ class BNMF(NMF):
     >>> import numpy as np
     >>> from bnmf import BNMF
     >>> data = np.array([[1.0, 0.0, 1.0], [0.0, 1.0, 1.0]])
-    >>> bnmf_mdl = BNMF(data, num_bases=2, niter=10)
-    >>> bnmf_mdl.initialization()
-    >>> bnmf_mdl.factorize()
+    
+    Use 2 basis vectors -> W shape(data_dimension, 2).    
+    
+    >>> bnmf_mdl = BNMF(data, num_bases=2)
+
+    Set number of iterations to 5 and start computing the factorization.    
+    
+    >>> bnmf_mdl.factorize(niter=5)
     
     The basis vectors are now stored in bnmf_mdl.W, the coefficients in bnmf_mdl.H. 
-    To compute coefficients for an existing set of basis vectors simply    copy W 
+    To compute coefficients for an existing set of basis vectors simply copy W 
     to bnmf_mdl.W, and set compute_w to False:
     
     >>> data = np.array([[0.0], [1.0]])
     >>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-    >>> bnmf_mdl = BNMF(data, num_bases=2, niter=1, compute_w=False)
-    >>> bnmf_mdl.initialization()
+    >>> bnmf_mdl = BNMF(data, num_bases=2, niter=10, compute_w=False)
     >>> bnmf_mdl.W = W
     >>> bnmf_mdl.factorize()
     
     The result is a set of coefficients bnmf_mdl.H, s.t. data = W * bnmf_mdl.H.
     """
     
-    def __init__(self, data, num_bases=4, niter=100, show_progress=False, compute_w=True):        
+    def __init__(self, data, num_bases=4, init_w=True, init_h=True):        
         # data can be either supplied by conventional numpy arrays or
         # as a numpy array within a pytables table (should be preferred for large data sets)
         
-        NMF.__init__(self, data, num_bases=num_bases, niter=niter, show_progress=show_progress, compute_w=compute_w)
+        NMF.__init__(self, data, num_bases=num_bases, init_w=True, init_h=True)
         
         # controls how fast lambda should increase:
         # this influence convergence to binary values during the update. A value
@@ -95,39 +97,46 @@ class BNMF(NMF):
         H1 = np.dot(self.W.T, self.data[:,:]) + 3.0*self._lamb_H*(self.H**2)
         H2 = np.dot(np.dot(self.W.T,self.W), self.H) + 2*self._lamb_H*(self.H**3) + self._lamb_H*self.H + 10**-9
         self.H *= H1/H2
+               
+        self._lamb_W = self._lamb_increase_W * self._lamb_W
+        self._lamb_H = self._lamb_increase_H * self._lamb_H
 
     def update_w(self):
         W1 = np.dot(self.data[:,:], self.H.T) + 3.0*self._lamb_W*(self.W**2)
         W2 = np.dot(self.W, np.dot(self.H, self.H.T)) + 2.0*self._lamb_W*(self.W**3) + self._lamb_W*self.W  + 10**-9
         self.W *= W1/W2
 
-    def factorize(self):
-        """ Perform factorization s.t. data = WH using the standard multiplicative 
-        update rule for binary matrix factorization.
-        """        
+    def factorize(self, niter=10, compute_w=True, compute_h=True, 
+                  show_progress=False, compute_err=True):
+        """ Factorize s.t. WH = data
+            
+            Parameters
+            ----------
+            niter : int
+                    number of iterations.
+            show_progress : bool
+                    print some extra information to stdout.
+            compute_h : bool
+                    iteratively update values for H.
+            compute_w : bool
+                    iteratively update values for W.
+            compute_err : bool
+                    compute Frobenius norm |data-WH| after each update and store
+                    it to .ferr[k].
+            
+            Updated Values
+            --------------
+            .W : updated values for W.
+            .H : updated values for H.
+            .ferr : Frobenius norm |data-WH| for each iteration.
+        """       
+              
+        self._lamb_W = 1.0/niter
+        self._lamb_H = 1.0/niter        
         
-        self._lamb_W = 1.0/self._niter
-        self._lamb_H = 1.0/self._niter        
-        
-
-        for i in range(self._niter):
-            self.ferr[i] = self.frobenius_norm()
-            
-            if self.update_w:
-                self.update_w()
-                
-            self.update_h()
-
-            epsilon = np.sum((self.H**2 - self.H)**2) + np.sum((self.W**2 - self.W)**2)
-            
-            if epsilon < 10**-10:
-                break
-            else:
-                self._lamb_W = self._lamb_increase_W * self._lamb_W
-                self._lamb_H = self._lamb_increase_H * self._lamb_H
-            
-            self._logger.info('iteration ' + str(i+1) + '/' + str(self._niter) + ' FN:' + str(self.ferr[i]))
-
+        NMF.factorize(self, niter=niter, compute_w=compute_w, 
+                      compute_h=compute_h, show_progress=show_progress,
+                      compute_err=compute_err)
 
 if __name__ == "__main__":
     import doctest  

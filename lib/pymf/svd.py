@@ -36,7 +36,6 @@ def pinv(A, k=-1, eps=10**-8):
     S = svd_mdl.S
     Sdiag = S.diagonal()
     Sdiag = np.where(Sdiag >eps, 1.0/Sdiag, 0.0)
-        
     
     for i in range(S.shape[0]):
         S[i,i] = Sdiag[i]

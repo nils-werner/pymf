@@ -30,7 +30,7 @@ import scipy.sparse
 
 def test_svd(A, func, desc, marker):
     stime = time.time()
-    m = func(A, show_progress=False, rrank=2, crank=2)    
+    m = func(A, rrank=2, crank=2)    
     m.factorize()
     print desc + ': Fro.:', m.frobenius_norm()/(A.shape[0] + A.shape[1]) , ' elapsed:' , time.time() - stime
     return m
@@ -38,28 +38,19 @@ def test_svd(A, func, desc, marker):
 
 def test(A, func, desc, marker, niter=200):
     stime = time.time()
-    
-    m = func(A, compute_w=True, num_bases=2, niter=niter, show_progress=False)
-    m.initialization()    
-    m.factorize()
-    
+    m = func(A, init_w=True, init_h=True, num_bases=4)
+    m.factorize(show_progress=False, niter=20)    
     print desc + ': Fro.:', m.ferr[-1]/(A.shape[0] + A.shape[1]) , ' elapsed:' , time.time() - stime
-    del(m)
-
-def testsub(A, func, mfmethod, nsub, desc, marker):
-    stime = time.time()    
+    stime = time.time()
+    m.factorize(show_progress=False, compute_h=False, niter=20) 
+    m.factorize(show_progress=False, compute_w=False, niter=20)
+    m.factorize(show_progress=False, compute_err=False, niter=20)
+    m.factorize(show_progress=True, niter=20)
+    print desc + ' additional tests - elapsed:' , time.time() - stime
     
-    m = func(A, mfmethod, compute_w=True, sstrategy='cur', nsub=nsub, num_bases=8, niter=200, niterH=1,  show_progress=False)
-    m.initialization()    
-    m.factorize()
-    
-    print desc, m.ferr[-1]/(A.shape[0] + A.shape[1]) , ' elapsed:' , time.time() - stime
-    
-    return m
-
 print "test all methods on boring random data..."
 np.random.seed(400401) # VS for repeatability of experiments/tests
-A = np.random.random((2,50)) + 2.0
+A = np.random.random((3,50)) + 2.0
 B = scipy.sparse.csc_matrix(A)
 # test pseudoinverse
 pymf.pinv(A)

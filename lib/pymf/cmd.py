@@ -23,7 +23,7 @@ __all__ = ["CMD"]
 
 class CMD(CUR):
     """      
-    CMD(data, rrank=0, crank=0, show_progress=False)
+    CMD(data, rrank=0, crank=0)
     
     
     Compact Matrix Decomposition. Factorize a data matrix into three matrices s.t.
@@ -41,10 +41,7 @@ class CMD(CUR):
     crank: int, optional
         Number of columns to sample from data. Double entries are eliminiated s.t.
         the resulting rank might be lower.
-        4 (default)
-    show_progress: bool, optional
-        Print some extra information
-        False (default)    
+        4 (default)  
     
     Attributes
     ----------
@@ -60,8 +57,8 @@ class CMD(CUR):
     """
     
 
-    def __init__(self, data, k=-1, rrank=0, crank=0, show_progress=True):
-        CUR.__init__(self, data, k=k, rrank=rrank, crank=rrank, show_progress=show_progress)
+    def __init__(self, data, k=-1, rrank=0, crank=0):
+        CUR.__init__(self, data, k=k, rrank=rrank, crank=rrank)
     
     def _cmdinit(self):
         nrids = np.unique(self._rid)
@@ -79,12 +76,23 @@ class CMD(CUR):
         self._rid = np.int32(list(nrids))
         self._cid = np.int32(list(ncids))
     
-    def factorize(self):                                
+    def factorize(self):
+        """ Factorize s.t. CUR = data
+            
+            Updated Values
+            --------------
+            .C : updated values for C.
+            .U : updated values for U.
+            .R : updated values for R.          
+        """
+                              
         [prow, pcol] = self.sample_probability()
+
         self._rid = self.sample(self._rrank, prow)
         self._cid = self.sample(self._crank, pcol)
                             
         self._cmdinit()
+        
         self.computeUCR()
         
         

@@ -27,7 +27,7 @@ __all__ = ["SIVM"]
 
 class SIVM(AA):
     """      
-    SIVM(data, num_bases=4, niter=100, show_progress=True, compute_w=True)
+    SIVM(data, num_bases=4, init_h=True, init_w=True, dist_measure='l2')
     
     
     Simplex Volume Maximization. Factorize a data matrix into two matrices s.t.
@@ -36,39 +36,28 @@ class SIVM(AA):
     
     Parameters
     ----------
-    data : array_like [data_dimension x num_samples]
+    data : array_like, shape (_data_dimension, _num_samples)
         the input data
-    num_bases: int, optional 
-        Number of bases to compute (column rank of W and row rank of H). 
-        4 (default)
-    niter: int, optional
-        Number of iterations of the alternating optimization.
-        100 (default)
-    show_progress: bool, optional
-        Print some extra information
-        False (default)
-    compute_w: bool, optional
-        Compute W (True) or only H (False). Useful for using basis vectors
-        from another convexity constrained matrix factorization function
-        (e.g. svmnmf) (if set to "True" niter can be set to "1")
-    compute_h: bool, optional
-        Compute H (True) or only H (False). Useful for using precomputed
-        basis vectors.
-    dist_measure: string, optional
-        The distance measure for finding the next best candidate that 
-        maximizes the simplex volume ['l2','l1','cosine','sparse_graph_l2']
-        'l2' (default)
-    optimize_lower_bound: bool, optional
-        Use the alternative selection criterion that optimizes the lower
-        bound (see [1])
-        False (default)
-    
+    num_bases: int, optional
+        Number of bases to compute (column rank of W and row rank of H).
+        4 (default)    
+    init_w: bool, optional
+        Initialize W (True - default). Useful for using precomputed basis 
+        vectors or custom initializations or matrices stored via hdf5.        
+    init_h: bool, optional
+        Initialize H (True - default). Useful for using precomputed coefficients 
+        or custom initializations or matrices stored via hdf5.        
+    dist_measure : one of 'l2' ,'cosine', 'l1', 'kl'
+        Standard is 'l2' which maximizes the volume of the simplex. In contrast,
+        'cosine' maximizes the volume of a cone (see [1] for details).
+
     Attributes
     ----------
-        W : "data_dimension x num_bases" matrix of basis vectors
-        H : "num bases x num_samples" matrix of coefficients
-        
-        ferr : frobenius norm (after applying .factoriz())        
+    W : "data_dimension x num_bases" matrix of basis vectors
+    H : "num bases x num_samples" matrix of coefficients
+    beta : "num_bases x num_samples" matrix of basis vector coefficients
+        (for constructing W s.t. W = beta * data.T )
+    ferr : frobenius norm (after calling .factorize())       
     
     Example
     -------
@@ -76,8 +65,7 @@ class SIVM(AA):
     
     >>> import numpy as np
     >>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
-    >>> sivm_mdl = SIVM(data, num_bases=2, niter=10)
-    >>> sivm_mdl.initialization()
+    >>> sivm_mdl = SIVM(data, num_bases=2,)
     >>> sivm_mdl.factorize()
     
     The basis vectors are now stored in sivm_mdl.W, the coefficients in sivm_mdl.H. 
@@ -86,8 +74,7 @@ class SIVM(AA):
     
     >>> data = np.array([[1.5, 1.3], [1.2, 0.3]])
     >>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-    >>> sivm_mdl = SIVM(data, num_bases=2, niter=1, compute_w=False)
-    >>> sivm_mdl.initialization()
+    >>> sivm_mdl = SIVM(data, num_bases=2, compute_w=False)
     >>> sivm_mdl.W = W
     >>> sivm_mdl.factorize()
     
@@ -95,16 +82,14 @@ class SIVM(AA):
     """
     
 
-    def __init__(self, data, num_bases=4, niter=1, 
-                show_progress=False, compute_w=True, compute_h=True, 
-                dist_measure='l2'):
+    def __init__(self, data, num_bases=4, init_w=True, init_h=True, 
+                 dist_measure='l2'):
 
-        # call inherited method        
-        # set "niter=1" as anything else doesn't make sense
-        AA.__init__(self, data, num_bases=num_bases, niter=1, show_progress=show_progress, compute_w=compute_w, compute_h=compute_h)
+        if init_h:
+            self.H = np.zeros((num_bases, data.shape[1]))
+        AA.__init__(self, data, num_bases=num_bases, init_w=False, init_h=False)
             
         self._dist_measure = dist_measure            
-        self._compute_h = compute_h        
 
         # assign the correct distance function
         if self._dist_measure == 'l1':
@@ -121,6 +106,11 @@ class SIVM(AA):
                 
         elif self._dist_measure == 'kl':
                 self._distfunc = kl_divergence    
+                 
+        self.W = np.zeros((self._data_dimension, self._num_bases))
+        if scipy.sparse.issparse(self.data):
+            self.W = scipy.sparse.csc_matrix(self.W)
+
                 
     def _distance(self, idx):
         # compute distances of a specific data point to all
@@ -151,39 +141,7 @@ class SIVM(AA):
             d[idx_start:idx_end] = self._distfunc(self.data[:,idx_start:idx_end], vec)
             self._logger.info('completed:' + str(idx_end/(self.data.shape[1]/100.0)) + "%")    
         return d
-    
-    def initialization(self, init='fastmap'):
-        # initialization can be either 'fastmap' or 'origin' ...
-        self.select = []
-
-        if init == 'fastmap':
-            # Fastmap like initialization
-            # set the starting index for fastmap initialization        
-            cur_p = 0        
-            
-            # after 3 iterations the first "real" index is found
-            for i in range(3):                                
-                d = self._distance(cur_p)        
-                cur_p = np.argmax(d)
-                
-            # store maximal found distance -> later used for "a" (->update_w) 
-            self._maxd = np.max(d)                        
-            self.select.append(cur_p)
-
-        elif init == 'origin':
-            # set first vertex to origin
-            cur_p = -1
-            d = self._distance(cur_p)
-            self._maxd = np.max(d)
-            self.select.append(cur_p)
-            
-
-        if self._compute_h:
-            self.H = np.zeros((self._num_bases, self._num_samples))
-                
-        self.W = np.zeros((self._data_dimension, self._num_bases))
-        if scipy.sparse.issparse(self.data):
-            self.W = scipy.sparse.csc_matrix(self.W)
+       
 
     def update_w(self):        
         # initialize some of the recursively updated distance measures ....        
@@ -216,7 +174,59 @@ class SIVM(AA):
             
         # "unsort" it again to keep the correct order
         self.W = self.W[:, np.argsort(np.argsort(self.select))]
-                    
+       
+    def factorize(self, niter=1, show_progress=False, init='fastmap', 
+                  compute_w=True, compute_h=True, compute_err=True):
+        """ Factorize s.t. WH = data
+            
+            Parameters
+            ----------          
+            show_progress : bool
+                    print some extra information to stdout.
+            compute_h : bool
+                    iteratively update values for H.
+            compute_w : bool
+                    iteratively update values for W.
+            compute_err : bool
+                    compute Frobenius norm |data-WH| after each update and store
+                    it to .ferr[k].
+            init : string (default: 'fastmap')
+                    'fastmap' or 'origin'. Sets the method used for finding
+                    the very first basis vector. 'Origin' assumes the zero
+                    vector, 'Fastmap' picks one of the two vectors that have
+                    the largest pairwise distance.
+            Updated Values
+            --------------
+            .W : updated values for W.
+            .H : updated values for H.
+            .ferr : Frobenius norm |data-WH|
+        """      
+        
+        self.select = []
+        if init == 'fastmap':
+            # Fastmap like initialization
+            # set the starting index for fastmap initialization        
+            cur_p = 0        
+            
+            # after 3 iterations the first "real" index is found
+            for i in range(3):                                
+                d = self._distance(cur_p)                        
+                cur_p = np.argmax(d)
+                
+            # store maximal found distance -> later used for "a" (->update_w) 
+            self._maxd = np.max(d)                        
+            self.select.append(cur_p)
+
+        elif init == 'origin':
+            # set first vertex to origin
+            cur_p = -1
+            d = self._distance(cur_p)
+            self._maxd = np.max(d)
+            self.select.append(cur_p)       
+                      
+        # set iterations to 1, otherwise it doesn't make sense
+        AA.factorize(self, niter=1, show_progress=False, compute_w=compute_w, compute_h=compute_h, compute_err=compute_err)  
+             
 if __name__ == "__main__":
     import doctest  
     doctest.testmod()    
