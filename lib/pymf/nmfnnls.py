@@ -65,7 +65,7 @@ class NMFNNLS(NMF):
     >>> nmf_mdl.factorize()
     
     The basis vectors are now stored in nmf_mdl.W, the coefficients in nmf_mdl.H. 
-    To compute coefficients for an existing set of basis vectors simply    copy W 
+    To compute coefficients for an existing set of basis vectors simply copy W 
     to nmf_mdl.W, and set compute_w to False:
     
     >>> data = np.array([[1.5], [1.2]])

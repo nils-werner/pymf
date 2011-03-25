@@ -26,7 +26,7 @@ class Kmeans(NMF):
     
     K-means clustering. Factorize a data matrix into two matrices s.t.
     F = | data - W*H | is minimal. H is restricted to unary vectors, W
-    is simply the mean over the corresponding samples in data.
+    is simply the mean over the corresponding samples in "data".
     
     Parameters
     ----------
