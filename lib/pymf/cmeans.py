@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
 #
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
@@ -22,7 +22,7 @@ __all__ = ["Cmeans"]
 
 class Cmeans(NMF):
     """      
-    cmeans(data, num_bases=4, niter=100, show_progress=True, compute_w=True)
+    cmeans(data, num_bases=4)
     
     
     Fuzzy c-means soft clustering. Factorize a data matrix into two matrices s.t.
@@ -37,13 +37,7 @@ class Cmeans(NMF):
         the input data
     num_bases: int, optional
         Number of bases to compute (column rank of W and row rank of H).
-        4 (default)    
-    init_w: bool, optional
-        Initialize W (True - default). Useful for using precomputed basis 
-        vectors or custom initializations or matrices stored via hdf5.        
-    init_h: bool, optional
-        Initialize H (True - default). Useful for using precomputed coefficients 
-        or custom initializations or matrices stored via hdf5.        
+        4 (default)        
     
 
     Attributes
@@ -69,15 +63,14 @@ class Cmeans(NMF):
     
     >>> data = np.array([[1.5], [1.2]])
     >>> W = [[1.0, 0.0], [0.0, 1.0]]
-    >>> cmeans_mdl = Cmeans(data, num_bases=2, niter=1, compute_w=False)
+    >>> cmeans_mdl = Cmeans(data, num_bases=2)
     >>> cmeans_mdl.initialization()
     >>> cmeans_mdl.W = W
-    >>> cmeans_mdl.factorize()
+    >>> cmeans_mdl.factorize(compute_w=False, niter=50)
     
     The result is a set of coefficients kmeans_mdl.H, s.t. data = W * kmeans_mdl.H.
     """
-    _EPS = 10**-8
-     
+
     def update_h(self):                    
         # assign samples to best matching centres ...
         m = 1.75

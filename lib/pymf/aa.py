@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
 #
 # Copyright (C) Christian Thurau, 2010.
 # Licensed under the GNU General Public License (GPL).
@@ -27,7 +27,7 @@ __all__ = ["AA"]
 
 class AA(NMF):
     """
-    AA(data, num_bases=4, niter=100, init_w=True, init_h=True)
+    AA(data, num_bases=4)
 
     Archetypal Analysis. Factorize a data matrix into two matrices s.t.
     F = | data - W*H | = | data - data*beta*H| is minimal. H and beta
@@ -41,13 +41,7 @@ class AA(NMF):
         the input data
     num_bases: int, optional
         Number of bases to compute (column rank of W and row rank of H).
-        4 (default)    
-    init_w: bool, optional
-        Initialize W (True - default). Useful for using precomputed basis 
-        vectors or custom initializations or matrices stored via hdf5.        
-    init_h: bool, optional
-        Initialize H (True - default). Useful for using precomputed coefficients 
-        or custom initializations or matrices stored via hdf5.        
+        4 (default)       
     
 
     Attributes
@@ -89,41 +83,18 @@ class AA(NMF):
     # set cvxopt options
     solvers.options['show_progress'] = False
 
+    
 
-    def __init__(self, data, num_bases=4, init_w=True, init_h=True):
-
-        # call inherited method
-        NMF.__init__(self, data, num_bases=num_bases, init_w=init_w, 
-                    init_h=init_h)
-
-        if init_h:
-            self.H /= self.H.sum(axis=0)
-
+    def init_h(self):
+        self.H = np.random.random((self._num_bases, self._num_samples))     
+        self.H /= self.H.sum(axis=0)
+            
+    def init_w(self):
         self.beta = np.random.random((self._num_bases, self._num_samples))
         self.beta /= self.beta.sum(axis=0)
-
-        if init_w:
-        # reintialize W to random data values       
-            self.W = np.dot(self.beta, self.data.T).T
-
-
-
-    def map_W_to_Data(self):
-        """ Return data points that are most similar to basis vectors W
-        """
-
-        # assign W to the next best data sample
-        self._Wmapped_index = vq(self.data, self.W)
-        self.Wmapped = np.zeros(self.W.shape)
-
-        # do not directly assign, i.e. Wdist = self.data[:,sel]
-        # as self might be unsorted (in non ascending order)
-        # -> sorting sel would screw the matching to W if
-        # self.data is stored as a hdf5 table (see h5py)
-        for i, s in enumerate(self._Wmapped_index):
-            self.Wmapped[:,i] = self.data[:,s]
-
-
+        self.W = np.dot(self.beta, self.data.T).T            
+        self.W = np.random.random((self._data_dimension, self._num_bases))        
+        
     def update_h(self):
         """ compute new H """
         def update_single_h(i):
@@ -139,10 +110,9 @@ class AA(NMF):
         INQa = base.matrix(-np.eye(self._num_bases))
         INQb = base.matrix(0.0, (self._num_bases,1))
         EQa = base.matrix(1.0, (1, self._num_bases))
-
+        
         for i in xrange(self._num_samples):
             update_single_h(i)        
-
 
     def update_w(self):
         """ compute new W """
@@ -165,7 +135,6 @@ class AA(NMF):
             update_single_w(i)            
 
         self.W = np.dot(self.beta, self.data.T).T
-
 
 if __name__ == "__main__":
     import doctest

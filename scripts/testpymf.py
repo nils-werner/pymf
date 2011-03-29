@@ -36,15 +36,15 @@ def test_svd(A, func, desc, marker):
     return m
 
 
-def test(A, func, desc, marker, niter=200):
+def test(A, func, desc, marker, niter=20):
     stime = time.time()
-    m = func(A, init_w=True, init_h=True, num_bases=4)
-    m.factorize(show_progress=False, niter=20)    
+    m = func(A, num_bases=4)
+    m.factorize(show_progress=False, niter=niter)    
     print desc + ': Fro.:', m.ferr[-1]/(A.shape[0] + A.shape[1]) , ' elapsed:' , time.time() - stime
     stime = time.time()
-    m.factorize(show_progress=False, compute_h=False, niter=20) 
-    m.factorize(show_progress=False, compute_w=False, niter=20)
-    m.factorize(show_progress=False, compute_err=False, niter=20)
+    m.factorize(show_progress=False, compute_h=False, niter=niter) 
+    m.factorize(show_progress=False, compute_w=False, niter=niter)
+    m.factorize(show_progress=False, compute_err=False, niter=niter)
     m.factorize(show_progress=True, niter=20)
     print desc + ' additional tests - elapsed:' , time.time() - stime
     

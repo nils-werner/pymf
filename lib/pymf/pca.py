@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
 #
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
@@ -24,7 +24,7 @@ __all__ = ["PCA"]
 
 class PCA(NMF):
     """      
-    PCA(data, num_bases=4, niter=100, show_progress=True, compute_w=True, center_mean=True)
+    PCA(data, num_bases=4, center_mean=True)
     
     
     Archetypal Analysis. Factorize a data matrix into two matrices s.t.
@@ -37,13 +37,7 @@ class PCA(NMF):
         the input data
     num_bases: int, optional
         Number of bases to compute (column rank of W and row rank of H).
-        4 (default)    
-    init_w: bool, optional
-        Initialize W (True - default). Useful for using precomputed basis 
-        vectors or custom initializations or matrices stored via hdf5.        
-    init_h: bool, optional
-        Initialize H (True - default). Useful for using precomputed coefficients 
-        or custom initializations or matrices stored via hdf5.        
+        4 (default)         
     center_mean: bool, True
         Make sure that the data is centred around the mean.
 
@@ -68,33 +62,37 @@ class PCA(NMF):
     
     >>> data = np.array([[1.5], [1.2]])
     >>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-    >>> pca_mdl = PCA(data, num_bases=2, compute_w=False)
+    >>> pca_mdl = PCA(data, num_bases=2)
     >>> pca_mdl.W = W
-    >>> pca_mdl.factorize()
+    >>> pca_mdl.factorize(compute_w=False)
     
     The result is a set of coefficients pca_mdl.H, s.t. data = W * pca_mdl.H.
     """
-    
-    def __init__(self, data, num_bases=0, init_w=True, init_h=True, center_mean=True):
+        
+    def __init__(self, data, num_bases=0, center_mean=True):
 
-        NMF.__init__(self, data, num_bases=num_bases, init_w=False, init_h=False)
+        NMF.__init__(self, data, num_bases=num_bases)
         
         # center the data around the mean first
         self._center_mean = center_mean            
 
         if self._center_mean:
-            # copy the data before centering it -> arrays
-            # are passed by reference ...
+            # copy the data before centering it
             self._data_orig = data            
             self._meanv = self._data_orig[:,:].mean(axis=1).reshape(data.shape[0],-1)                
             self.data = self._data_orig -  self._meanv
         else:
             self.data = data
 
+    def init_h(self):
+        pass
+
+    def init_w(self):
+        pass
+    
     def update_h(self):                    
         self.H = np.dot(self.W.T, self.data[:,:])
         
-                    
     def update_w(self):
         # compute eigenvectors and eigenvalues using SVD            
         svd_mdl = SVD(self.data)
@@ -112,6 +110,34 @@ class PCA(NMF):
         self.W = svd_mdl.U[:,order]
         self.eigenvalues =  S[order]               
     
+    def factorize(self, show_progress=False, compute_w=True, compute_h=True,
+                  compute_err=True, niter=1):
+        """ Factorize s.t. WH = data
+            
+            Parameters
+            ----------
+            show_progress : bool
+                    print some extra information to stdout.
+            compute_h : bool
+                    iteratively update values for H.
+            compute_w : bool
+                    iteratively update values for W.
+            compute_err : bool
+                    compute Frobenius norm |data-WH| after each update and store
+                    it to .ferr[k].
+            
+            Updated Values
+            --------------
+            .W : updated values for W.
+            .H : updated values for H.
+            .ferr : Frobenius norm |data-WH|.
+        """
+        
+        NMF.factorize(self, niter=1, show_progress=show_progress, 
+                  compute_w=compute_w, compute_h=compute_h, 
+                  compute_err=compute_err)
+                  
+                  
 if __name__ == "__main__":
     import doctest  
     doctest.testmod()        

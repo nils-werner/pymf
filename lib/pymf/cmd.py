@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
 #
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
@@ -55,10 +55,6 @@ class CMD(CUR):
     >>> cmd_mdl = CMD(data, show_progress=False, rrank=1, crank=2)    
     >>> cmd_mdl.factorize()
     """
-    
-
-    def __init__(self, data, k=-1, rrank=0, crank=0):
-        CUR.__init__(self, data, k=k, rrank=rrank, crank=rrank)
     
     def _cmdinit(self):
         nrids = np.unique(self._rid)

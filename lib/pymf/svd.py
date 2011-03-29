@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
 #
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
@@ -61,9 +61,6 @@ class SVD():
     ----------
     data : array_like [data_dimension x num_samples]
         the input data
-    show_progress: bool, optional
-        Print some extra information
-        False (default)    
     
     Attributes
     ----------
@@ -79,7 +76,7 @@ class SVD():
     
     _EPS=10**-8
     
-    def __init__(self, data, k=-1, rrank=0, crank=0, show_progress=True):
+    def __init__(self, data, k=-1, rrank=0, crank=0):
         self.data = data
         (self._rows, self._cols) = self.data.shape
         if rrank > 0:
@@ -94,8 +91,6 @@ class SVD():
         
         # set the rank to either rrank or crank
         self._k = k
-
-        self._show_progress = show_progress
     
     def frobenius_norm(self):
         """ Frobenius norm (||data - USV||) for a data matrix and a low rank

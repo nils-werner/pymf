@@ -14,7 +14,6 @@ __version__ = "$Revision$"
 import numpy as np
 from scipy.sparse import issparse
 
-    
 from .nmf import *
 from .nmfals import *
 from .nmfnnls import *

@@ -64,7 +64,7 @@ def quickhull(sample):
 
 class CHNMF(AA):
     """      
-    CHNMF(data, num_bases=4, niter=100, show_progress=True, compute_w=True, compute_h=True)
+    CHNMF(data, num_bases=4)
         
     Convex Hull Non-negative Matrix Factorization. Factorize a data matrix into
     two matrices s.t. F = | data - W*H | is minimal. H is restricted to convexity 
@@ -80,13 +80,7 @@ class CHNMF(AA):
         the input data
     num_bases: int, optional
         Number of bases to compute (column rank of W and row rank of H).
-        4 (default)    
-    init_w: bool, optional
-        Initialize W (True - default). Useful for using precomputed basis 
-        vectors or custom initializations or matrices stored via hdf5.        
-    init_h: bool, optional
-        Initialize H (True - default). Useful for using precomputed coefficients 
-        or custom initializations or matrices stored via hdf5.   
+        4 (default)        
     base_sel: int,
         Number of pairwise basis vector projections. Set to a value< rank(data).
         Computation time scale exponentially with this value, usually rather low
@@ -120,25 +114,48 @@ class CHNMF(AA):
     
     >>> data = np.array([[1.5, 2.0], [1.2, 1.8]])
     >>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-    >>> chnmf_mdl = CHNMF(data, num_bases=2, niter=1, compute_w=False)
+    >>> chnmf_mdl = CHNMF(data, num_bases=2)
     >>> chnmf_mdl.W = W
-    >>> chnmf_mdl.factorize()
+    >>> chnmf_mdl.factorize(niter=1, compute_w=False)
     
     The result is a set of coefficients chnmf_mdl.H, s.t. data = W * chnmf_mdl.H.
     """        
+
+    # always overwrite the default number of iterations
+    # -> any value other does not make sense.
+    _NITER = 1    
     
-    def __init__(self, data, num_bases=4, init_w=True, init_h=True, base_sel=3):
+    def __init__(self, data, num_bases=4, base_sel=3):
                              
         # call inherited method
-        AA.__init__(self, data, num_bases=num_bases, 
-                    init_w=init_w, init_h=init_h)
+        AA.__init__(self, data, num_bases=num_bases)
                 
         # base sel should never be larger than the actual data dimension
-        if base_sel < self.data.shape[0]:
-            self._base_sel = base_sel
-        else:
+        self._base_sel = base_sel
+        if base_sel > self.data.shape[0]:
             self._base_sel = self.data.shape[0]
 
+    def init_h(self):
+        self.H = np.zeros((self._num_bases, self._num_samples))
+        
+    def init_w(self):
+        self.W = np.zeros((self._data_dimension, self._num_bases))
+        
+    def _map_w_to_data(self):
+        """ Return data points that are most similar to basis vectors W
+        """
+
+        # assign W to the next best data sample
+        self._Wmapped_index = vq(self.data, self.W)
+        self.Wmapped = np.zeros(self.W.shape)
+
+        # do not directly assign, i.e. Wdist = self.data[:,sel]
+        # as self might be unsorted (in non ascending order)
+        # -> sorting sel would screw the matching to W if
+        # self.data is stored as a hdf5 table (see h5py)
+        for i, s in enumerate(self._Wmapped_index):
+            self.Wmapped[:,i] = self.data[:,s]
+            
     def update_w(self): 
         """ compute new W """
         def select_hull_points(data, n=3):
@@ -159,35 +176,26 @@ class CHNMF(AA):
                 
             return np.int32(idx)
     
-        # determine convex hull data points only if the total
-        # amount of available data is >50
-        #if self.data.shape[1] > 50:    
+        # determine convex hull data points:
         pcamodel = PCA(self.data)        
         pcamodel.factorize(show_progress=False)        
         self._hull_idx = select_hull_points(pcamodel.H, n=self._base_sel)
 
-        #else:
-        #    self._hull_idx = range(self.data.shape[1])
-
-        aa_mdl = AA(self.data[:, self._hull_idx], num_bases=self._num_bases,                     
-                    init_w=True, init_h=True)
+        aa_mdl = AA(self.data[:, self._hull_idx], num_bases=self._num_bases)
 
         # determine W
         aa_mdl.factorize(niter=50, compute_h=True, compute_w=True, 
                          compute_err=True, show_progress=False)
             
         self.W = aa_mdl.W        
-        self.map_W_to_Data()
+        self._map_w_to_data()
         
-        
-    def factorize(self, niter=1, show_progress=False, 
-                 compute_w=True, compute_h=True, compute_err=True):  
+    def factorize(self, show_progress=False, compute_w=True, compute_h=True,
+                  compute_err=True, niter=1):
         """ Factorize s.t. WH = data
             
             Parameters
             ----------
-            niter : int
-                    number of iterations.
             show_progress : bool
                     print some extra information to stdout.
             compute_h : bool
@@ -202,14 +210,14 @@ class CHNMF(AA):
             --------------
             .W : updated values for W.
             .H : updated values for H.
-            .ferr : Frobenius norm |data-WH| for each iteration.
-        """                     
-        # set iterations to 1, otherwise it doesn't make sense
+            .ferr : Frobenius norm |data-WH|.
+        """
+        
         AA.factorize(self, niter=1, show_progress=show_progress, 
-                     compute_w=compute_w, compute_h=compute_h, 
-                     compute_err=compute_err)      
-
-
+                  compute_w=compute_w, compute_h=compute_h, 
+                  compute_err=compute_err)        
+        
+        
 if __name__ == "__main__":
     import doctest  
     doctest.testmod()    

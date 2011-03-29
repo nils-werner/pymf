@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
 #
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
@@ -63,8 +63,8 @@ class CUR(SVD):
         SVD.__init__(self, data,k=k,rrank=rrank, crank=rrank)
         
         # select all data samples for computing the error:
-        # note that this might take very long, adjust self._rset and self._cset for 
-        # faster computations.
+        # note that this might take very long, adjust self._rset and self._cset 
+        # for faster computations.
         self._rset = range(self._rows)
         self._cset = range(self._cols) 
 

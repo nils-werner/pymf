@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
 #
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
@@ -26,7 +26,7 @@ __all__ = ["CNMF"]
 
 class CNMF(NMF):
     """      
-    CNMF(data, num_bases=4, niter=100, show_progress=True, compute_w=True)
+    CNMF(data, num_bases=4)
     
     
     Convex NMF. Factorize a data matrix into two matrices s.t.
@@ -39,15 +39,8 @@ class CNMF(NMF):
         the input data
     num_bases: int, optional
         Number of bases to compute (column rank of W and row rank of H).
-        4 (default)    
-    init_w: bool, optional
-        Initialize W (True - default). Useful for using precomputed basis 
-        vectors or custom initializations or matrices stored via hdf5.        
-    init_h: bool, optional
-        Initialize H (True - default). Useful for using precomputed coefficients 
-        or custom initializations or matrices stored via hdf5.        
+        4 (default)          
     
-
     Attributes
     ----------
     W : "data_dimension x num_bases" matrix of basis vectors
@@ -61,9 +54,8 @@ class CNMF(NMF):
     >>> import numpy as np
     >>> from cnmf import CNMF
     >>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
-    >>> cnmf_mdl = CNMF(data, num_bases=2, niter=10)
-    >>> cnmf_mdl.initialization()
-    >>> cnmf_mdl.factorize()
+    >>> cnmf_mdl = CNMF(data, num_bases=2)
+    >>> cnmf_mdl.factorize(niter=10)
     
     The basis vectors are now stored in cnmf_mdl.W, the coefficients in cnmf_mdl.H. 
     To compute coefficients for an existing set of basis vectors simply    copy W 
@@ -71,50 +63,49 @@ class CNMF(NMF):
     
     >>> data = np.array([[1.5, 1.3], [1.2, 0.3]])
     >>> W = [[1.0, 0.0], [0.0, 1.0]]
-    >>> cnmf_mdl = CNMF(data, num_bases=2, niter=1, compute_w=False)
-    >>> cnmf_mdl.initialization()
+    >>> cnmf_mdl = CNMF(data, num_bases=2)
     >>> cnmf_mdl.W = W
-    >>> cnmf_mdl.factorize()
+    >>> cnmf_mdl.factorize(compute_w=False, niter=1)
     
     The result is a set of coefficients acnmf_mdl.H, s.t. data = W * cnmf_mdl.H.
     """
 
-    def __init__(self, data, num_bases=4, init_w=True, init_h=True):
-        # data can be either supplied by conventional numpy arrays or
-        # as a numpy array within a pytables table (should be preferred for large data sets)
-        NMF.__init__(self, data, num_bases=num_bases, 
-                     init_w=init_w, init_h=init_h)
-         
-        # init basic matrices        
-        self.W = np.zeros((self._data_dimension, self._num_bases))
-        self.H = np.zeros((self._num_bases, self._num_samples))
-        self.G = np.zeros((self._num_samples, self._num_bases))
-        #####
-        
-        # initialize using k-means
-        km = Kmeans(self.data[:,:], num_bases=num_bases)        
-        km.factorize(niter=10)
-        assign = km.assigned
-
-        num_i = np.zeros(self._num_bases)
-        for i in range(self._num_bases):
-            num_i[i] = len(np.where(assign == i)[0])
-
-        self.G[range(len(assign)), assign] = 1.0 
-        self.G += 0.01                        
-        self.G /= np.tile(np.reshape(num_i[assign],(-1,1)), self.G.shape[1])
-    
-        self.H.T[range(len(assign)), assign] = 1.0                
-        self.H += 0.2*np.ones((self._num_bases, self._num_samples))
-        
-        self.W = np.dot(self.data[:,:], self.G)
-            
-    
     # see .factorize() for the update of W and H
+    # -> proper decoupling of W/H not possible ...
     def update_w(self):
         pass        
         
     def update_h(self):
+        pass
+    
+    def init_h(self):
+        if not hasattr(self, 'H'):
+            # init basic matrices       
+            self.H = np.zeros((self._num_bases, self._num_samples))
+            
+            # initialize using k-means
+            km = Kmeans(self.data[:,:], num_bases=self._num_bases)        
+            km.factorize(niter=10)
+            assign = km.assigned
+    
+            num_i = np.zeros(self._num_bases)
+            for i in range(self._num_bases):
+                num_i[i] = len(np.where(assign == i)[0])
+    
+            self.H.T[range(len(assign)), assign] = 1.0                
+            self.H += 0.2*np.ones((self._num_bases, self._num_samples))
+        
+        if not hasattr(self, 'G'):
+            self.G = np.zeros((self._num_samples, self._num_bases))
+            
+            self.G[range(len(assign)), assign] = 1.0 
+            self.G += 0.01                        
+            self.G /= np.tile(np.reshape(num_i[assign],(-1,1)), self.G.shape[1])
+            
+        if not hasattr(self,'W'):
+            self.W = np.dot(self.data[:,:], self.G)
+    
+    def init_w(self):
         pass
     
     def factorize(self, niter=10, compute_w=True, compute_h=True, 
@@ -141,6 +132,13 @@ class CNMF(NMF):
             .H : updated values for H.
             .ferr : Frobenius norm |data-WH| for each iteration.
         """   
+        
+        if not hasattr(self,'W'):
+               self.init_w()
+               
+        if not hasattr(self,'H'):
+                self.init_h()              
+        
         def separate_positive(m):
             return (np.abs(m) + m)/2.0 
         
@@ -179,9 +177,12 @@ class CNMF(NMF):
                 self.G *= np.sqrt(wa/wb)
                 self.W = np.dot(self.data[:,:], self.G)
                                 
-            self.ferr[i] = self.frobenius_norm()
-
-            self._logger.info('iteration ' + str(i+1) + '/' + str(niter) + ' Fro:' + str(self.ferr[i]))
+            if compute_err:                 
+                self.ferr[i] = self.frobenius_norm()
+                self._logger.info('Iteration ' + str(i+1) + '/' + str(niter) + 
+                ' FN:' + str(self.ferr[i]))
+            else:                
+                self._logger.info('Iteration ' + str(i+1) + '/' + str(niter))
 
             if i > 1 and compute_err:
                 if self.converged(i):                    

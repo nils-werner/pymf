@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
 #
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
@@ -16,7 +16,6 @@ Applications. ICDM 2007
 
 __version__ = "$Revision$"
 
-import logging
 import numpy as np
 from nmf import NMF
 
@@ -24,7 +23,7 @@ __all__ = ["BNMF"]
 
 class BNMF(NMF):
     """      
-    BNMF(data, data, num_bases=4, init_w=True, init_h=True)
+    BNMF(data, data, num_bases=4)
     Binary Matrix Factorization. Factorize a data matrix into two matrices s.t.
     F = | data - W*H | is minimal. H and W are restricted to binary values.
     
@@ -34,15 +33,8 @@ class BNMF(NMF):
         the input data
     num_bases: int, optional
         Number of bases to compute (column rank of W and row rank of H).
-        4 (default)    
-    init_w: bool, optional
-        Initialize W (True - default). Useful for using precomputed basis 
-        vectors or custom initializations or matrices stored via hdf5.        
-    init_h: bool, optional
-        Initialize H (True - default). Useful for using precomputed coefficients 
-        or custom initializations or matrices stored via hdf5.        
+        4 (default)         
     
-
     Attributes
     ----------
         W : "data_dimension x num_bases" matrix of basis vectors
@@ -71,35 +63,29 @@ class BNMF(NMF):
     
     >>> data = np.array([[0.0], [1.0]])
     >>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-    >>> bnmf_mdl = BNMF(data, num_bases=2, niter=10, compute_w=False)
+    >>> bnmf_mdl = BNMF(data, num_bases=2)
     >>> bnmf_mdl.W = W
-    >>> bnmf_mdl.factorize()
+    >>> bnmf_mdl.factorize(niter=10, compute_w=False)
     
     The result is a set of coefficients bnmf_mdl.H, s.t. data = W * bnmf_mdl.H.
     """
     
-    def __init__(self, data, num_bases=4, init_w=True, init_h=True):        
-        # data can be either supplied by conventional numpy arrays or
-        # as a numpy array within a pytables table (should be preferred for large data sets)
+    # controls how fast lambda should increase:
+    # this influence convergence to binary values during the update. A value
+    # <1 will result in non-binary decompositions as the update rule effectively
+    # is a conventional nmf update rule. Values >1 give more weight to making the
+    # factorization binary with increasing iterations.
+    # setting either W or H to 0 results make the resulting matrix non binary.
+    _LAMB_INCREASE_W = 1.1 
+    _LAMB_INCREASE_H = 1.1    
         
-        NMF.__init__(self, data, num_bases=num_bases, init_w=True, init_h=True)
-        
-        # controls how fast lambda should increase:
-        # this influence convergence to binary values during the update. A value
-        # <1 will result in non-binary decompositions as the update rule effectively
-        # is a conventional nmf update rule. Values >1 give more weight to making the
-        # factorization binary with increasing iterations.
-        # setting either W or H to 0 results make the resulting matrix non binary.
-        self._lamb_increase_W = 1.1 
-        self._lamb_increase_H = 1.1 
-
     def update_h(self):
         H1 = np.dot(self.W.T, self.data[:,:]) + 3.0*self._lamb_H*(self.H**2)
         H2 = np.dot(np.dot(self.W.T,self.W), self.H) + 2*self._lamb_H*(self.H**3) + self._lamb_H*self.H + 10**-9
         self.H *= H1/H2
                
-        self._lamb_W = self._lamb_increase_W * self._lamb_W
-        self._lamb_H = self._lamb_increase_H * self._lamb_H
+        self._lamb_W = self._LAMB_INCREASE_W * self._lamb_W
+        self._lamb_H = self._LAMB_INCREASE_H * self._lamb_H
 
     def update_w(self):
         W1 = np.dot(self.data[:,:], self.H.T) + 3.0*self._lamb_W*(self.W**2)
@@ -131,8 +117,9 @@ class BNMF(NMF):
             .ferr : Frobenius norm |data-WH| for each iteration.
         """       
               
+        # init some learning parameters
         self._lamb_W = 1.0/niter
-        self._lamb_H = 1.0/niter        
+        self._lamb_H = 1.0/niter  
         
         NMF.factorize(self, niter=niter, compute_w=compute_w, 
                       compute_h=compute_h, show_progress=show_progress,

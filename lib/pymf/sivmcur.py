@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
 #
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
@@ -26,7 +26,7 @@ __all__ = ["SIVMCUR"]
 
 class SIVMCUR(CUR):
     '''
-    SIVMCUR(data, num_bases=4, show_progress=True, compute_w=True, product=False, dist_measure='l2')
+    SIVMCUR(data, num_bases=4, dist_measure='l2')
     
     Simplex Volume based CUR Decomposition. Factorize a data matrix into three 
     matrices s.t. F = | data - USV| is minimal. Unlike CUR, SIVMCUR selects the
@@ -42,13 +42,7 @@ class SIVMCUR(CUR):
         4 (default)crank
     crank: int, optional
         Number of columns to sample from data.
-        4 (default)
-    product: bool, optional
-        Use the alternative product-rule for maximizing the simplex. 
-        False (default)
-    show_progress: bool, optional
-        Print some extra information
-        False (default)    
+        4 (default)   
     dist_measure: string, optional
         The distance measure for finding the next best candidate that 
         maximizes the simplex volume ['l2','l1','cosine','sparse_graph_l2']
@@ -68,17 +62,15 @@ class SIVMCUR(CUR):
     
     def __init__(self, data, k=-1, rrank=0, crank=0, dist_measure='l2'):
         CUR.__init__(self, data, k=k, rrank=rrank, crank=rrank)
-    
         self._dist_measure = dist_measure    
 	
-        
     def sample(self, A, c):
         # for optimizing the volume of the submatrix, set init to 'origin' (otherwise the volume of
         # the ordinary simplex would be optimized)      
-        sivm_mdl = SIVM(A, num_bases=c, init_h=False, init_w=True,
-                        dist_measure=self._dist_measure)
+        sivm_mdl = SIVM(A, num_bases=c, dist_measure=self._dist_measure,  
+                        init='origin')
         
-        sivm_mdl.factorize(show_progress=False, compute_w=True, init='origin', 
+        sivm_mdl.factorize(show_progress=False, compute_w=True, niter=1,
                            compute_h=False, compute_err=False)
         
         return sivm_mdl.select    

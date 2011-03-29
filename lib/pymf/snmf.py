@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
 #
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
@@ -25,7 +25,7 @@ __all__ = ["SNMF"]
 
 class SNMF(NMF):
     """      
-    SNMF(data, num_bases=4, init_h=True, init_w=True)
+    SNMF(data, num_bases=4)
     
     Semi Non-negative Matrix Factorization. Factorize a data matrix into two 
     matrices s.t. F = | data - W*H | is minimal.
@@ -36,21 +36,12 @@ class SNMF(NMF):
         the input data
     num_bases: int, optional
         Number of bases to compute (column rank of W and row rank of H).
-        4 (default)    
-    init_w: bool, optional
-        Initialize W (True - default). Useful for using precomputed basis 
-        vectors or custom initializations or matrices stored via hdf5.        
-    init_h: bool, optional
-        Initialize H (True - default). Useful for using precomputed coefficients 
-        or custom initializations or matrices stored via hdf5.        
+        4 (default)       
     
-
     Attributes
     ----------
     W : "data_dimension x num_bases" matrix of basis vectors
     H : "num bases x num_samples" matrix of coefficients
-    beta : "num_bases x num_samples" matrix of basis vector coefficients
-        (for constructing W s.t. W = beta * data.T )
     ferr : frobenius norm (after calling .factorize())
         
     Example
@@ -59,9 +50,8 @@ class SNMF(NMF):
     
     >>> import numpy as np
     >>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
-    >>> snmf_mdl = SNMF(data, num_bases=2, niter=10)
-    >>> snmf_mdl.initialization()
-    >>> snmf_mdl.factorize()
+    >>> snmf_mdl = SNMF(data, num_bases=2)
+    >>> snmf_mdl.factorize(niter=10)
     
     The basis vectors are now stored in snmf_mdl.W, the coefficients in snmf_mdl.H. 
     To compute coefficients for an existing set of basis vectors simply    copy W 
@@ -69,10 +59,9 @@ class SNMF(NMF):
     
     >>> data = np.array([[1.5], [1.2]])
     >>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-    >>> snmf_mdl = SNMF(data, num_bases=2, niter=1, compute_w=False)
-    >>> snmf_mdl.initialization()
+    >>> snmf_mdl = SNMF(data, num_bases=2)
     >>> snmf_mdl.W = W
-    >>> snmf_mdl.factorize()
+    >>> snmf_mdl.factorize(niter=1, compute_w=False)
     
     The result is a set of coefficients snmf_mdl.H, s.t. data = W * snmf_mdl.H. 
     """

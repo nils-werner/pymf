@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
 #
 # Copyright (C) Christian Thurau, 2010.
 # Licensed under the GNU General Public License (GPL).
@@ -23,9 +23,9 @@ import scipy.sparse
 
 __all__ = ["NMF"]
 
-class NMF:
+class NMF():
     """
-    NMF(data, num_bases=4, compute_w=True, compute_H=True)
+    NMF(data, num_bases=4)
 
 
     Non-negative Matrix Factorization. Factorize a data matrix into two matrices
@@ -38,14 +38,7 @@ class NMF:
         the input data
     num_bases: int, optional
         Number of bases to compute (column rank of W and row rank of H).
-        4 (default)    
-    init_w: bool, optional
-        Initialize W (True - default). Useful for using precomputed basis 
-        vectors or custom initializations or matrices stored via hdf5.        
-    init_h: bool, optional
-        Initialize H (True - default). Useful for using precomputed coefficients 
-        or custom initializations or matrices stored via hdf5.        
-    
+        4 (default)        
 
     Attributes
     ----------
@@ -60,7 +53,6 @@ class NMF:
     >>> import numpy as np
     >>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
     >>> nmf_mdl = NMF(data, num_bases=2, niter=10)
-    >>> nmf_mdl.initialization()
     >>> nmf_mdl.factorize()
 
     The basis vectors are now stored in nmf_mdl.W, the coefficients in nmf_mdl.H.
@@ -69,17 +61,17 @@ class NMF:
 
     >>> data = np.array([[1.5], [1.2]])
     >>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-    >>> nmf_mdl = NMF(data, num_bases=2, niter=1, compute_w=False)
-    >>> nmf_mdl.initialization()
+    >>> nmf_mdl = NMF(data, num_bases=2)
     >>> nmf_mdl.W = W
-    >>> nmf_mdl.factorize()
+    >>> nmf_mdl.factorize(niter=20, compute_w=False)
 
     The result is a set of coefficients nmf_mdl.H, s.t. data = W * nmf_mdl.H.
     """
-
-    EPS = 10**-8
-
-    def __init__(self, data, num_bases=4, init_h=True, init_w=True):
+    
+    # some small value
+    _EPS = 10**-8
+    
+    def __init__(self, data, num_bases=4):
         
         def setup_logging():
             # create logger       
@@ -104,15 +96,8 @@ class NMF:
         self.data = data       
         self._num_bases = num_bases             
       
-
         # initialize H and W to random values
         (self._data_dimension, self._num_samples) = self.data.shape
-        
-        if init_w:
-            self.W = np.random.random((self._data_dimension, self._num_bases))
-        
-        if init_h:
-            self.H = np.random.random((self._num_bases, self._num_samples))
         
 
     def frobenius_norm(self):
@@ -130,7 +115,13 @@ class NMF:
             err = -123456
 
         return err
-
+        
+    def init_w(self):
+        self.W = np.random.random((self._data_dimension, self._num_bases)) 
+        
+    def init_h(self):
+        self.H = np.random.random((self._num_bases, self._num_samples)) 
+        
     def update_h(self):
             # pre init H1, and H2 (necessary for storing matrices on disk)
             H2 = np.dot(np.dot(self.W.T, self.W), self.H) + 10**-9
@@ -145,7 +136,7 @@ class NMF:
 
     def converged(self, i):
         derr = np.abs(self.ferr[i] - self.ferr[i-1])/self._num_samples
-        if derr < self.EPS:
+        if derr < self._EPS:
             return True
         else:
             return False
@@ -180,10 +171,17 @@ class NMF:
         else:
             self._logger.setLevel(logging.ERROR)        
         
+        # create W and H if they don't already exist
+        # -> any custom initialization to W,H should be done before
+        if not hasattr(self,'W'):
+               self.init_w()
+               
+        if not hasattr(self,'H'):
+                self.init_h()                   
+
         if compute_err:
             self.ferr = np.zeros(niter)
-        
-        # iterate over W and H
+             
         for i in xrange(niter):
             if compute_w:
                 self.update_w()
@@ -193,7 +191,8 @@ class NMF:
          
             if compute_err:                 
                 self.ferr[i] = self.frobenius_norm()
-                self._logger.info('Iteration ' + str(i+1) + '/' + str(niter) + ' FN:' + str(self.ferr[i]))
+                self._logger.info('Iteration ' + str(i+1) + '/' + str(niter) + 
+                ' FN:' + str(self.ferr[i]))
             else:                
                 self._logger.info('Iteration ' + str(i+1) + '/' + str(niter))
            

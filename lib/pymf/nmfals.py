@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
 #
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
@@ -26,7 +26,7 @@ __all__ = ["NMFALS"]
 
 class NMFALS(NMF):
     """      
-    NMF(data, num_bases=4, niter=100, show_progress=False, compute_w=True)
+    NMF(data, num_bases=4)
     
     
     Non-negative Matrix Factorization. Factorize a data matrix into two matrices 
@@ -41,14 +41,7 @@ class NMFALS(NMF):
     num_bases: int, optional
         Number of bases to compute (column rank of W and row rank of H).
         4 (default)    
-    init_w: bool, optional
-        Initialize W (True - default). Useful for using precomputed basis 
-        vectors or custom initializations or matrices stored via hdf5.        
-    init_h: bool, optional
-        Initialize H (True - default). Useful for using precomputed coefficients 
-        or custom initializations or matrices stored via hdf5.        
     
-
     Attributes
     ----------
     W : "data_dimension x num_bases" matrix of basis vectors
@@ -61,9 +54,8 @@ class NMFALS(NMF):
     
     >>> import numpy as np
     >>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
-    >>> nmf_mdl = NMFALS(data, num_bases=2, niter=10)
-    >>> nmf_mdl.initialization()
-    >>> nmf_mdl.factorize()
+    >>> nmf_mdl = NMFALS(data, num_bases=2)
+    >>> nmf_mdl.factorize(niter=10)
     
     The basis vectors are now stored in nmf_mdl.W, the coefficients in nmf_mdl.H. 
     To compute coefficients for an existing set of basis vectors simply    copy W 
@@ -71,10 +63,9 @@ class NMFALS(NMF):
     
     >>> data = np.array([[1.5], [1.2]])
     >>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-    >>> nmf_mdl = NMFALS(data, num_bases=2, niter=1, compute_w=False)
-    >>> nmf_mdl.initialization()
+    >>> nmf_mdl = NMFALS(data, num_bases=2)
     >>> nmf_mdl.W = W
-    >>> nmf_mdl.factorize()
+    >>> nmf_mdl.factorize(niter=1, compute_w=False)
     
     The result is a set of coefficients nmf_mdl.H, s.t. data = W * nmf_mdl.H.
     """
