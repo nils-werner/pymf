@@ -64,7 +64,7 @@ class SIVM(AA):
     >>> sivm_mdl.factorize()
     
     The basis vectors are now stored in sivm_mdl.W, the coefficients in sivm_mdl.H. 
-    To compute coefficients for an existing set of basis vectors simply    copy W 
+    To compute coefficients for an existing set of basis vectors simply copy W 
     to sivm_mdl.W, and set compute_w to False:
     
     >>> data = np.array([[1.5, 1.3], [1.2, 0.3]])
@@ -85,7 +85,7 @@ class SIVM(AA):
         AA.__init__(self, data, num_bases=num_bases)
             
         self._dist_measure = dist_measure            
-        self._init = init
+        self._init = init      
         
         # assign the correct distance function
         if self._dist_measure == 'l1':
@@ -99,6 +99,9 @@ class SIVM(AA):
         
         elif self._dist_measure == 'abs_cosine':                
             self._distfunc = abs_cosine_distance
+        
+        elif self._dist_measure == 'weighted_abs_cosine':                
+            self._distfunc = weighted_abs_cosine_distance
                 
         elif self._dist_measure == 'kl':
             self._distfunc = kl_divergence    
@@ -175,9 +178,8 @@ class SIVM(AA):
         d_sum = np.zeros((self.data.shape[1]))
         d_i_times_d_j = np.zeros((self.data.shape[1]))
         distiter = np.zeros((self.data.shape[1]))
-
         a = np.log(self._maxd) 
-         
+        a_inc = a.copy()
         
         for l in range(1, self._num_bases):
             d = self._distance(self.select[l-1])
@@ -188,10 +190,11 @@ class SIVM(AA):
             d_i_times_d_j += d * d_sum
             d_sum += d
             d_square += d**2
-            distiter = d_i_times_d_j + a*d_sum - (l/2.0) * d_square        
-
+            distiter = d_i_times_d_j + a*d_sum - (l/2.0) * d_square                   
+            
             # detect the next best data point                      
-            self.select.append(np.argmax(distiter))
+            self.select.append(np.argmax(distiter))                       
+        
             self._logger.info('cur_nodes: ' + str(self.select))
 
         # sort indices, otherwise h5py won't work
