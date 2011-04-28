@@ -21,7 +21,7 @@ from .cnmf import *
 from .chnmf import *
 from .snmf import *
 from .aa import *
-from .sivm import *
+
 from .laesa import *
 from .bnmf import *
 
@@ -30,8 +30,15 @@ from .sub import *
 from .svd import *
 from .pca import *
 from .cur import *
-from .sivmcur import *
+from .sivm_cur import *
 from .cmd import *
 
 from .kmeans import *
 from .cmeans import *
+
+from .sivm import *
+from .sivm_sgreedy import *
+from .sivm_search import *
+from .sivm_gsat import *
+
+from .gmap import *

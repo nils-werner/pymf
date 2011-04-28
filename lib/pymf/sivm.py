@@ -6,7 +6,7 @@
 #$Id: sivm.py 22 2010-08-13 11:16:43Z cthurau $
 #$Author$
 """ 
-PyMF Simplex Volume Maximization for CUR [1]
+PyMF Simplex Volume Maximization [1]
 
     SIVM: class for SiVM
 

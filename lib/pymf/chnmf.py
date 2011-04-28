@@ -116,14 +116,10 @@ class CHNMF(AA):
     >>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
     >>> chnmf_mdl = CHNMF(data, num_bases=2)
     >>> chnmf_mdl.W = W
-    >>> chnmf_mdl.factorize(niter=1, compute_w=False)
+    >>> chnmf_mdl.factorize(compute_w=False)
     
     The result is a set of coefficients chnmf_mdl.H, s.t. data = W * chnmf_mdl.H.
     """        
-
-    # always overwrite the default number of iterations
-    # -> any value other does not make sense.
-    _NITER = 1    
     
     def __init__(self, data, num_bases=4, base_sel=3):
                              
@@ -176,11 +172,18 @@ class CHNMF(AA):
                 
             return np.int32(idx)
     
-        # determine convex hull data points:
-        pcamodel = PCA(self.data)        
-        pcamodel.factorize(show_progress=False)        
-        self._hull_idx = select_hull_points(pcamodel.H, n=self._base_sel)
-
+        # determine convex hull data points using either PCA or random
+        # projections
+        method = 'randomprojection'
+        if method == 'pca':
+            pcamodel = PCA(self.data)        
+            pcamodel.factorize(show_progress=False)        
+            proj = pcamodel.H
+        else:            
+            R = np.random.randn(self._base_sel, self._data_dimension)           
+            proj = np.dot(R, self.data)
+            
+        self._hull_idx = select_hull_points(proj, n=self._base_sel)
         aa_mdl = AA(self.data[:, self._hull_idx], num_bases=self._num_bases)
 
         # determine W

@@ -8,7 +8,7 @@
 """  
 PyMF Simplex Volume Maximization for CUR [1]
 
-    SIVMCUR: class for SiVMCUR
+    SIVMCUR: class for SiVM-CUR
 
 [1] C. Thurau, K. Kersting, and C. Bauckhage. Yes We Can - Simplex Volume 
 Maximization for Descriptive Web-Scale Matrix Factorization. In Proc. Int. 
@@ -19,14 +19,15 @@ __version__ = "$Revision$"
 
 
 import numpy as np
+import scipy
 from sivm import SIVM
 from cur import CUR
 
-__all__ = ["SIVMCUR"]
+__all__ = ["SIVM_CUR"]
 
-class SIVMCUR(CUR):
+class SIVM_CUR(CUR):
     '''
-    SIVMCUR(data, num_bases=4, dist_measure='l2')
+    SIVM_CUR(data, num_bases=4, dist_measure='l2')
     
     Simplex Volume based CUR Decomposition. Factorize a data matrix into three 
     matrices s.t. F = | data - USV| is minimal. Unlike CUR, SIVMCUR selects the
@@ -56,20 +57,20 @@ class SIVMCUR(CUR):
     -------
     >>> import numpy as np
     >>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
-    >>> sivmcur_mdl = SIVMCUR(data, show_progress=False, rrank=1, crank=2)    
+    >>> sivmcur_mdl = SIVM_CUR(data, show_progress=False, rrank=1, crank=2)    
     >>> sivmcur_mdl.factorize()
     '''
     
-    def __init__(self, data, k=-1, rrank=0, crank=0, dist_measure='l2'):
+    def __init__(self, data, k=-1, rrank=0, crank=0, dist_measure='l2', init='origin'):
         CUR.__init__(self, data, k=k, rrank=rrank, crank=rrank)
-        self._dist_measure = dist_measure    
-	
+        self._dist_measure = dist_measure
+        self.init = init
+
     def sample(self, A, c):
         # for optimizing the volume of the submatrix, set init to 'origin' (otherwise the volume of
-        # the ordinary simplex would be optimized)      
+        # the ordinary simplex would be optimized) 
         sivm_mdl = SIVM(A, num_bases=c, dist_measure=self._dist_measure,  
-                        init='origin')
-        
+                            init=self.init)                        
         sivm_mdl.factorize(show_progress=False, compute_w=True, niter=1,
                            compute_h=False, compute_err=False)
         
