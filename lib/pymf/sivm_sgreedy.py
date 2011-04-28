@@ -16,6 +16,7 @@ Conf. on Information and Knowledge Management. ACM. 2010.
 """
 
 __version__ = "$Revision$"
+# $Source$
 
 import numpy as np
 import time
