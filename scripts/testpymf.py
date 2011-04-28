@@ -36,11 +36,13 @@ def test_svd(A, func, desc, marker):
     return m
 
 
-def test(A, func, desc, marker, niter=20):
+def test(A, func, desc, marker, niter=20, num_bases=4):
     stime = time.time()
-    m = func(A, num_bases=4)
-    m.factorize(show_progress=False, niter=niter)    
+    m = func(A, num_bases=num_bases)
+    m.factorize(show_progress=True, niter=niter)   
+    
     print desc + ': Fro.:', m.ferr[-1]/(A.shape[0] + A.shape[1]) , ' elapsed:' , time.time() - stime
+
     stime = time.time()
     m.factorize(show_progress=False, compute_h=False, niter=niter) 
     m.factorize(show_progress=False, compute_w=False, niter=niter)
@@ -55,6 +57,12 @@ B = scipy.sparse.csc_matrix(A)
 # test pseudoinverse
 pymf.pinv(A)
 pymf.pinv(B)
+
+m = test(A, pymf.SIVM_SEARCH, 'SIVM_SEARCH', 'c<', num_bases=2)
+m = test(A, pymf.SIVM_GSAT, 'SIVM_GSAT ', 'c<', niter=20)
+m = test(A, pymf.SIVM_SGREEDY, 'SIVM Greedy ', 'c<')
+m = test(A, pymf.GMAP, 'GMAP ', 'c<')
+
 svdm = test_svd(A, pymf.SVD, 'Singula Value Decomposition (SVD)', 'c<')
 svdm = test_svd(A.T, pymf.SVD, 'Singula Value Decomposition (SVD)', 'c<')
 svdm = test_svd(B, pymf.SVD, 'svd sparse', 'c<')
@@ -62,7 +70,9 @@ curm = test_svd(A, pymf.CUR, 'CUR Matrix Decomposition', 'b<')
 curm = test_svd(B, pymf.CUR, 'CUR Matrix Decomposition (sparse data)', 'b<')
 cmdm = test_svd(A, pymf.CMD, 'Compact Matrix Decomposition (CMD)', 'm<')
 cmdm = test_svd(B, pymf.CMD, 'Compact Matrix Decomposition (CMD - sparse data)', 'm<')
-sparse_svmcur = test_svd(A, pymf.SIVMCUR, 'Simplex Volume Maximization f. CUR (SIVMCUR)', 'm<')
+sparse_svmcur = test_svd(A, pymf.SIVM_CUR, 'Simplex Volume Maximization f. CUR (SIVMCUR)', 'm<')
+svmcur = test_svd(A, pymf.SIVM_CUR, 'Simplex Volume Maximization f. CUR (SIVMCUR)', 'm<')
+
 m = test(A, pymf.PCA, 'Principal Component Analysis (PCA)', 'c<')
 m = test(A, pymf.NMF, 'Non-negative Matrix Factorization (NMF)', 'rs')
 m = test(A, pymf.NMFALS, 'NMF u. alternating least squares (NMFALS)', 'rs', niter=10)

@@ -84,8 +84,6 @@ class AA(NMF):
     # set cvxopt options
     solvers.options['show_progress'] = False
 
-    
-
     def init_h(self):
         self.H = np.random.random((self._num_bases, self._num_samples))     
         self.H /= self.H.sum(axis=0)
@@ -97,7 +95,8 @@ class AA(NMF):
         self.W = np.random.random((self._data_dimension, self._num_bases))        
         
     def update_h(self):
-        """ compute new H """
+        """ alternating least squares step, update H under the convexity
+        constraint """
         def update_single_h(i):
             """ compute single H[:,i] """
             # optimize alpha using qp solver from cvxopt
@@ -116,7 +115,8 @@ class AA(NMF):
             update_single_h(i)        
 
     def update_w(self):
-        """ compute new W """
+        """ alternating least squares step, update W under the convexity
+        constraint """
         def update_single_w(i):
             """ compute single W[:,i] """
             # optimize beta     using qp solver from cvxopt

@@ -1,5 +1,5 @@
-Matrix Factorization Methods for Python (pymf) v. 0.1
-=====================================================
+Matrix Factorization Methods for Python (pymf)
+==============================================
 
 What is PyMF?
 -------------
