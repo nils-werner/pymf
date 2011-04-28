@@ -19,6 +19,9 @@ import numpy as np
 
 from dist import *
 from aa import AA
+from nmf import NMF
+#from pca import PCA
+from svd import pinv
 from kmeans import Kmeans
 
 __all__ = ["GMAP"]
@@ -93,6 +96,27 @@ class GMAP(AA):
         
     def init_w(self):
         self.W = np.zeros((self._data_dimension, self._num_bases))
+           
+    def update_h(self):
+        print self._method
+        if self._method == 'pca':
+           #mdl = PCA(self.data, num_bases=self._num_bases)
+           #mdl.W = self.W
+           #mdl.factorize(compute_w=False)
+           self.H = np.dot(pinv(self.W), self.data)
+               
+        if self._method == 'nmf':
+            mdl = NMF(self.data, num_bases=self._num_bases)
+            mdl.W = self.W
+            mdl.factorize(compute_w=False, niter=50)
+            self.H = mdl.H.copy()
+        
+        if self._method == 'aa':
+            mdl = AA(self.data, num_bases=self._num_bases)
+            mdl.W = self.W
+            mdl.factorize(compute_w=False)
+            self.H = mdl.H.copy()
+           
            
     def update_w(self): 
         """ compute new W """     
@@ -175,6 +199,12 @@ class GMAP(AA):
             
         # "unsort" it again to keep the correct order
         self.W = self.W[:, np.argsort(np.argsort(self.select))]
+    
+        # if the method is either "pca" or "nmf" normalize vectors to
+        # unit length
+        if self._method == "pca" or self._method == "nmf":
+            no = np.sqrt(np.sum(self.W**2.0, axis=0))
+            self.W = self.W/no
     
     def factorize(self, show_progress=False, compute_w=True, compute_h=True,
                   compute_err=True, robust_cluster=3, niter=1, robust_nselect=-1):

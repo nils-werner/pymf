@@ -76,10 +76,7 @@ class SIVM(AA):
     
     The result is a set of coefficients sivm_mdl.H, s.t. data = W * sivm_mdl.H.
     """
-    
-    # always overwrite the default number of iterations
-    # -> any value other does not make sense.
-    _NITER = 1
+
 
     def __init__(self, data, num_bases=4, dist_measure='l2',  init='fastmap'):
        
@@ -106,8 +103,8 @@ class SIVM(AA):
                 
         elif self._dist_measure == 'kl':
             self._distfunc = kl_divergence    
-
-  
+            
+            
     def _distance(self, idx):
         """ compute distances of a specific data point to all other samples"""
             
@@ -168,6 +165,7 @@ class SIVM(AA):
             d = self._distance(cur_p)
             self._maxd = np.max(d)
             self.select.append(cur_p)         
+        
         
     def update_w(self): 
         """ compute new W """        
