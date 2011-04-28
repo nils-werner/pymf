@@ -15,6 +15,7 @@ Applications. ICDM 2007
 """
 
 __version__ = "$Revision$"
+# $Source$
 
 import numpy as np
 from nmf import NMF

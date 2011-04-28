@@ -15,6 +15,7 @@ PyMF Archetypal Analysis [1]
 """
 
 __version__ = "$Revision$"
+# $Source$
 
 import numpy as np
 from dist import vq

@@ -14,6 +14,7 @@ PyMF Singular Value Decomposition.
 """
 
 __version__ = "$Revision$"
+# $Source$
 
 
 from numpy.linalg import eigh

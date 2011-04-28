@@ -18,6 +18,7 @@ PyMF several distance functions
 """
 
 __version__ = "$Revision$"
+# $Source$
 
 import numpy as np
 import scipy.sparse

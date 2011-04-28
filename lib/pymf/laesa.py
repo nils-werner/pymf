@@ -10,6 +10,7 @@ PyMF LAESA
 """
 
 __version__ = "$Revision$"
+# $Source$
 
 import scipy.sparse
 import numpy as np

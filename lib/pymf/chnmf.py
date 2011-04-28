@@ -16,6 +16,7 @@ Factorization in the Wild. ICDM 2009.
 """
 
 __version__ = "$Revision$"
+# $Source$
 
 import numpy as np
 

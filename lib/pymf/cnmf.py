@@ -15,6 +15,7 @@ IEEE Trans. on Pattern Analysis and Machine Intelligence 32(1), 45-55.
 """
 
 __version__ = "$Revision$"
+# $Source$
 
 import numpy as np
 import logging

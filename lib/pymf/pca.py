@@ -12,6 +12,7 @@ PyMF Principal Component Analysis.
 """
 
 __version__ = "$Revision$"
+# $Source$
 
 
 import numpy as np

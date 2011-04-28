@@ -15,6 +15,7 @@ Sparse Graphs, in Proc. SIAM Int. Conf. on Data Mining.
 """
 
 __version__ = "$Revision$"
+# $Source$
 
 import numpy as np
 from cur import CUR

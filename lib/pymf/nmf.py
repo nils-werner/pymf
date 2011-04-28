@@ -15,6 +15,7 @@ Matrix Factorization, Nature 401(6755), 788-799.
 """
 
 __version__ = "$Revision$"
+# $Source$
 
 import numpy as np
 import logging

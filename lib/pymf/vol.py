@@ -14,6 +14,7 @@ PyMF functions for computing matrix/simplex volumes
 """
 
 __version__ = "$Revision$"
+# $Source$
 
 import numpy as np
 from scipy import factorial

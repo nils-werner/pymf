@@ -12,6 +12,7 @@ PyMF Geometric-Map
 """
 
 __version__ = "$Revision$"
+# $Source$
 
 import scipy.sparse
 import numpy as np

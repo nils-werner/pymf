@@ -10,6 +10,7 @@ Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL)
 '''
 
 __version__ = "$Revision$"
+# $Source$
 
 import numpy as np
 from scipy.sparse import issparse

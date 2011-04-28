@@ -15,6 +15,7 @@ a Compressed Approixmate Matrix Decomposition', SIAM J. Computing 36(1), 184-206
 """
 
 __version__ = "$Revision$"
+# $Source$
 
 import numpy as np
 import scipy.sparse
