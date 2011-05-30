@@ -116,16 +116,17 @@ class SVD():
             AA = np.dot(self.data[:,:], self.data[:,:].T)
             values, u_vectors = eigh(AA)            
                       
-            # get rid of too low eigenvalues            
-            u_vectors = u_vectors[:, values > self._EPS] 
-            values = values[values > self._EPS]                            
+            # get rid of too low eigenvalues
+            s = np.where(values > self._EPS)[0]
+            u_vectors = u_vectors[:, s] 
+            values = values[values > s]                            
                      
             # sort eigenvectors according to largest value
-            idx = np.argsort(values)
-            values = values[idx[::-1]]
+            idx = np.argsort(values)[::-1]
+            values = values[idx]
 
             # argsort sorts in ascending order -> access is backwards
-            self.U = u_vectors[:,idx[::-1]]            
+            self.U = u_vectors[:,idx]            
             if self._k > 0:
                 self.U = self.U[:,:self._k]
                 values = values[:self._k]
@@ -146,8 +147,9 @@ class SVD():
            
             
             # get rid of too low eigenvalues
-            v_vectors = v_vectors[:, values > self._EPS] 
-            values = values[values > self._EPS]
+            s = np.where(values > self._EPS)[0]
+            v_vectors = v_vectors[:, s] 
+            values = values[s]
             
             # sort eigenvectors according to largest value
             # argsort sorts in ascending order -> access is backwards
@@ -158,7 +160,7 @@ class SVD():
             if self._k > 0:
                 Vtmp = Vtmp[:,:self._k]
                 values = values[:self._k]
-                
+            
             # compute S
             self.S = np.diag(np.sqrt(values))
             
@@ -185,15 +187,11 @@ class SVD():
                     values, u_vectors = linalg.eigen_symmetric(AA,k=k)
             else:                
                 values, u_vectors = eigh(AA.todense())
-                    
-            # get rid of too low eigenvalues
-            # invert negative eigenvalues
-            s = np.where(values < 0)  
-            values[s] = values[s] * -1.0
-            u_vectors[:,s] = u_vectors[:,s] * -1.0
             
-            u_vectors = u_vectors[:, values > self._EPS] 
-            values = values[values > self._EPS]
+            # get rid of negative/too low eigenvalues   
+            s = np.where(values > self._EPS)[0]
+            u_vectors = u_vectors[:, s] 
+            values = values[s]
             
             # sort eigenvectors according to largest value
             # argsort sorts in ascending order -> access is backwards
@@ -215,9 +213,9 @@ class SVD():
             self.V = S_inv * self.V
     
         def _sparse_left_svd():        
-            # for some reasons arpack does not allow computation of rank(A) eigenvectors (??)        
+            # for some reasons arpack does not allow computation of rank(A) eigenvectors (??)
             AA = self.data.transpose()*self.data
-
+    
             if self.data.shape[1] > 1:                
                 # do not compute full rank if desired
                 if self._k > 0 and self._k < AA.shape[1]-1:
@@ -225,21 +223,19 @@ class SVD():
                 else:
                     k = self.data.shape[1]-1
                 
-                if scipy.version.version == '0.9.0':
-                    values, v_vectors = linalg.eigsh(AA,k=k)
+                if scipy.version.version == '0.9.0':                    
+                    values, v_vectors = linalg.eigsh(AA,k=k)                    
                 else:
                     values, v_vectors = linalg.eigen_symmetric(AA,k=k)
                                     
             else:                
                 values, v_vectors = eigh(AA.todense())    
-
-            # get rid of negative/too low eigenvalues
-            # invert negative eigenvalues
-            s = np.where(values < 0)  
-            values[s] = values[s] * -1
-            v_vectors[:,s] = v_vectors[:,s] * -1.0
-            v_vectors = v_vectors[:, values > self._EPS] 
-            values = values[values > self._EPS]
+           
+            
+            # get rid of negative/too low eigenvalues   
+            s = np.where(values > self._EPS)[0]
+            v_vectors = v_vectors[:, s] 
+            values = values[s]
             
             # sort eigenvectors according to largest value
             idx = np.argsort(values)[::-1]                  
@@ -257,8 +253,7 @@ class SVD():
             S_inv = scipy.sparse.spdiags(1.0/tmp_val, 0, l, l,format='csc')
             
             self.U = self.data * self.V * S_inv        
-            self.V = self.V.transpose()
-    
+            self.V = self.V.transpose()           
         
         if self._rows >= self._cols:
             if scipy.sparse.issparse(self.data):                
