@@ -119,7 +119,7 @@ class SVD():
             # get rid of too low eigenvalues
             s = np.where(values > self._EPS)[0]
             u_vectors = u_vectors[:, s] 
-            values = values[values > s]                            
+            values = values[s]                            
                      
             # sort eigenvectors according to largest value
             idx = np.argsort(values)[::-1]
