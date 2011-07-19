@@ -70,9 +70,9 @@ class NMF():
     """
     
     # some small value
-    _EPS = 10**-8
+    _EPS = np.finfo(float).eps
     
-    def __init__(self, data, num_bases=4):
+    def __init__(self, data, num_bases=4, **kwargs):
         
         def setup_logging():
             # create logger       
@@ -108,10 +108,14 @@ class NMF():
         Returns:
             frobenius norm: F = ||data - WH||
         """
-
         # check if W and H exist
         if hasattr(self,'H') and hasattr(self,'W') and not scipy.sparse.issparse(self.data):
             err = np.sqrt( np.sum((self.data[:,:] - np.dot(self.W, self.H))**2 ))
+            
+        elif hasattr(self,'H') and hasattr(self,'W') and scipy.sparse.issparse(self.data):
+            tmp = self.data[:,:] - (self.W * self.H)
+            tmp = tmp.multiply(tmp).sum()
+            err = np.sqrt(tmp)
         else:
             err = -123456
 
@@ -134,6 +138,7 @@ class NMF():
             W2 = np.dot(np.dot(self.W, self.H), self.H.T) + 10**-9
             self.W *= np.dot(self.data[:,:], self.H.T)
             self.W /= W2
+            self.W = self.W/np.sqrt(np.sum(self.W**2.0, axis=0))
 
     def converged(self, i):
         derr = np.abs(self.ferr[i] - self.ferr[i-1])/self._num_samples
@@ -142,7 +147,7 @@ class NMF():
         else:
             return False
 
-    def factorize(self, niter=1, show_progress=False, 
+    def factorize(self, niter=100, show_progress=False, 
                   compute_w=True, compute_h=True, compute_err=True):
         """ Factorize s.t. WH = data
             
@@ -174,10 +179,10 @@ class NMF():
         
         # create W and H if they don't already exist
         # -> any custom initialization to W,H should be done before
-        if not hasattr(self,'W'):
+        if not hasattr(self,'W') and compute_w:
                self.init_w()
                
-        if not hasattr(self,'H'):
+        if not hasattr(self,'H') and compute_h:
                 self.init_h()                   
 
         if compute_err:

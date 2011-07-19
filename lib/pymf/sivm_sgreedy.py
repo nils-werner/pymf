@@ -61,10 +61,6 @@ class SIVM_SGREEDY(SIVM_SEARCH):
         The distance measure for finding the next best candidate that 
         maximizes the simplex volume ['l2','l1','cosine','sparse_graph_l2']
         'l2' (default)
-    optimize_lower_bound: bool, optional
-        Use the alternative selection criterion that optimizes the lower
-        bound (see [1])
-        False (default)
     
     Attributes
     ----------

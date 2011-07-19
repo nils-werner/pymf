@@ -29,7 +29,7 @@ except (ImportError, AttributeError):
 
 import numpy as np
 
-def pinv(A, k=-1, eps=10**-8):    
+def pinv(A, k=-1, eps= np.finfo(float).eps):    
     # Compute Pseudoinverse of a matrix   
     svd_mdl =  SVD(A, k=k)
     svd_mdl.factorize()
@@ -75,7 +75,7 @@ class SVD():
     >>> svd_mdl.factorize()
     """
     
-    _EPS=10**-8
+    _EPS = np.finfo(float).eps
     
     def __init__(self, data, k=-1, rrank=0, crank=0):
         self.data = data

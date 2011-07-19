@@ -70,7 +70,7 @@ class PCA(NMF):
     The result is a set of coefficients pca_mdl.H, s.t. data = W * pca_mdl.H.
     """
         
-    def __init__(self, data, num_bases=0, center_mean=True):
+    def __init__(self, data, num_bases=0, center_mean=True,  **kwargs):
 
         NMF.__init__(self, data, num_bases=num_bases)
         

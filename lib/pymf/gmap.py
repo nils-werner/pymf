@@ -78,10 +78,6 @@ class GMAP(AA):
     
     The result is a set of coefficients gmap_mdl.H, s.t. data = W * gmap_mdl.H.
     """
-    
-    # always overwrite the default number of iterations
-    # -> any value other does not make sense.
-    _NITER = 1
 
     def __init__(self, data, num_bases=4, method='pca', robust_map=True):
        
@@ -100,9 +96,6 @@ class GMAP(AA):
     def update_h(self):
         print self._method
         if self._method == 'pca':
-           #mdl = PCA(self.data, num_bases=self._num_bases)
-           #mdl.W = self.W
-           #mdl.factorize(compute_w=False)
            self.H = np.dot(pinv(self.W), self.data)
                
         if self._method == 'nmf':
@@ -204,7 +197,7 @@ class GMAP(AA):
         # unit length
         if self._method == "pca" or self._method == "nmf":
             no = np.sqrt(np.sum(self.W**2.0, axis=0))
-            self.W = self.W/no
+            self.W /= no
     
     def factorize(self, show_progress=False, compute_w=True, compute_h=True,
                   compute_err=True, robust_cluster=3, niter=1, robust_nselect=-1):

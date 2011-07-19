@@ -54,7 +54,7 @@ class NMFNNLS(NMF):
     
     >>> import numpy as np
     >>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
-    >>> nmf_mdl = NMFALS(data, num_bases=2)
+    >>> nmf_mdl = NMFNNLS(data, num_bases=2)
     >>> nmf_mdl.factorize(niter=10)
     
     The basis vectors are now stored in nmf_mdl.W, the coefficients in nmf_mdl.H. 
@@ -63,7 +63,7 @@ class NMFNNLS(NMF):
     
     >>> data = np.array([[1.5], [1.2]])
     >>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-    >>> nmf_mdl = NMFALS(data, num_bases=2)
+    >>> nmf_mdl = NMFNNLS(data, num_bases=2)
     >>> nmf_mdl.W = W
     >>> nmf_mdl.factorize(niter=1, compute_w=False)
     

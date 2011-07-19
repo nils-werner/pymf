@@ -8,7 +8,7 @@
 """ 
 PyMF Simplex Volume Maximization [1]
 
-    SIVM_GSAT: class for gsat-SiVM
+    SIVM_GSAT: class for GSAT-SIVM
 
 [1] C. Thurau, K. Kersting, and C. Bauckhage. Yes We Can - Simplex Volume 
 Maximization for Descriptive Web-Scale Matrix Factorization. In Proc. Int. 
@@ -28,7 +28,7 @@ __all__ = ["SIVM_GSAT"]
 
 class SIVM_GSAT(SIVM):
     """      
-    SIVM(data, num_bases=4, dist_measure='l2')
+    SIVM_GSAT(data, num_bases=4, dist_measure='l2')
     
     
     Simplex Volume Maximization. Factorize a data matrix into two matrices s.t.

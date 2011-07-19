@@ -78,7 +78,7 @@ class SIVM(AA):
     """
 
 
-    def __init__(self, data, num_bases=4, dist_measure='l2',  init='fastmap'):
+    def __init__(self, data, num_bases=4, dist_measure='l2',  init='fastmap',  **kwargs):
        
         AA.__init__(self, data, num_bases=num_bases)
             
@@ -157,19 +157,18 @@ class SIVM(AA):
                 
             # store maximal found distance -> later used for "a" (->update_w) 
             self._maxd = np.max(d)                        
-            self.select.append(cur_p)
+            self.select = [cur_p]
 
         elif self._init == 'origin':
             # set first vertex to origin
             cur_p = -1
             d = self._distance(cur_p)
             self._maxd = np.max(d)
-            self.select.append(cur_p)         
+            self.select = [np.argmax(d)]
         
         
     def update_w(self): 
         """ compute new W """        
-        EPS = 10**-8
         self.init_sivm()       
         
         # initialize some of the recursively updated distance measures ....
@@ -184,7 +183,7 @@ class SIVM(AA):
             d = self._distance(self.select[l-1])
             
             # take the log of d (sually more stable that d)
-            d = np.log(d + EPS)            
+            d = np.log(d + self._EPS)            
             
             d_i_times_d_j += d * d_sum
             d_sum += d

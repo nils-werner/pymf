@@ -8,7 +8,7 @@
 """
 PyMF CUR Decomposition [1]
 
-    CUR(SVD) : Class for CUR Decomposition
+    CUR(SVD) : Class for CUR Decomposition (uses an l2-norm based sampling)
 
 [1] Drineas, P., Kannan, R. and Mahoney, M. (2006), 'Fast Monte Carlo Algorithms III: Computing 
 a Compressed Approixmate Matrix Decomposition', SIAM J. Computing 36(1), 184-206.
@@ -49,7 +49,7 @@ class CUR(SVD):
     
     Attributes
     ----------
-        U,S,V : submatrices s.t. data = USV        
+        U,S,V : submatrices s.t. data = USV (or _C _U _R)
     
     Example
     -------

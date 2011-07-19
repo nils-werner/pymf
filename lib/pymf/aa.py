@@ -18,7 +18,6 @@ __version__ = "$Revision$"
 # $Source$
 
 import numpy as np
-from dist import vq
 from cvxopt import solvers, base
 
 from svd import pinv
@@ -95,7 +94,7 @@ class AA(NMF):
         self.W = np.random.random((self._data_dimension, self._num_bases))        
         
     def update_h(self):
-        """ alternating least squares step, update H under the convexity
+        """ alternating least squares step, update H enforcing a convexity
         constraint """
         def update_single_h(i):
             """ compute single H[:,i] """
@@ -115,11 +114,11 @@ class AA(NMF):
             update_single_h(i)        
 
     def update_w(self):
-        """ alternating least squares step, update W under the convexity
+        """ alternating least squares step, update W enforcing a convexity
         constraint """
         def update_single_w(i):
             """ compute single W[:,i] """
-            # optimize beta     using qp solver from cvxopt
+            # optimize beta using qp solver from cvxopt
             FB = base.matrix(np.float64(np.dot(-self.data.T, W_hat[:,i])))
             be = solvers.qp(HB, FB, INQa, INQb, EQa, EQb)
             self.beta[i,:] = np.array(be['x']).reshape((1, self._num_samples))

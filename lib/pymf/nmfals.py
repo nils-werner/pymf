@@ -27,7 +27,7 @@ __all__ = ["NMFALS"]
 
 class NMFALS(NMF):
     """      
-    NMF(data, num_bases=4)
+    NMFALS(data, num_bases=4)
     
     
     Non-negative Matrix Factorization. Factorize a data matrix into two matrices 

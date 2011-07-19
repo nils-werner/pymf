@@ -51,6 +51,7 @@ class SIVM_SEARCH(SIVM):
         'fastmap' or 'origin'. Sets the method used for finding the very first 
         basis vector. 'Origin' assumes the zero vector, 'Fastmap' picks one of 
         the two vectors that have the largest pairwise distance.
+        
     Attributes
     ----------
     W : "data_dimension x num_bases" matrix of basis vectors
