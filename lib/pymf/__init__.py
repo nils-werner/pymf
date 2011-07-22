@@ -14,6 +14,8 @@ __version__ = "$Revision$"
 
 # Non-negative matrix factorization (using the standard multiplicative update rule)
 from .nmf import *
+from .rnmf import *
+from .nmfimsparse import *
 # NMF with an alternating least squares optimization
 from .nmfals import *
 # NMF with non-negative least squares optimization
@@ -32,6 +34,8 @@ from .laesa import *
 from .bnmf import *
 # Singular value decomposition
 from .svd import *
+# Non-negative Double Singular Value Decompositions
+from .nndsvd import *
 # Principal component analysis
 from .pca import *
 # CUR decomposition (using norm-based sampling)

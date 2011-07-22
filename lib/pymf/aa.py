@@ -3,7 +3,7 @@
 # Copyright (C) Christian Thurau, 2010.
 # Licensed under the GNU General Public License (GPL).
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: aa.py 21 2010-08-05 08:13:08Z cthurau $
+#$Id$
 #$Author$
 """
 PyMF Archetypal Analysis [1]

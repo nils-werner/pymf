@@ -3,7 +3,7 @@
 # Copyright (C) Christian Thurau, 2010.
 # Licensed under the GNU General Public License (GPL).
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: nmf.py 20 2010-08-02 17:35:19Z cthurau $
+#$Id$
 #$Author$
 """
 PyMF Non-negative Matrix Factorization.
@@ -101,6 +101,13 @@ class NMF():
         (self._data_dimension, self._num_samples) = self.data.shape
         
 
+    def residual(self):
+        """ Returns the residual in % of the total amount of data """
+        
+        res = np.sum(np.abs(self.data - np.dot(self.W, self.H)))
+        total = 100.0*res/np.sum(np.abs(self.data))
+        return total
+        
     def frobenius_norm(self):
         """ Frobenius norm (||data - WH||) of a data matrix and a low rank
         approximation given by WH
@@ -110,8 +117,7 @@ class NMF():
         """
         # check if W and H exist
         if hasattr(self,'H') and hasattr(self,'W') and not scipy.sparse.issparse(self.data):
-            err = np.sqrt( np.sum((self.data[:,:] - np.dot(self.W, self.H))**2 ))
-            
+            err = np.sqrt( np.sum((self.data[:,:] - np.dot(self.W, self.H))**2 ))            
         elif hasattr(self,'H') and hasattr(self,'W') and scipy.sparse.issparse(self.data):
             tmp = self.data[:,:] - (self.W * self.H)
             tmp = tmp.multiply(tmp).sum()
@@ -138,7 +144,7 @@ class NMF():
             W2 = np.dot(np.dot(self.W, self.H), self.H.T) + 10**-9
             self.W *= np.dot(self.data[:,:], self.H.T)
             self.W /= W2
-            self.W = self.W/np.sqrt(np.sum(self.W**2.0, axis=0))
+            self.W /= np.sqrt(np.sum(self.W**2.0, axis=0))
 
     def converged(self, i):
         derr = np.abs(self.ferr[i] - self.ferr[i-1])/self._num_samples
@@ -196,9 +202,9 @@ class NMF():
                 self.update_h()                                        
          
             if compute_err:                 
-                self.ferr[i] = self.frobenius_norm()
+                self.ferr[i] = self.frobenius_norm()                
                 self._logger.info('Iteration ' + str(i+1) + '/' + str(niter) + 
-                ' FN:' + str(self.ferr[i]))
+                ' FN:' + str(self.ferr[i]) + ' Res %:' + str(self.residual()))
             else:                
                 self._logger.info('Iteration ' + str(i+1) + '/' + str(niter))
            

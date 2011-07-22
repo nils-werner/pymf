@@ -3,7 +3,7 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: pca.py 20 2010-08-02 17:35:19Z cthurau $
+#$Id$
 #$Author$
 """  
 PyMF Principal Component Analysis.

@@ -3,7 +3,7 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: sivm.py 22 2010-08-13 11:16:43Z cthurau $
+#$Id$
 #$Author$
 """ 
 PyMF Geometric-Map
