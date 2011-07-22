@@ -15,7 +15,7 @@ PyMF Archetypal Analysis [1]
 """
 
 __version__ = "$Revision$"
-# $Source$
+# $HeadURL$
 
 import numpy as np
 from cvxopt import solvers, base
