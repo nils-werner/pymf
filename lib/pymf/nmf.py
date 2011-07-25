@@ -97,7 +97,7 @@ class NMF():
         self._num_bases = num_bases             
       
         # initialize H and W to random values
-        (self._data_dimension, self._num_samples) = self.data.shape
+        self._data_dimension, self._num_samples = self.data.shape
         
 
     def residual(self):

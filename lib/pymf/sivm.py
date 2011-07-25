@@ -139,7 +139,9 @@ class SIVM(AA):
     def init_h(self):
         self.H = np.zeros((self._num_bases, self._num_samples))
         
-    def init_w(self):
+    def init_w(self):        
+        print "dd:", self._data_dimension
+        print "nd:", self._num_bases
         self.W = np.zeros((self._data_dimension, self._num_bases))
         
     def init_sivm(self):
