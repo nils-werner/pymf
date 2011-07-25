@@ -4,7 +4,6 @@
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
 #$Id$
-#$Author$
 """
 PyMF Non-negative Matrix Factorization.
 
@@ -16,7 +15,7 @@ Matrix Factorization, Nature 401(6755), 788-799.
 """
 
 __version__ = "$Revision$"
-# $Source$
+# $HeadURL$
 
 
 import scipy.optimize

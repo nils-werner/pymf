@@ -4,7 +4,6 @@
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
 #$Id$
-#$Author$
 """      
 PyMF Convex Hull Non-negative Matrix Factorization [1]
     
@@ -16,7 +15,7 @@ Factorization in the Wild. ICDM 2009.
 """
 
 __version__ = "$Revision$"
-# $Source$
+# $HeadURL$
 
 import numpy as np
 

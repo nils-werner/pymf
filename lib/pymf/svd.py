@@ -4,7 +4,6 @@
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
 #$Id$
-#$Author$
 """  
 PyMF Singular Value Decomposition.
 
@@ -14,7 +13,7 @@ PyMF Singular Value Decomposition.
 """
 
 __version__ = "$Revision$"
-# $Source$
+# $HeadURL$
 
 
 from numpy.linalg import eigh

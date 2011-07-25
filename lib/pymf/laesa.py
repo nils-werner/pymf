@@ -4,13 +4,12 @@
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
 #$Id$
-#$Author$
 """ 
 PyMF LAESA
 """
 
 __version__ = "$Revision$"
-# $Source$
+# $HeadURL$
 
 import scipy.sparse
 import numpy as np

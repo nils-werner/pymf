@@ -4,7 +4,6 @@
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
 #$Id$
-#$Author$
 """
 PyMF CUR Decomposition [1]
 
@@ -15,7 +14,7 @@ a Compressed Approixmate Matrix Decomposition', SIAM J. Computing 36(1), 184-206
 """
 
 __version__ = "$Revision$"
-# $Source$
+# $HeadURL$
 
 import numpy as np
 import scipy.sparse

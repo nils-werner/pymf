@@ -4,9 +4,6 @@
 # Licensed under the GNU General Public License (GPL).
 # http://www.gnu.org/licenses/gpl.txt
 #$Id$
-#$Author$
-#$Date$
-
 """
 PyMF Non-negative Double Singular Value Decompositions.
 
@@ -17,7 +14,7 @@ start for nonnegative matrix factorization, Pattern Recognition, 41, 1350-1362
 """
 
 __version__ = "$Revision$"
-# $Source$
+# $HeadURL$
 
 import numpy as np
 

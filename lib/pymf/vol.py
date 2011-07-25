@@ -4,7 +4,6 @@
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
 #$Id$
-#$Author$
 """
 PyMF functions for computing matrix/simplex volumes
 
@@ -14,7 +13,7 @@ PyMF functions for computing matrix/simplex volumes
 """
 
 __version__ = "$Revision$"
-# $Source$
+# $HeadURL$
 
 import numpy as np
 from scipy import factorial

@@ -4,7 +4,6 @@
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
 #$Id$
-#$Author$
 """  
 PyMF Principal Component Analysis.
 
@@ -12,7 +11,7 @@ PyMF Principal Component Analysis.
 """
 
 __version__ = "$Revision$"
-# $Source$
+# $HeadURL$
 
 
 import numpy as np

@@ -4,7 +4,6 @@
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
 #$Id$
-#$Author$
 """
 PyMF Binary Matrix Factorization [1]
 
@@ -15,7 +14,7 @@ Applications. ICDM 2007
 """
 
 __version__ = "$Revision$"
-# $Source$
+# $HeadURL$
 
 import numpy as np
 from nmf import NMF

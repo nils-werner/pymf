@@ -4,7 +4,6 @@
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
 #$Id$
-#$Author$
 """  
 PyMF Matrix sampling methods
 
@@ -15,7 +14,7 @@ Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL).
 """
 
 __version__ = "$Revision$"
-# $Source$
+# $HeadURL$
 
 
 import numpy as np

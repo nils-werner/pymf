@@ -4,7 +4,6 @@
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
 #$Id$
-#$Author$
 """      
 PyMF Convex Matrix Factorization [1]
 
@@ -15,7 +14,7 @@ IEEE Trans. on Pattern Analysis and Machine Intelligence 32(1), 45-55.
 """
 
 __version__ = "$Revision$"
-# $Source$
+# $HeadURL$
 
 import numpy as np
 import logging

@@ -4,7 +4,6 @@
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
 #$Id$
-#$Author$
 """  
 PyMF CUR-like Sparse Column Based Matrix Reconstruction via Greedy Approximation[1]
 
@@ -17,7 +16,7 @@ Reconstruction via Greedy Approximation of SVD. ISAAC'2008.
 """
 
 __version__ = "$Revision$"
-
+# $HeadURL$
 
 import numpy as np
 from greedy import GREEDY

@@ -4,7 +4,6 @@
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
 #$Id$
-#$Author$
 """ 
 PyMF GREEDY[1]
 
@@ -16,6 +15,7 @@ Reconstruction via Greedy Approximation of SVD. ISAAC'2008.
 """
 
 __version__ = "$Revision$"
+# $HeadURL$
 
 import time
 import scipy.sparse

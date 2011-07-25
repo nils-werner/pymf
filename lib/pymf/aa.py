@@ -4,7 +4,6 @@
 # Licensed under the GNU General Public License (GPL).
 # http://www.gnu.org/licenses/gpl.txt
 #$Id$
-#$Author$
 """
 PyMF Archetypal Analysis [1]
 

@@ -3,14 +3,13 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-
 '''pymf is a package for several Matrix Factorization variants.-
 Detailed documentation is available at http://pymf.googlecode.com
 Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL)
 '''
 
 __version__ = "$Revision$"
-# $Source$
+# $HeadURL$
 
 # Non-negative matrix factorization (using the standard multiplicative update rule)
 from .nmf import *
