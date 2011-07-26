@@ -14,7 +14,7 @@ __version__ = "$Revision$"
 # Non-negative matrix factorization (using the standard multiplicative update rule)
 from .nmf import *
 from .rnmf import *
-from .nmfimsparse import *
+#from .nmfimsparse import *
 # NMF with an alternating least squares optimization
 from .nmfals import *
 # NMF with non-negative least squares optimization
