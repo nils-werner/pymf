@@ -203,7 +203,7 @@ class NMF():
             if compute_err:                 
                 self.ferr[i] = self.frobenius_norm()                
                 self._logger.info('Iteration ' + str(i+1) + '/' + str(niter) + 
-                ' FN:' + str(self.ferr[i]) + ' Res %:' + str(self.residual()))
+                ' FN:' + str(self.ferr[i]))
             else:                
                 self._logger.info('Iteration ' + str(i+1) + '/' + str(niter))
            
