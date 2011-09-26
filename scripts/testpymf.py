@@ -36,10 +36,10 @@ def test_svd(A, func, desc, marker):
     return m
 
 
-def test(A, func, desc, marker, niter=20, num_bases=4):
+def test(A, func, desc, marker, niter=10, num_bases=3):
     stime = time.time()
     m = func(A, num_bases=num_bases)
-    m.factorize(show_progress=True, niter=niter)   
+    m.factorize(show_progress=False, niter=niter)   
     
     print desc + ': Fro.:', m.ferr[-1]/(A.shape[0] + A.shape[1]) , ' elapsed:' , time.time() - stime
 
@@ -47,12 +47,12 @@ def test(A, func, desc, marker, niter=20, num_bases=4):
     m.factorize(show_progress=False, compute_h=False, niter=niter) 
     m.factorize(show_progress=False, compute_w=False, niter=niter)
     m.factorize(show_progress=False, compute_err=False, niter=niter)
-    m.factorize(show_progress=True, niter=20)
+    m.factorize(show_progress=False, niter=20)
     print desc + ' additional tests - elapsed:' , time.time() - stime
     
 print "test all methods on boring random data..."
 np.random.seed(400401) # VS for repeatability of experiments/tests
-A = np.random.random((3,50)) + 2.0
+A = np.random.random((4,50)) + 2.0
 B = scipy.sparse.csc_matrix(A)
 # test pseudoinverse
 pymf.pinv(A)
@@ -68,8 +68,12 @@ svdm = test_svd(A.T, pymf.SVD, 'Singula Value Decomposition (SVD)', 'c<')
 svdm = test_svd(B, pymf.SVD, 'svd sparse', 'c<')
 curm = test_svd(A, pymf.CUR, 'CUR Matrix Decomposition', 'b<')
 curm = test_svd(B, pymf.CUR, 'CUR Matrix Decomposition (sparse data)', 'b<')
+curm = test_svd(A, pymf.CURSL, 'CUR SL Matrix Decomposition', 'b<')
+curm = test_svd(B, pymf.CURSL, 'CUR SL Matrix Decomposition (sparse data)', 'b<')
 cmdm = test_svd(A, pymf.CMD, 'Compact Matrix Decomposition (CMD)', 'm<')
 cmdm = test_svd(B, pymf.CMD, 'Compact Matrix Decomposition (CMD - sparse data)', 'm<')
+cmdm = test_svd(A, pymf.GREEDYCUR, 'Greedy CUR (GREEDYCUR)', 'm<')
+cmdm = test_svd(B, pymf.GREEDYCUR, 'Greedy CUR (GREEDYCUR - sparse data)', 'm<')
 sparse_svmcur = test_svd(A, pymf.SIVM_CUR, 'Simplex Volume Maximization f. CUR (SIVMCUR)', 'm<')
 svmcur = test_svd(A, pymf.SIVM_CUR, 'Simplex Volume Maximization f. CUR (SIVMCUR)', 'm<')
 
@@ -79,6 +83,8 @@ m = test(A, pymf.NMFALS, 'NMF u. alternating least squares (NMFALS)', 'rs', nite
 m = test(A, pymf.NMFNNLS, 'NMF u. non-neg. least squares (NMFNNLS)', 'rs', niter=10)
 m = test(A, pymf.LAESA, 'Linear Approximating Eliminating Search Algorithm (LAESA)', 'rs')
 m = test(A, pymf.SIVM, 'Simplex Volume Maximization (SIVM)', 'bs')
+m = test(A, pymf.GREEDY, 'Greedy Volume Max. (GREEDY)', 'bs')
+m = test(B, pymf.GREEDY, 'Greedy Volume Max. (GREEDY)', 'bs')
 m = test(A, pymf.Kmeans, 'K-means clustering (Kmeans)', 'b*')
 m = test(A, pymf.Cmeans, 'C-means clustering (Cmeans)', 'b*')
 m = test(A, pymf.AA, 'Archetypal Analysis (AA)', 'bs')
