@@ -3,18 +3,19 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id$
+#$Id: cur.py 24 2010-09-01 07:51:05Z cthurau $
+#$Author: cthurau $
 """
 PyMF CUR Decomposition [1]
 
-    CUR(SVD) : Class for CUR Decomposition (uses an l2-norm based sampling)
+    CUR(SVD) : Class for CUR Decomposition
 
 [1] Drineas, P., Kannan, R. and Mahoney, M. (2006), 'Fast Monte Carlo Algorithms III: Computing 
 a Compressed Approixmate Matrix Decomposition', SIAM J. Computing 36(1), 184-206.
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
+__version__ = "$Revision: 46 $"
+# $Source$
 
 import numpy as np
 import scipy.sparse
@@ -48,7 +49,7 @@ class CUR(SVD):
     
     Attributes
     ----------
-        U,S,V : submatrices s.t. data = USV (or _C _U _R)
+        U,S,V : submatrices s.t. data = USV        
     
     Example
     -------

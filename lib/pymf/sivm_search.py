@@ -3,7 +3,8 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id$
+#$Id: sivm.py 22 2010-08-13 11:16:43Z cthurau $
+#$Author: cthurau $
 """ 
 PyMF Simplex Volume Maximization [1]
 
@@ -14,13 +15,15 @@ Maximization for Descriptive Web-Scale Matrix Factorization. In Proc. Int.
 Conf. on Information and Knowledge Management. ACM. 2010.
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
+__version__ = "$Revision: 45 $"
+# $Source$
 
 import scipy.sparse
 import numpy as np
+from scipy import inf
+from scipy.misc.common import factorial
 
-from dist import pdist
+from dist import *
 from vol import *
 from sivm import SIVM
 
@@ -50,7 +53,6 @@ class SIVM_SEARCH(SIVM):
         'fastmap' or 'origin'. Sets the method used for finding the very first 
         basis vector. 'Origin' assumes the zero vector, 'Fastmap' picks one of 
         the two vectors that have the largest pairwise distance.
-        
     Attributes
     ----------
     W : "data_dimension x num_bases" matrix of basis vectors
@@ -80,8 +82,7 @@ class SIVM_SEARCH(SIVM):
     """
     
     def update_w(self):
-        
-        def h(sel, D, k):
+        def h(sel,D,k):
             # compute the volume for a selection of sel columns
             # and a k-1 simplex (-> k columns have to be selected)
             mv = np.max(D)
@@ -93,7 +94,7 @@ class SIVM_SEARCH(SIVM):
             
             for idx_i,i in enumerate(sel):
                 for idx_j,j in enumerate(sel):
-                    d[idx_i,idx_j] = D[i, j]
+                    d[idx_i,idx_j] = D[i,j]
     
             return d
   
@@ -103,15 +104,16 @@ class SIVM_SEARCH(SIVM):
         
         for i in range(self._num_samples):
             # compute volume for temp selection
-            d = h([i],D,self._num_bases)           
-            Openset[tuple([i])] = cmdet(d)
+            d = h([i],D,self._num_bases)
+            Vtmp = cmdet(d)
+            Openset[tuple([i])] = Vtmp
         
         Closedset = {}
         finished = False
         self._v = []
         self.init_sivm()
         next_sel = np.array([self.select[0]])
-        niter = 0
+        iter = 0
 
         while not finished:
             # add the current selection to closedset
@@ -131,9 +133,10 @@ class SIVM_SEARCH(SIVM):
                     
                     # compute volume for temp selection
                     d = h(tmp_sel, D, self._num_bases)
-      
+                    Vtmp = cmdet(d)
+                    
                     # add to openset
-                    Openset[hkey] = cmdet(d)
+                    Openset[hkey] = Vtmp
 
             # get next best tuple
             vmax = 0.0
@@ -142,7 +145,7 @@ class SIVM_SEARCH(SIVM):
                     next_sel = k
                     vmax = v
 
-            self._logger.info('Iter:' + str(niter))
+            self._logger.info('Iter:' + str(iter))
             self._logger.info('Current selection:' + str(next_sel))
             self._logger.info('Current volume:' + str(vmax))
             self._v.append(vmax)
@@ -152,7 +155,7 @@ class SIVM_SEARCH(SIVM):
 
             if len(list(next_sel)) == self._num_bases:
                 finished = True
-            niter += 1
+            iter += 1
 
         # update some values ...
         self.select = list(next_sel)

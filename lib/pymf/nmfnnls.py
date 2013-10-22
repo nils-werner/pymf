@@ -3,7 +3,8 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id$
+#$Id: kmeans.py 20 2010-08-02 17:35:19Z cthurau $
+#$Author: cthurau $
 """
 PyMF Non-negative Matrix Factorization.
 
@@ -14,8 +15,8 @@ PyMF Non-negative Matrix Factorization.
 Matrix Factorization, Nature 401(6755), 788-799.
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
+__version__ = "$Revision: 46 $"
+# $Source$
 
 
 import scipy.optimize
@@ -53,7 +54,7 @@ class NMFNNLS(NMF):
     
     >>> import numpy as np
     >>> data = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 1.0]])
-    >>> nmf_mdl = NMFNNLS(data, num_bases=2)
+    >>> nmf_mdl = NMFALS(data, num_bases=2)
     >>> nmf_mdl.factorize(niter=10)
     
     The basis vectors are now stored in nmf_mdl.W, the coefficients in nmf_mdl.H. 
@@ -62,7 +63,7 @@ class NMFNNLS(NMF):
     
     >>> data = np.array([[1.5], [1.2]])
     >>> W = np.array([[1.0, 0.0], [0.0, 1.0]])
-    >>> nmf_mdl = NMFNNLS(data, num_bases=2)
+    >>> nmf_mdl = NMFALS(data, num_bases=2)
     >>> nmf_mdl.W = W
     >>> nmf_mdl.factorize(niter=1, compute_w=False)
     

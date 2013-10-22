@@ -3,15 +3,16 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id$
+#$Id: pca.py 20 2010-08-02 17:35:19Z cthurau $
+#$Author: cthurau $
 """  
 PyMF Principal Component Analysis.
 
     PCA: Class for Principal Component Analysis
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
+__version__ = "$Revision: 46 $"
+# $Source$
 
 
 import numpy as np
@@ -69,7 +70,7 @@ class PCA(NMF):
     The result is a set of coefficients pca_mdl.H, s.t. data = W * pca_mdl.H.
     """
         
-    def __init__(self, data, num_bases=0, center_mean=True,  **kwargs):
+    def __init__(self, data, num_bases=0, center_mean=True):
 
         NMF.__init__(self, data, num_bases=num_bases)
         

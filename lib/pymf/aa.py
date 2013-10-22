@@ -3,7 +3,8 @@
 # Copyright (C) Christian Thurau, 2010.
 # Licensed under the GNU General Public License (GPL).
 # http://www.gnu.org/licenses/gpl.txt
-#$Id$
+#$Id: aa.py 21 2010-08-05 08:13:08Z cthurau $
+#$Author: cthurau $
 """
 PyMF Archetypal Analysis [1]
 
@@ -13,10 +14,11 @@ PyMF Archetypal Analysis [1]
 338-347.
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
+__version__ = "$Revision: 46 $"
+# $Source$
 
 import numpy as np
+from dist import vq
 from cvxopt import solvers, base
 
 from svd import pinv
@@ -93,7 +95,7 @@ class AA(NMF):
         self.W = np.random.random((self._data_dimension, self._num_bases))        
         
     def update_h(self):
-        """ alternating least squares step, update H enforcing a convexity
+        """ alternating least squares step, update H under the convexity
         constraint """
         def update_single_h(i):
             """ compute single H[:,i] """
@@ -113,11 +115,11 @@ class AA(NMF):
             update_single_h(i)        
 
     def update_w(self):
-        """ alternating least squares step, update W enforcing a convexity
+        """ alternating least squares step, update W under the convexity
         constraint """
         def update_single_w(i):
             """ compute single W[:,i] """
-            # optimize beta using qp solver from cvxopt
+            # optimize beta     using qp solver from cvxopt
             FB = base.matrix(np.float64(np.dot(-self.data.T, W_hat[:,i])))
             be = solvers.qp(HB, FB, INQa, INQb, EQa, EQb)
             self.beta[i,:] = np.array(be['x']).reshape((1, self._num_samples))

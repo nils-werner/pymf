@@ -3,7 +3,8 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id$
+#$Id: sivm.py 22 2010-08-13 11:16:43Z cthurau $
+#$Author: cthurau $
 """ 
 PyMF Simplex Volume Maximization [1]
 
@@ -14,8 +15,8 @@ Maximization for Descriptive Web-Scale Matrix Factorization. In Proc. Int.
 Conf. on Information and Knowledge Management. ACM. 2010.
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
+__version__ = "$Revision: 45 $"
+# $Source$
 
 import numpy as np
 import time
@@ -60,6 +61,10 @@ class SIVM_SGREEDY(SIVM_SEARCH):
         The distance measure for finding the next best candidate that 
         maximizes the simplex volume ['l2','l1','cosine','sparse_graph_l2']
         'l2' (default)
+    optimize_lower_bound: bool, optional
+        Use the alternative selection criterion that optimizes the lower
+        bound (see [1])
+        False (default)
     
     Attributes
     ----------

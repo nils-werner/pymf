@@ -1,6 +1,5 @@
 import os
-#from distutils.core import setup
-from setuptools import setup
+from distutils.core import setup
 
 setup(name='PyMF',
       version='0.1.9',
@@ -12,6 +11,6 @@ setup(name='PyMF',
       package_dir = {'pymf': './lib/pymf'},   
       scripts=['scripts/testpymf.py',],      
       license = 'OSI Approved :: GNU General Public License (GPL)',
-      install_requires=['cvxopt'],
+      requires=['cvxopt'],
       long_description=open('README.txt').read(),
       )     

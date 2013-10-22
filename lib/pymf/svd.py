@@ -3,7 +3,8 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id$
+#$Id: svd.py 24 2010-09-01 07:51:05Z cthurau $
+#$Author: cthurau $
 """  
 PyMF Singular Value Decomposition.
 
@@ -12,12 +13,11 @@ PyMF Singular Value Decomposition.
      
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
+__version__ = "$Revision: 46 $"
+# $Source$
 
 
 from numpy.linalg import eigh
-import time
 import scipy.sparse
 
 try:
@@ -28,20 +28,21 @@ except (ImportError, AttributeError):
 
 import numpy as np
 
-def pinv(A, k=-1, eps= np.finfo(float).eps):    
-    # Compute Pseudoinverse of a matrix   
+def pinv(A, k=-1, eps=10**-8):    
+    # Compute Pseudoinverse of a matrix
+    # calculate SVD
     svd_mdl =  SVD(A, k=k)
     svd_mdl.factorize()
     
     S = svd_mdl.S
     Sdiag = S.diagonal()
-    Sdiag = np.where(Sdiag>eps, 1.0/Sdiag, 0.0)
+    Sdiag = np.where(Sdiag >eps, 1.0/Sdiag, 0.0)
     
     for i in range(S.shape[0]):
         S[i,i] = Sdiag[i]
-
+            
     if scipy.sparse.issparse(A):            
-        A_p = svd_mdl.V.transpose() * (S * svd_mdl.U.transpose())
+        A_p = svd_mdl.V.T * (S *  svd_mdl.U.T)
     else:    
         A_p = np.dot(svd_mdl.V.T, np.core.multiply(np.diag(S)[:,np.newaxis], svd_mdl.U.T))
 
@@ -74,7 +75,7 @@ class SVD():
     >>> svd_mdl.factorize()
     """
     
-    _EPS = np.finfo(float).eps
+    _EPS=10**-8
     
     def __init__(self, data, k=-1, rrank=0, crank=0):
         self.data = data
@@ -100,7 +101,7 @@ class SVD():
             frobenius norm: F = ||data - USV||
         """    
         if scipy.sparse.issparse(self.data):
-            err = self.data - (self.U*self.S*self.V)
+            err = self.data - self.U*self.S*self.V    
             err = err.multiply(err)
             err = np.sqrt(err.sum())
         else:                
@@ -114,22 +115,18 @@ class SVD():
         def _right_svd():            
             AA = np.dot(self.data[:,:], self.data[:,:].T)
             values, u_vectors = eigh(AA)            
-                      
+                
             # get rid of too low eigenvalues
-            s = np.where(values > self._EPS)[0]
-            u_vectors = u_vectors[:, s] 
-            values = values[s]                            
-                     
+            u_vectors = u_vectors[:, values > self._EPS] 
+            values = values[values > self._EPS]
+                            
             # sort eigenvectors according to largest value
-            idx = np.argsort(values)[::-1]
-            values = values[idx]
+            idx = np.argsort(values)
+            values = values[idx[::-1]]
 
             # argsort sorts in ascending order -> access is backwards
-            self.U = u_vectors[:,idx]            
-            if self._k > 0:
-                self.U = self.U[:,:self._k]
-                values = values[:self._k]
-                
+            self.U = u_vectors[:,idx[::-1]]
+            
             # compute S
             self.S = np.diag(np.sqrt(values))
             
@@ -143,70 +140,58 @@ class SVD():
         def _left_svd():
             AA = np.dot(self.data[:,:].T, self.data[:,:])
             values, v_vectors = eigh(AA)    
-           
-            
+        
             # get rid of too low eigenvalues
-            s = np.where(values > self._EPS)[0]
-            v_vectors = v_vectors[:, s] 
-            values = values[s]
+            v_vectors = v_vectors[:, values > self._EPS] 
+            values = values[values > self._EPS]
             
             # sort eigenvectors according to largest value
             # argsort sorts in ascending order -> access is backwards
             idx = np.argsort(values)[::-1]
-            values = values[idx]            
-            
-            Vtmp = v_vectors[:,idx]
-            if self._k > 0:
-                Vtmp = Vtmp[:,:self._k]
-                values = values[:self._k]
+            values = values[idx]
             
             # compute S
-            self.S = np.diag(np.sqrt(values))
+            self.S= np.diag(np.sqrt(values))
             
             # and the inverse of it
             S_inv = np.diag(1.0/np.sqrt(values))    
                         
-
+            Vtmp = v_vectors[:,idx]
+            
             self.U = np.dot(np.dot(self.data[:,:], Vtmp), S_inv)                
             self.V = Vtmp.T
     
         def _sparse_right_svd():
             ## for some reasons arpack does not allow computation of rank(A) eigenvectors (??)    #
-            AA = self.data*self.data.transpose()
-            
+            AA = self.data*self.data.transpose()    
             if self.data.shape[0] > 1:                    
-                # only compute a few eigenvectors ...
+                # do not compute full rank if desired
                 if self._k > 0 and self._k < self.data.shape[0]-1:
                     k = self._k
                 else:
                     k = self.data.shape[0]-1
-                if scipy.version.version == '0.9.0':
-                    values, u_vectors = linalg.eigsh(AA,k=k)
-                else:
-                    values, u_vectors = linalg.eigen_symmetric(AA,k=k)
+
+                values, u_vectors = linalg.eigen_symmetric(AA,k=k)
             else:                
                 values, u_vectors = eigh(AA.todense())
-            
-            # get rid of negative/too low eigenvalues   
-            s = np.where(values > self._EPS)[0]
-            u_vectors = u_vectors[:, s] 
-            values = values[s]
+                    
+            # get rid of too low eigenvalues
+            u_vectors = u_vectors[:, values > self._EPS] 
+            values = values[values > self._EPS]
             
             # sort eigenvectors according to largest value
-            # argsort sorts in ascending order -> access is backwards
-            idx = np.argsort(values)[::-1]
-            values = values[idx]                        
+            idx = np.argsort(values)
+            values = values[idx[::-1]]                        
             
-            self.U = scipy.sparse.csc_matrix(u_vectors[:,idx])
+            # argsort sorts in ascending order -> access is backwards            
+            self.U = scipy.sparse.csc_matrix(u_vectors[:,idx[::-1]])
                     
             # compute S
-            tmp_val = np.sqrt(values)            
-            l = len(idx)
-            self.S = scipy.sparse.spdiags(tmp_val, 0, l, l,format='csc') 
+            self.S = scipy.sparse.csc_matrix(np.diag(np.sqrt(values)))
             
-            # and the inverse of it            
-            S_inv = scipy.sparse.spdiags(1.0/tmp_val, 0, l, l,format='csc')
-            
+            # and the inverse of it
+            S_inv = scipy.sparse.csc_matrix(np.diag(1.0/np.sqrt(values)))            
+                    
             # compute V from it
             self.V = self.U.transpose() * self.data
             self.V = S_inv * self.V
@@ -214,48 +199,39 @@ class SVD():
         def _sparse_left_svd():        
             # for some reasons arpack does not allow computation of rank(A) eigenvectors (??)
             AA = self.data.transpose()*self.data
-    
+            
             if self.data.shape[1] > 1:                
                 # do not compute full rank if desired
-                if self._k > 0 and self._k < AA.shape[1]-1:
+                if self._k > 0 and self._k < self.data.shape[1]-1:
                     k = self._k
                 else:
                     k = self.data.shape[1]-1
-                
-                if scipy.version.version == '0.9.0':                    
-                    values, v_vectors = linalg.eigsh(AA,k=k)                    
-                else:
-                    values, v_vectors = linalg.eigen_symmetric(AA,k=k)
-                                    
+                values, v_vectors = linalg.eigen_symmetric(AA,k=k)            
             else:                
                 values, v_vectors = eigh(AA.todense())    
-           
-            
-            # get rid of negative/too low eigenvalues   
-            s = np.where(values > self._EPS)[0]
-            v_vectors = v_vectors[:, s] 
-            values = values[s]
+            # get rid of too low eigenvalues
+            v_vectors = v_vectors[:, values > self._EPS] 
+            values = values[values > self._EPS]
             
             # sort eigenvectors according to largest value
-            idx = np.argsort(values)[::-1]                  
-            values = values[idx]
+            idx = np.argsort(values)
+            values = values[idx[::-1]]
             
             # argsort sorts in ascending order -> access is backwards            
-            self.V = scipy.sparse.csc_matrix(v_vectors[:,idx])      
-            
+            self.V = scipy.sparse.csc_matrix(v_vectors[:,idx[::-1]])
+                    
             # compute S
-            tmp_val = np.sqrt(values)            
-            l = len(idx)      
-            self.S = scipy.sparse.spdiags(tmp_val, 0, l, l,format='csc') 
+            self.S = scipy.sparse.csc_matrix(np.diag(np.sqrt(values)))
             
-            # and the inverse of it                                         
-            S_inv = scipy.sparse.spdiags(1.0/tmp_val, 0, l, l,format='csc')
+            # and the inverse of it            
+            S_inv = scipy.sparse.csc_matrix(np.diag(1.0/np.sqrt(values)))                                
             
             self.U = self.data * self.V * S_inv        
-            self.V = self.V.transpose()           
+            self.V = self.V.transpose()
+    
         
-        if self._rows >= self._cols:
-            if scipy.sparse.issparse(self.data):                
+        if self._rows > self._cols:
+            if scipy.sparse.issparse(self.data):
                 _sparse_left_svd()
             else:            
                 _left_svd()

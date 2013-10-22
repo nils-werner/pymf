@@ -3,19 +3,20 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id$
+#$Id: sivm.py 22 2010-08-13 11:16:43Z cthurau $
+#$Author: cthurau $
 """ 
 PyMF Simplex Volume Maximization [1]
 
-    SIVM_GSAT: class for GSAT-SIVM
+    SIVM_GSAT: class for gsat-SiVM
 
 [1] C. Thurau, K. Kersting, and C. Bauckhage. Yes We Can - Simplex Volume 
 Maximization for Descriptive Web-Scale Matrix Factorization. In Proc. Int. 
 Conf. on Information and Knowledge Management. ACM. 2010.
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
+__version__ = "$Revision: 45 $"
+# $Source$
 
 import logging
 import numpy as np
@@ -27,7 +28,7 @@ __all__ = ["SIVM_GSAT"]
 
 class SIVM_GSAT(SIVM):
     """      
-    SIVM_GSAT(data, num_bases=4, dist_measure='l2')
+    SIVM(data, num_bases=4, dist_measure='l2')
     
     
     Simplex Volume Maximization. Factorize a data matrix into two matrices s.t.

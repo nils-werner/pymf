@@ -3,14 +3,15 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id$
+#$Id: kmeans.py 20 2010-08-02 17:35:19Z cthurau $
+#$Author: cthurau $
 """
 PyMF K-means clustering (unary-convex matrix factorization).
 Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL). 
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
+__version__ = "$Revision: 46 $"
+# $Source$
 
 
 import numpy as np

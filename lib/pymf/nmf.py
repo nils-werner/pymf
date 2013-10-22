@@ -3,7 +3,8 @@
 # Copyright (C) Christian Thurau, 2010.
 # Licensed under the GNU General Public License (GPL).
 # http://www.gnu.org/licenses/gpl.txt
-#$Id$
+#$Id: nmf.py 20 2010-08-02 17:35:19Z cthurau $
+#$Author: cthurau $
 """
 PyMF Non-negative Matrix Factorization.
 
@@ -13,8 +14,8 @@ PyMF Non-negative Matrix Factorization.
 Matrix Factorization, Nature 401(6755), 788-799.
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
+__version__ = "$Revision: 46 $"
+# $Source$
 
 import numpy as np
 import logging
@@ -69,9 +70,9 @@ class NMF():
     """
     
     # some small value
-    _EPS = np.finfo(float).eps
+    _EPS = 10**-8
     
-    def __init__(self, data, num_bases=4, **kwargs):
+    def __init__(self, data, num_bases=4):
         
         def setup_logging():
             # create logger       
@@ -97,16 +98,9 @@ class NMF():
         self._num_bases = num_bases             
       
         # initialize H and W to random values
-        self._data_dimension, self._num_samples = self.data.shape
+        (self._data_dimension, self._num_samples) = self.data.shape
         
 
-    def residual(self):
-        """ Returns the residual in % of the total amount of data """
-        
-        res = np.sum(np.abs(self.data - np.dot(self.W, self.H)))
-        total = 100.0*res/np.sum(np.abs(self.data))
-        return total
-        
     def frobenius_norm(self):
         """ Frobenius norm (||data - WH||) of a data matrix and a low rank
         approximation given by WH
@@ -114,13 +108,10 @@ class NMF():
         Returns:
             frobenius norm: F = ||data - WH||
         """
+
         # check if W and H exist
         if hasattr(self,'H') and hasattr(self,'W') and not scipy.sparse.issparse(self.data):
-            err = np.sqrt( np.sum((self.data[:,:] - np.dot(self.W, self.H))**2 ))            
-        elif hasattr(self,'H') and hasattr(self,'W') and scipy.sparse.issparse(self.data):
-            tmp = self.data[:,:] - (self.W * self.H)
-            tmp = tmp.multiply(tmp).sum()
-            err = np.sqrt(tmp)
+            err = np.sqrt( np.sum((self.data[:,:] - np.dot(self.W, self.H))**2 ))
         else:
             err = -123456
 
@@ -143,7 +134,6 @@ class NMF():
             W2 = np.dot(np.dot(self.W, self.H), self.H.T) + 10**-9
             self.W *= np.dot(self.data[:,:], self.H.T)
             self.W /= W2
-            self.W /= np.sqrt(np.sum(self.W**2.0, axis=0))
 
     def converged(self, i):
         derr = np.abs(self.ferr[i] - self.ferr[i-1])/self._num_samples
@@ -152,7 +142,7 @@ class NMF():
         else:
             return False
 
-    def factorize(self, niter=100, show_progress=False, 
+    def factorize(self, niter=1, show_progress=False, 
                   compute_w=True, compute_h=True, compute_err=True):
         """ Factorize s.t. WH = data
             
@@ -184,10 +174,10 @@ class NMF():
         
         # create W and H if they don't already exist
         # -> any custom initialization to W,H should be done before
-        if not hasattr(self,'W') and compute_w:
+        if not hasattr(self,'W'):
                self.init_w()
                
-        if not hasattr(self,'H') and compute_h:
+        if not hasattr(self,'H'):
                 self.init_h()                   
 
         if compute_err:
@@ -201,7 +191,7 @@ class NMF():
                 self.update_h()                                        
          
             if compute_err:                 
-                self.ferr[i] = self.frobenius_norm()                
+                self.ferr[i] = self.frobenius_norm()
                 self._logger.info('Iteration ' + str(i+1) + '/' + str(niter) + 
                 ' FN:' + str(self.ferr[i]))
             else:                

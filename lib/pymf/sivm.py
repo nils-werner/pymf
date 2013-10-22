@@ -3,7 +3,8 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id$
+#$Id: sivm.py 22 2010-08-13 11:16:43Z cthurau $
+#$Author: cthurau $
 """ 
 PyMF Simplex Volume Maximization [1]
 
@@ -14,8 +15,8 @@ Maximization for Descriptive Web-Scale Matrix Factorization. In Proc. Int.
 Conf. on Information and Knowledge Management. ACM. 2010.
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
+__version__ = "$Revision: 46 $"
+# $Source$
 
 import scipy.sparse
 import numpy as np
@@ -75,9 +76,12 @@ class SIVM(AA):
     
     The result is a set of coefficients sivm_mdl.H, s.t. data = W * sivm_mdl.H.
     """
+    
+    # always overwrite the default number of iterations
+    # -> any value other does not make sense.
+    _NITER = 1
 
-
-    def __init__(self, data, num_bases=4, dist_measure='l2',  init='fastmap',  **kwargs):
+    def __init__(self, data, num_bases=4, dist_measure='l2',  init='fastmap'):
        
         AA.__init__(self, data, num_bases=num_bases)
             
@@ -102,8 +106,8 @@ class SIVM(AA):
                 
         elif self._dist_measure == 'kl':
             self._distfunc = kl_divergence    
-            
-            
+
+  
     def _distance(self, idx):
         """ compute distances of a specific data point to all other samples"""
             
@@ -139,9 +143,7 @@ class SIVM(AA):
     def init_h(self):
         self.H = np.zeros((self._num_bases, self._num_samples))
         
-    def init_w(self):        
-        print "dd:", self._data_dimension
-        print "nd:", self._num_bases
+    def init_w(self):
         self.W = np.zeros((self._data_dimension, self._num_bases))
         
     def init_sivm(self):
@@ -158,18 +160,18 @@ class SIVM(AA):
                 
             # store maximal found distance -> later used for "a" (->update_w) 
             self._maxd = np.max(d)                        
-            self.select = [cur_p]
+            self.select.append(cur_p)
 
         elif self._init == 'origin':
             # set first vertex to origin
             cur_p = -1
             d = self._distance(cur_p)
             self._maxd = np.max(d)
-            self.select = [np.argmax(d)]
-        
+            self.select.append(cur_p)         
         
     def update_w(self): 
         """ compute new W """        
+        EPS = 10**-8
         self.init_sivm()       
         
         # initialize some of the recursively updated distance measures ....
@@ -184,7 +186,7 @@ class SIVM(AA):
             d = self._distance(self.select[l-1])
             
             # take the log of d (sually more stable that d)
-            d = np.log(d + self._EPS)            
+            d = np.log(d + EPS)            
             
             d_i_times_d_j += d * d_sum
             d_sum += d

@@ -3,7 +3,8 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id$
+#$Id: sub.py 24 2010-09-01 07:51:05Z cthurau $
+#$Author: cthurau $
 """  
 PyMF Matrix sampling methods
 
@@ -13,8 +14,8 @@ PyMF Matrix sampling methods
 Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL). 
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
+__version__ = "$Revision: 46 $"
+# $Source$
 
 
 import numpy as np
