@@ -15,8 +15,6 @@ Computing a Compressed Approixmate Matrix Decomposition', SIAM J. Computing 36(1
 Reconstruction via Greedy Approximation of SVD. ISAAC'2008.
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
 
 import numpy as np
 from greedy import GREEDY

@@ -13,8 +13,6 @@ PyMF Non-negative Double Singular Value Decompositions.
 start for nonnegative matrix factorization, Pattern Recognition, 41, 1350-1362
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
 
 import numpy as np
 

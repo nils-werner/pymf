@@ -13,8 +13,6 @@ PyMF CUR Decomposition [1]
 a Compressed Approixmate Matrix Decomposition', SIAM J. Computing 36(1), 184-206.
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
 
 import numpy as np
 import scipy.sparse

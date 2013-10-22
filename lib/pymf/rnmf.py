@@ -3,7 +3,6 @@
 # Copyright (C) Christian Thurau, 2010.
 # Licensed under the GNU General Public License (GPL).
 # http://www.gnu.org/licenses/gpl.txt
-#$Id:$
 """
 PyMF Non-negative Matrix Factorization.
 
@@ -13,8 +12,6 @@ PyMF Non-negative Matrix Factorization.
 Matrix Factorization, Nature 401(6755), 788-799.
 """
 
-__version__ = "$Revision$"
-# $HeadURL:$
 
 import numpy as np
 import logging

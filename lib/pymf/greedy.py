@@ -14,8 +14,6 @@ PyMF GREEDY[1]
 Reconstruction via Greedy Approximation of SVD. ISAAC'2008.
 """
 
-__version__ = "$Revision$"
-# $HeadURL$
 
 import time
 import scipy.sparse

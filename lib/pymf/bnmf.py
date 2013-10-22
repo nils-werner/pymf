@@ -3,8 +3,6 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: bnmf.py 20 2010-08-02 17:35:19Z cthurau $
-#$Author: cthurau $
 """
 PyMF Binary Matrix Factorization [1]
 
@@ -14,8 +12,6 @@ PyMF Binary Matrix Factorization [1]
 Applications. ICDM 2007
 """
 
-__version__ = "$Revision: 46 $"
-# $Source$
 
 import numpy as np
 from nmf import NMF

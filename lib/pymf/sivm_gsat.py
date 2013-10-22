@@ -3,8 +3,6 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: sivm.py 22 2010-08-13 11:16:43Z cthurau $
-#$Author: cthurau $
 """ 
 PyMF Simplex Volume Maximization [1]
 
@@ -15,8 +13,6 @@ Maximization for Descriptive Web-Scale Matrix Factorization. In Proc. Int.
 Conf. on Information and Knowledge Management. ACM. 2010.
 """
 
-__version__ = "$Revision: 45 $"
-# $Source$
 
 import logging
 import numpy as np

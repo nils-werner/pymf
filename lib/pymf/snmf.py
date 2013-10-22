@@ -3,8 +3,6 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: snmf.py 20 2010-08-02 17:35:19Z cthurau $
-#$Author: cthurau $
 """  
 PyMF Semi Non-negative Matrix Factorization.
 
@@ -14,8 +12,6 @@ PyMF Semi Non-negative Matrix Factorization.
 IEEE Trans. on Pattern Analysis and Machine Intelligence 32(1), 45-55. 
 """
 
-__version__ = "$Revision: 46 $"
-# $Source$
 
 
 import numpy as np

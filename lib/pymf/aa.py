@@ -3,8 +3,6 @@
 # Copyright (C) Christian Thurau, 2010.
 # Licensed under the GNU General Public License (GPL).
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: aa.py 21 2010-08-05 08:13:08Z cthurau $
-#$Author: cthurau $
 """
 PyMF Archetypal Analysis [1]
 
@@ -14,8 +12,6 @@ PyMF Archetypal Analysis [1]
 338-347.
 """
 
-__version__ = "$Revision: 46 $"
-# $Source$
 
 import numpy as np
 from dist import vq

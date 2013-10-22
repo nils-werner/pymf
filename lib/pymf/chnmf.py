@@ -3,8 +3,6 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: chnmf.py 20 2010-08-02 17:35:19Z cthurau $
-#$Author: cthurau $
 """      
 PyMF Convex Hull Non-negative Matrix Factorization [1]
     
@@ -15,8 +13,6 @@ PyMF Convex Hull Non-negative Matrix Factorization [1]
 Factorization in the Wild. ICDM 2009.
 """
 
-__version__ = "$Revision: 46 $"
-# $Source$
 
 import numpy as np
 

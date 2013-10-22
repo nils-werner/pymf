@@ -3,8 +3,6 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: cmd.py 24 2010-09-01 07:51:05Z cthurau $
-#$Author: cthurau $
 """
 PyMF Compact Matrix Decomposition [1]
 
@@ -14,8 +12,6 @@ PyMF Compact Matrix Decomposition [1]
 Sparse Graphs, in Proc. SIAM Int. Conf. on Data Mining. 
 """
 
-__version__ = "$Revision: 46 $"
-# $Source$
 
 import numpy as np
 from cur import CUR

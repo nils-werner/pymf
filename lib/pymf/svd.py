@@ -3,8 +3,6 @@
 # Copyright (C) Christian Thurau, 2010. 
 # Licensed under the GNU General Public License (GPL). 
 # http://www.gnu.org/licenses/gpl.txt
-#$Id: svd.py 24 2010-09-01 07:51:05Z cthurau $
-#$Author: cthurau $
 """  
 PyMF Singular Value Decomposition.
 
@@ -13,8 +11,6 @@ PyMF Singular Value Decomposition.
      
 """
 
-__version__ = "$Revision: 46 $"
-# $Source$
 
 
 from numpy.linalg import eigh
