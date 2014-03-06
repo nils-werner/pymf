@@ -11,6 +11,6 @@ setup(name='PyMF',
       package_dir = {'pymf': './lib/pymf'},   
       scripts=['scripts/testpymf.py',],      
       license = 'OSI Approved :: GNU General Public License (GPL)',
-      requires=['cvxopt'],
+      install_requires=['cvxopt'],
       long_description=open('README.txt').read(),
       )     
