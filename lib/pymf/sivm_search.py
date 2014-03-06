@@ -17,7 +17,10 @@ Conf. on Information and Knowledge Management. ACM. 2010.
 import scipy.sparse
 import numpy as np
 from scipy import inf
-from scipy.misc.common import factorial
+try:
+    from scipy.misc.common import factorial
+except:
+    from scipy.misc import factorial
 
 from dist import *
 from vol import *
