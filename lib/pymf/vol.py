@@ -13,7 +13,7 @@ PyMF functions for computing matrix/simplex volumes
 
 
 import numpy as np
-from scipy import factorial
+from scipy.misc.common import factorial
 
 __all__ = ["cmdet", "simplex"]
 
