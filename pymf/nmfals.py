@@ -17,7 +17,7 @@ Matrix Factorization, Nature 401(6755), 788-799.
 
 import numpy as np
 from cvxopt import solvers, base
-from nmf import NMF
+from .nmf import NMF
 
 __all__ = ["NMFALS"]
 

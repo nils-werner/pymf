@@ -18,7 +18,7 @@ import logging
 import logging.config
 import scipy.sparse
 
-from nmf import NMF
+from .nmf import NMF
 
 __all__ = ["RNMF"]
 

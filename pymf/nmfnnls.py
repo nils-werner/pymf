@@ -16,7 +16,7 @@ Matrix Factorization, Nature 401(6755), 788-799.
 
 
 import scipy.optimize
-from nmf import NMF
+from .nmf import NMF
 
 __all__ = ["NMFNNLS"]
 

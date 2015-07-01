@@ -14,11 +14,11 @@ PyMF Archetypal Analysis [1]
 
 
 import numpy as np
-from dist import vq
+from .dist import vq
 from cvxopt import solvers, base
 
-from svd import pinv
-from nmf import NMF
+from .svd import pinv
+from .nmf import NMF
 
 __all__ = ["AA"]
 

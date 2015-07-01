@@ -18,8 +18,8 @@ Reconstruction via Greedy Approximation of SVD. ISAAC'2008.
 import time
 import scipy.sparse
 import numpy as np
-from svd import *
-from nmf import NMF
+from .svd import *
+from .nmf import NMF
 
 __all__ = ["GREEDY"]
 

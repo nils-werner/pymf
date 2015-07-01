@@ -13,8 +13,8 @@ PyMF Principal Component Analysis.
 
 import numpy as np
 
-from nmf import NMF
-from svd import SVD
+from .nmf import NMF
+from .svd import SVD
 
 
 __all__ = ["PCA"]

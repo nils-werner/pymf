@@ -13,9 +13,9 @@ PyMF Geometric-Map
 import scipy.sparse
 import numpy as np
 
-from dist import *
-from aa import AA
-from kmeans import Kmeans
+from .dist import *
+from .aa import AA
+from .kmeans import Kmeans
 
 __all__ = ["GMAP"]
 

@@ -17,15 +17,15 @@ Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL).
 import numpy as np
 import random
 #from itertools import combinations
-from chnmf import combinations
+from .chnmf import combinations
 
-import dist
-from chnmf import quickhull
-from nmf import NMF
-from pca import PCA
-from kmeans import Kmeans
-from laesa import LAESA
-from sivm import SIVM
+from . import dist
+from .chnmf import quickhull
+from .nmf import NMF
+from .pca import PCA
+from .kmeans import Kmeans
+from .laesa import LAESA
+from .sivm import SIVM
 
 __all__ = ["SUB"]
 

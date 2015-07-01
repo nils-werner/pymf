@@ -16,7 +16,7 @@ IEEE Trans. on Pattern Analysis and Machine Intelligence 32(1), 45-55.
 
 import numpy as np
 
-from nmf import NMF
+from .nmf import NMF
 
 __all__ = ["SNMF"]
 

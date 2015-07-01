@@ -12,8 +12,8 @@ Copyright (C) Christian Thurau, 2010. GNU General Public License (GPL).
 
 import numpy as np
 
-import dist
-from nmf import NMF
+from . import dist
+from .nmf import NMF
 
 __all__ = ["Cmeans"]
 

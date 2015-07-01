@@ -16,9 +16,9 @@ Conf. on Information and Knowledge Management. ACM. 2010.
 
 import logging
 import numpy as np
-from dist import *
-from vol import cmdet
-from sivm import SIVM
+from .dist import *
+from .vol import cmdet
+from .sivm import SIVM
 
 __all__ = ["SIVM_GSAT"]
 

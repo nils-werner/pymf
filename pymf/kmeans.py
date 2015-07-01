@@ -12,7 +12,7 @@ import numpy as np
 import random
 
 import dist
-from nmf import NMF
+from .nmf import NMF
 
 __all__ = ["Kmeans"]
 

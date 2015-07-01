@@ -14,7 +14,7 @@ Applications. ICDM 2007
 
 
 import numpy as np
-from nmf import NMF
+from .nmf import NMF
 
 __all__ = ["BNMF"]
 

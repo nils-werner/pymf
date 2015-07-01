@@ -22,9 +22,9 @@ try:
 except:
     from scipy.misc import factorial
 
-from dist import *
-from vol import *
-from sivm import SIVM
+from .dist import *
+from .vol import *
+from .sivm import SIVM
 
 __all__ = ["SIVM_SEARCH"]
 
