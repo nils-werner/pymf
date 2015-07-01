@@ -167,7 +167,10 @@ class SVD():
                 else:
                     k = self.data.shape[0]-1
 
-                values, u_vectors = linalg.eigen_symmetric(AA,k=k)
+                try:
+                    values, u_vectors = linalg.eigen_symmetric(AA,k=k)
+                except AttributeError:
+                    values, u_vectors = linalg.eigsh(AA,k=k)
             else:
                 values, u_vectors = eigh(AA.todense())
 
@@ -202,7 +205,10 @@ class SVD():
                     k = self._k
                 else:
                     k = self.data.shape[1]-1
-                values, v_vectors = linalg.eigen_symmetric(AA,k=k)
+                try:
+                    values, v_vectors = linalg.eigen_symmetric(AA,k=k)
+                except AttributeError:
+                    values, v_vectors = linalg.eigsh(AA,k=k)
             else:
                 values, v_vectors = eigh(AA.todense())
             # get rid of too low eigenvalues
