@@ -14,5 +14,15 @@ setuptools.setup(
         'numpy',
         'scipy',
     ],
+    extras_require={
+        'tests': [
+            'pytest',
+            'pytest-cov',
+        ],
+    },
+    tests_require=[
+        'pytest',
+        'pytest-cov',
+    ],
     long_description=open('README.txt').read(),
 )
